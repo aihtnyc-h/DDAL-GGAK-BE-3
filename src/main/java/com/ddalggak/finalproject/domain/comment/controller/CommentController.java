@@ -1,4 +1,4 @@
-package com.ddalggak.finalproject.domain.ticket.comment.controller;
+package com.ddalggak.finalproject.domain.comment.controller;
 
 import javax.validation.Valid;
 
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ddalggak.finalproject.domain.ticket.comment.dto.CommentRequestDto;
-import com.ddalggak.finalproject.domain.ticket.comment.service.CommentService;
+import com.ddalggak.finalproject.domain.comment.dto.CommentRequestDto;
+import com.ddalggak.finalproject.domain.comment.service.CommentService;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
