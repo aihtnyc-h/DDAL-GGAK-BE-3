@@ -1,15 +1,15 @@
-package com.ddalggak.finalproject.domain.ticket.comment.service;
+package com.ddalggak.finalproject.domain.comment.service;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ddalggak.finalproject.domain.ticket.comment.dto.CommentRequestDto;
+import com.ddalggak.finalproject.domain.comment.dto.CommentRequestDto;
+import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
-import com.ddalggak.finalproject.domain.ticket.comment.entity.Comment;
-import com.ddalggak.finalproject.domain.ticket.comment.repository.CommentRepository;
+
+import com.ddalggak.finalproject.domain.comment.repository.CommentRepository;
 import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
-import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;

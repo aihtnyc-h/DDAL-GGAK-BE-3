@@ -1,4 +1,4 @@
-package com.ddalggak.finalproject.domain.ticket.comment.entity;
+package com.ddalggak.finalproject.domain.comment.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,9 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import com.ddalggak.finalproject.domain.ticket.comment.dto.CommentRequestDto;
+import com.ddalggak.finalproject.domain.comment.dto.CommentRequestDto;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
-import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.global.entity.BaseEntity;
 
 import lombok.Getter;

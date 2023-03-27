@@ -1,8 +1,8 @@
-package com.ddalggak.finalproject.domain.ticket.comment.dto;
+package com.ddalggak.finalproject.domain.comment.dto;
 
 import javax.validation.constraints.NotNull;
 
-import com.ddalggak.finalproject.domain.ticket.comment.entity.Comment;
+import com.ddalggak.finalproject.domain.comment.entity.Comment;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
