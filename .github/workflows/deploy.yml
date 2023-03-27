@@ -45,6 +45,21 @@ jobs:
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
       with:
         arguments: clean build -x test
+    # (5) 디렉토리 생성
+    - name: Make Directory
+      run: mkdir -p deploy
+    # (6) Jar 파일 복사
+    - name: Copy Jar
+      run: cp ./build/libs/*.jar ./deploy
+    # (7) clean build
+    - name: Build with Gradle
+      run: ./gradlew clean build
+      shell: bash
+   # (8) zip file 
+    - name: Make zip file
+      run: zip -r ./$finalproject.zip .
+      shell: bash    
+    
     # (5) AWS 인증 (IAM 사용자 Access Key, Secret Key 활용)
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
