@@ -9,8 +9,8 @@ on:
 env:
   AWS_REGION: ap-northeast-2
   S3_BUCKET_NAME: ddal-ggak-codedeploy-app
-  CODE_DEPLOY_APPLICATION_NAME: test1
-  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: test1-g
+  CODE_DEPLOY_APPLICATION_NAME: codedeploy
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: codedeploy_g
   ZIP_NAME: zip -r ./finalproject.zip .
   APPLICATION: ./src/main/resources/application.yml
 
@@ -40,10 +40,6 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         
-    - name: Current Time
-      # You may pin to the exact commit or the version.
-      # uses: gerred/current-time@5172b4eff2aed61e8c68ca11076d69a2abc0b1bc
-      uses: gerred/current-time@v1.0.0    
     # (4) Gradle build (Test 제외)
     - name: Build with Gradle
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
@@ -55,7 +51,10 @@ jobs:
     # (6) Jar 파일 복사
     - name: Copy Jar
       run: cp ./build/libs/*.jar ./deploy
-
+#     # (7) clean build
+#     - name: Build with Gradle
+#       run: ./gradlew clean build
+#       shell: bash
    # (8) zip file 
     - name: Make zip file
       run: zip -r ./$finalproject.zip .
