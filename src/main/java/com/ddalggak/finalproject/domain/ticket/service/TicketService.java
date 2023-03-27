@@ -139,7 +139,6 @@ public class TicketService {
 	// 	TicketResponseDto ticketResponseDto = new TicketResponseDto(ticket, commentResponseDtoList);
 	// 	return ResponseEntity.ok().body(ticketResponseDto);
 	// }
-
 	// 티켓 상세조회 (해당되는 티켓만 조회 // 로직 다시 짜보기)
 	@Transactional(readOnly = true)
 	public ResponseEntity<TicketResponseDto> getTicket(Long ticketId, User user, TicketRequestDto ticketRequestDto) {
@@ -150,6 +149,7 @@ public class TicketService {
 		List<CommentResponseDto> commentList = getComment(ticket);
 		TicketResponseDto ticketResponseDto = new TicketResponseDto(ticket, commentList);
 		return ResponseEntity.ok().body(ticketResponseDto);
+
 	}
 	// 티켓에 있는 댓글 가져오기
 	private List<CommentResponseDto> getComment(Ticket ticket) {
@@ -162,6 +162,7 @@ public class TicketService {
 		}
 		return commentResponseDtoList; //.add(new CommentResponseDto(commentList));
 	}
+
 	// @Transactional(readOnly = true)
 	// 	public ResponseEntity<TicketResponseDto> getTicket(User user, Long taskId, Long ticketId) {
 	// 	// User user = userDetails.getUser();
