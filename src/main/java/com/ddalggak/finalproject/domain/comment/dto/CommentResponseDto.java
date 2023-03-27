@@ -1,6 +1,7 @@
-package com.ddalggak.finalproject.domain.ticket.comment.dto;
+package com.ddalggak.finalproject.domain.comment.dto;
 
-import com.ddalggak.finalproject.domain.ticket.comment.entity.Comment;
+import com.ddalggak.finalproject.domain.comment.entity.Comment;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
