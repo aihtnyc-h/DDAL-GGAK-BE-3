@@ -139,7 +139,7 @@ public class TicketService {
 	// 	TicketResponseDto ticketResponseDto = new TicketResponseDto(ticket, commentResponseDtoList);
 	// 	return ResponseEntity.ok().body(ticketResponseDto);
 	// }
-	
+
 	// 티켓 상세조회 (해당되는 티켓만 조회 // 로직 다시 짜보기)
 	@Transactional(readOnly = true)
 	public ResponseEntity<TicketResponseDto> getTicket(Long ticketId, User user, TicketRequestDto ticketRequestDto) {
@@ -242,7 +242,7 @@ public class TicketService {
 		// else throw new CustomException(UNAUTHORIZED_USER);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
 	}
-	
+
 	// 티켓 삭제하기
 	@Transactional
 	public ResponseEntity<?> deleteTicket(User user, Long ticketId) {

@@ -41,9 +41,15 @@ public class Ticket extends BaseEntity {
 	// 티켓 내용 notnull
 	private String ticketDescription;
 	// 중요도 null 허용 -> int 로 변경 필요
+<<<<<<< HEAD
 	private int priority;
 	// 난이도  null 허용 -> int 로 변경 필요
 	private int difficulty;
+=======
+	private int totalPriority;
+	// 난이도  null 허용 -> int 로 변경 필요
+	private int totalDifficulty;
+>>>>>>> 67e65d9 (feat: Add init 초기설정)
 	// 태그(이름 변경 해야함)  null 허용
 	private String assigned;
 	// 마감 날짜  null 허용 -> 최신 생성순으로
@@ -59,7 +65,11 @@ public class Ticket extends BaseEntity {
 	// user 연관관계 // FE에서 user -> onwer 로 변경요청
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "userId")
+<<<<<<< HEAD
 	private User user;
+=======
+	private User userList;
+>>>>>>> 67e65d9 (feat: Add init 초기설정)
 
 	// @Column(nullable = true)
 	// @Enumerated(value = EnumType.STRING)
@@ -75,6 +85,7 @@ public class Ticket extends BaseEntity {
 	private List<Comment> comment = new ArrayList<>();
 
 	@Builder
+<<<<<<< HEAD
 	public Ticket(TicketRequestDto ticketRequestDto, User user, List<Comment> commentList) {
 		this.ticketTitle = ticketRequestDto.getTicketTitle();
 		this.ticketDescription = ticketRequestDto.getTicketDescription();
@@ -92,6 +103,29 @@ public class Ticket extends BaseEntity {
 		this.assigned = ticketRequestDto.getAssigned();
 		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
 		this.comment = getComment();
+=======
+	public Ticket(TicketRequestDto ticketRequestDto, User user, List<Comment> comment) {
+		this.ticketTitle = ticketRequestDto.getTicketTitle();
+		this.ticketDescription = ticketRequestDto.getTicketDescription();
+		this.totalPriority = ticketRequestDto.getTotalPriority();
+		this.totalDifficulty = ticketRequestDto.getTotalDifficulty();
+		this.assigned = ticketRequestDto.getAssigned();
+		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
+		// this.taskLeader = user.getEmail();
+		// this.labelLeader = user.getEmail();
+	}
+	public void update(TicketRequestDto ticketRequestDto, User user) {
+		this.ticketTitle = ticketRequestDto.getTicketTitle();
+		this.ticketDescription = ticketRequestDto.getTicketDescription();
+		this.totalPriority = ticketRequestDto.getTotalPriority();
+		this.totalDifficulty = ticketRequestDto.getTotalDifficulty();
+		this.assigned = ticketRequestDto.getAssigned();
+		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
+		// this.addTask(task);
+		// this.status = ticketRequestDto.getStatus();
+		// this.taskLeader = user.getEmail();
+		// this.teamLeader = user.getEmail();
+>>>>>>> 67e65d9 (feat: Add init 초기설정)
 	}
 	@Builder
 	public static Ticket create(TicketRequestDto ticketRequestDto, User user, Task task) {
@@ -101,4 +135,15 @@ public class Ticket extends BaseEntity {
 			// .task(task)
 			.build();
 	}
+<<<<<<< HEAD
+=======
+	// private void addTicketUser(TaskUser taskUser) {
+	// 	taskUser.addTask(taskUser.getTask());
+	// 	task.addTicket(this);
+	// }
+	// private void addTask(Task task) {
+	// 	this.task = task;
+	// 	task.addTicket(this);
+	// }
+>>>>>>> 67e65d9 (feat: Add init 초기설정)
 }

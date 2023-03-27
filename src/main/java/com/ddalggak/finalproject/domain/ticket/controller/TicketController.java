@@ -39,6 +39,43 @@ public class TicketController {
 		return ticketService.createTicket(userDetails.getUser(), ticketRequestDto);
 	}
 
+<<<<<<< HEAD
+=======
+	// // 티켓 전체 조회 (테스크에 들어갈 내용) getTickets
+	// @GetMapping
+	// public ResponseEntity<List<TicketResponseDto>> getTickets(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+	// 	return ticketService.getTickets();
+	// }
+
+	// 티켓 상세 조회
+	// @Operation(summary = "get ticket", description = "Ticket 상세조회 get 메서드 체크")
+	// @GetMapping("/ticket/{ticketId}")
+	// public ResponseEntity<TicketResponseDto> getTicket(@PathVariable Long ticketId, @PathVariable Long taskId) {
+	// 	return ticketService.getTicket(ticketId);
+	// }
+	//
+	// @GetMapping("/{postId}")
+	// public ResponseEntity<TicketResponseDto> getPost(@PathVariable Long ticketId, @PathVariable Long taskId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+	// 	return ticketService.getTicket(ticketId, taskId, userDetails.getUser());
+	// }
+	// public ResponseEntity<?> getTicket(
+	// 	@AuthenticationPrincipal UserDetailsImpl userDetails,
+	// 	@Valid @RequestBody TicketRequestDto ticketRequestDto,
+	// 	@PathVariable Long ticketId
+	// ) {
+	// 	return ticketService.getTicket(userDetails.getUser(), ticketRequestDto, ticketId);//.getTicket(userDetails.getUser(), ticketId);
+	// }
+
+	// 티켓 상세 조회
+	// @Operation(summary = "get ticket", description = "Ticket 상세조회 get 메서드 체크")
+	// @GetMapping("/ticket/{ticketId}")
+	// public ResponseEntity<TicketResponseDto> getTicket(
+	// 	@PathVariable Long ticketId,
+	// 	@RequestBody TicketRequestDto ticketRequestDto,
+	// 	@AuthenticationPrincipal UserDetailsImpl userDetails) {
+	// 	return ticketService.getTicket(userDetails.getUser(), ticketId, ticketRequestDto.getTaskId());
+	// }
+>>>>>>> 67e65d9 (feat: Add init 초기설정)
 
 	// 티켓 상세 조회
 	@Operation(summary = "get ticket", description = "Ticket 상세조회 get 메서드 체크")
@@ -50,6 +87,7 @@ public class TicketController {
 		return ticketService.getTicket(ticketId, userDetails.getUser(), ticketRequestDto);
 	}
 	// 티켓 수정
+<<<<<<< HEAD
 	@Operation(summary = "patch ticket", description = "Ticket 수정 patch 메서드 체크")
 	@PatchMapping("/ticket/{ticketId}")
 	public ResponseEntity<?> updateTicket(
@@ -58,11 +96,29 @@ public class TicketController {
 		@Valid @RequestBody TicketRequestDto ticketRequestDto) {
 		return ticketService.updateTicket(ticketId, ticketRequestDto, userDetails.getUser());
 	}
+=======
+	// @Operation(summary = "patch ticket", description = "Ticket 수정 patch 메서드 체크")
+	// @PatchMapping("/ticket/{ticketId}")
+	// public ResponseEntity<?> updateTicket(
+	// 	@PathVariable Long ticketId,
+	// 	@AuthenticationPrincipal UserDetailsImpl userDetails,
+	// 	@Valid @RequestBody TicketRequestDto ticketRequestDto) {
+	// 	return ticketService.updateTicket(ticketId, ticketRequestDto, userDetails.getUser());
+	// }
+>>>>>>> 67e65d9 (feat: Add init 초기설정)
 
 	// 티켓 삭제
 	@Operation(summary = "delete ticket", description = "Ticket 삭제 delete 메서드 체크")
 	@DeleteMapping("/ticket/{ticketId}")
+<<<<<<< HEAD
 	public ResponseEntity<?> deleteTicket(@PathVariable Long ticketId,	@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return ticketService.deleteTicket(userDetails.getUser(), ticketId);
+=======
+	public ResponseEntity<?> deleteTicket(
+		@PathVariable Long ticketId,
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
+		@Valid @RequestBody TicketRequestDto ticketRequestDto) {
+		return ticketService.deleteTicket(ticketId, ticketRequestDto, userDetails.getUser());
+>>>>>>> 67e65d9 (feat: Add init 초기설정)
 	}
 }
