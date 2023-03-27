@@ -10,7 +10,6 @@ import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 
 import com.ddalggak.finalproject.domain.comment.repository.CommentRepository;
 import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
-import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;

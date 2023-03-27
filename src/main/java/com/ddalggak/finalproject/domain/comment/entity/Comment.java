@@ -11,7 +11,6 @@ import javax.persistence.ManyToOne;
 
 import com.ddalggak.finalproject.domain.comment.dto.CommentRequestDto;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
-import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.global.entity.BaseEntity;
 
 import lombok.Getter;
