@@ -335,11 +335,11 @@ public class TicketService {
 	// }
 	// 티켓에 있는 댓글 가져오기
 	// 권한 부여
-	// private void validateExistUser(Task task, User user) {
-	// 	if (!(task.getLabelLeadersList().equals(user.getEmail())) || task.getLabelLeadersList().contains(user.getEmail())) {
-	// 		throw new CustomException(UNAUTHORIZED_USER);
-	// 	}
-	// }
+	private void validateExistUser(Task task, User user) {
+		if (!(task.getLabelLeadersList().equals(user.getEmail())) || task.getLabelLeadersList().contains(user.getEmail())) {
+			throw new CustomException(UNAUTHORIZED_USER);
+		}
+	}
 
 	// 	if (!ticket.getTeamLeader().equals(userDetails.getUser().getUserId()))
 	// 		// equals(userDetails.getUser().getUserId()))
@@ -357,12 +357,4 @@ public class TicketService {
 		}
 		return label;
 	}
-
-
-	// private void validateExistMember(Task task, TaskUser taskUser) {
-	// 	if (!task.getTaskUserList().contains(taskUser)) {
-	// 		throw new CustomException(UNAUTHORIZED_USER);
-	// 	}
-	// }
-
 }
