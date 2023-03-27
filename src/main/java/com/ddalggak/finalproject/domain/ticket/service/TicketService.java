@@ -54,9 +54,6 @@ public class TicketService {
 		// ResponseEntity.ok().body(TicketResponseDto.of(ticket));
 		// return ResponseEntity.createTicket(ticketResponseDto, userDetails.getUser());
 	}
-<<<<<<< HEAD
-
-=======
 	// @Transactional
 	// public ResponseEntity<?> createTicket(TicketRequestDto ticketRequestDto, User user) {
 	// 	Task task = validateTask(ticketRequestDto.ticketId);
@@ -142,7 +139,6 @@ public class TicketService {
 	// 	TicketResponseDto ticketResponseDto = new TicketResponseDto(ticket, commentResponseDtoList);
 	// 	return ResponseEntity.ok().body(ticketResponseDto);
 	// }
->>>>>>> 48d1ccd (feat: Add init 초기설정)
 	// 티켓 상세조회 (해당되는 티켓만 조회 // 로직 다시 짜보기)
 	@Transactional(readOnly = true)
 	public ResponseEntity<TicketResponseDto> getTicket(Long ticketId, User user, TicketRequestDto ticketRequestDto) {
@@ -361,4 +357,13 @@ public class TicketService {
 		}
 		return label;
 	}
+
+
+
+	// private void validateExistMember(Task task, TaskUser taskUser) {
+	// 	if (!task.getTaskUserList().contains(taskUser)) {
+	// 		throw new CustomException(UNAUTHORIZED_USER);
+	// 	}
+	// }
+
 }
