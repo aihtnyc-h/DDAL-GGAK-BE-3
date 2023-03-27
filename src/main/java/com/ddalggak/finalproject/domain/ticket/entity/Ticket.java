@@ -39,6 +39,7 @@ public class Ticket extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long ticketId;
+
 	// 티켓 제목 notnull
 	private String ticketTitle;
 	// 티켓 내용 notnull
