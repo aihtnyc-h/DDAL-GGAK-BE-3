@@ -1,3 +1,4 @@
+package com.ddalggak.finalproject.domain.ticket.comment.entity;
 package com.ddalggak.finalproject.domain.comment.entity;
 
 import javax.persistence.Column;
