@@ -38,8 +38,6 @@ public class TicketController {
 		return ticketService.createTicket(userDetails.getUser(), ticketRequestDto);
 	}
 
-<<<<<<< HEAD
-=======
 	// // 티켓 전체 조회 (테스크에 들어갈 내용) getTickets
 	// @GetMapping
 	// public ResponseEntity<List<TicketResponseDto>> getTickets(@AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -74,7 +72,6 @@ public class TicketController {
 	// 	@AuthenticationPrincipal UserDetailsImpl userDetails) {
 	// 	return ticketService.getTicket(userDetails.getUser(), ticketId, ticketRequestDto.getTaskId());
 	// }
->>>>>>> 48d1ccd (feat: Add init 초기설정)
 
 	// 티켓 상세 조회
 	@Operation(summary = "get ticket", description = "Ticket 상세조회 get 메서드 체크")
