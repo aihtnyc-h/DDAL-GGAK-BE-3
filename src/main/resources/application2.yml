@@ -1,0 +1,72 @@
+## set2
+#spring:
+#config:
+#  activate:
+#    on-profile: set2
+#
+#datasource:
+#  driver-class-name: com.mysql.cj.jdbc.Driver
+#  url: jdbc:mysql://database-1.cpeuic9kxxte.ap-northeast-2.rds.amazonaws.com:3306/DDAL_GGAK1?serverTimezone=Asia/Seoul
+#  username: admin
+#  password: 1q2w3e4r
+#h2:
+#  console:
+#    enabled: false
+#jpa:
+#  hibernate:
+#    ddl-auto: create
+#security:
+#  oauth2:
+#    client:
+#      registration:
+#        google:
+#          client-id: myid
+#          client-secret: mysecretkey
+#mail:
+#  host: smtp.gmail.com
+#  port: 587
+#  username: psm4502@gmail.com
+#  password: ysewqxqnhzqchgsy
+#  properties:
+#    mail:
+#      smtp:
+#        auth: true
+#        starttls:
+#          enable: true
+#  redis:
+#    host: 13.124.201.18
+#    port: 6379
+#    password: 1ddalggak
+#  cache:
+#    type: redis
+#  profiles:
+#    active: local
+#cloud:
+#  aws:
+#    s3:
+#      bucket: ddal-ggak-codedeploy-app
+#    credentials:
+#      access-key: AKIATSKRK4EYASEYLUNL
+#      secret-key: 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
+#    region:
+#      static: ap-northeast-2
+#    stack:
+#      auto: false
+#
+#file:
+#  size:
+#    limit: 10485760
+#
+#jwt:
+#  secret:
+#    key: xkf1cnl2gk3wl4akf5dk6wn7tp8dy9wp0qkf1qn2xkr3gkq4sl5ek6bb7gla8emf9dj0dy1
+#app:
+#  auth:
+#    accessTokenTime: 1800000
+#    refreshTokenTime: 50400000
+#  oauth2:
+#    authorizedRedirectUri: http://localhost:3000/oauth/redirect
+#server:
+#  tomcat:
+#    use-relative-redirects: true
+#  port: 8082
