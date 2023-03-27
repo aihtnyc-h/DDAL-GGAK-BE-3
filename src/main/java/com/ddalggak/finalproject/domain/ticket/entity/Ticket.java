@@ -14,10 +14,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.label.entity.Label;
 import com.ddalggak.finalproject.domain.task.entity.Task;
-import com.ddalggak.finalproject.domain.ticket.dto.TicketRequestDto;
+import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.global.entity.BaseEntity;
 
