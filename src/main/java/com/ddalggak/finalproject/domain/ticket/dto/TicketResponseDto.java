@@ -3,6 +3,9 @@ package com.ddalggak.finalproject.domain.ticket.dto;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.ddalggak.finalproject.domain.comment.dto.CommentResponseDto;
+import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
