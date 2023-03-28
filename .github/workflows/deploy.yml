@@ -51,7 +51,10 @@ jobs:
     # (6) Jar 파일 복사
     - name: Copy Jar
       run: cp ./build/libs/*.jar ./deploy
-
+#     # (7) clean build
+#     - name: Build with Gradle
+#       run: ./gradlew clean build
+#       shell: bash
    # (8) zip file 
     - name: Make zip file
       run: zip -r ./$finalproject.zip .
