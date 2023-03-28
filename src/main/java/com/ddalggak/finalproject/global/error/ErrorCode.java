@@ -17,6 +17,7 @@ public enum ErrorCode {
 	MISMATCH_REFRESH_TOKEN(BAD_REQUEST, "A-002", "리프레시 토큰의 유저 정보가 일치하지 않습니다"),
 	INVALID_REQUEST(BAD_REQUEST, "A-003", "잘못된 요청입니다."),
 	INVALID_PASSWORD(BAD_REQUEST, "A-004", "비밀번호가 일치하지 않습니다."),
+	INVALID_RANDOM_CODE(BAD_REQUEST, "A-005", "인증코드가 일치하지 않습니다."),
 
 	/* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
 	INVALID_AUTH_TOKEN(UNAUTHORIZED, "B-001", "권한 정보가 없는 토큰입니다"),
