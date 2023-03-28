@@ -30,7 +30,7 @@ public enum ErrorCode {
 	EMPTY_CLIENT(NOT_FOUND, "D-002", "등록된 유저가 없습니다."),
 	NOT_FOUND_CLIENT(NOT_FOUND, "D-003", "해당 유저를 찾을 수 없습니다."),
 	NOT_FOUND_PHOTO(NOT_FOUND, "D-004", "해당 사진을 찾을 수 없습니다."),
-	NOT_FOUND_COMMENT(NOT_FOUND, "D-005", "해당 댓글을 찾을 수 없습니다."),
+	COMMENT_NOT_FOUND(NOT_FOUND, "D-005", "해당 댓글을 찾을 수 없습니다."),
 	TICKET_NOT_FOUND(NOT_FOUND, "D-006", "해당 티켓을 찾을 수 없습니다."),
 	PROJECT_NOT_FOUND(NOT_FOUND, "D-007", "해당 프로젝트를 찾을 수 없습니다."),
 	TASK_NOT_FOUND(NOT_FOUND, "D-008", "해당 태스크를 찾을 수 없습니다."),
