@@ -21,9 +21,9 @@ public class TicketResponseDto {
 	@Schema(name = "ticket description", example = "ticket description")
 	private String ticketDescription;
 	@Schema(name = "ticket priority", example = "ticket priority")
-	private int totalPriority;
+	private int priority;
 	@Schema(name = "ticket difficulty", example = "ticket difficulty")
-	private int totalDifficulty;
+	private int difficulty;
 	@Schema(name = "ticket assigned", example = "ticket assigned")
 	private String assigned;
 	@Schema(name = "ticket assigned", example = "ticket assigned")
@@ -38,8 +38,8 @@ public class TicketResponseDto {
 		this.ticketId = ticket.getTicketId();
 		this.ticketTitle = ticket.getTicketTitle();
 		this.ticketDescription = ticket.getTicketDescription();
-		this.totalPriority = ticket.getTotalPriority();
-		this.totalDifficulty = ticket.getTotalDifficulty();
+		this.priority = ticket.getPriority();
+		this.difficulty = ticket.getDifficulty();
 		this.assigned = ticket.getAssigned();
 		this.ticketExpiredAt = ticket.getTicketExpiredAt();
 		this.commentList = commentList;
