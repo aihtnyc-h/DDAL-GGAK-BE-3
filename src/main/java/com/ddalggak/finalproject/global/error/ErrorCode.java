@@ -10,6 +10,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+	//todo 상세코드 작성
 
 	/* 400 BAD_REQUEST : 잘못된 요청  */
 	INVALID_REFRESH_TOKEN(BAD_REQUEST, "A-001", "Please enter valid refresh token."),
