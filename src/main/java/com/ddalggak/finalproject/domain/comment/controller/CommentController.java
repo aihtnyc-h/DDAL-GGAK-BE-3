@@ -37,19 +37,19 @@ public class CommentController {
 	}
 	// 댓글 수정
 	@Operation(summary = "patch ticket comment", description = "comment 수정 get 메서드 체크")
-	@PatchMapping("/comment/{comment_id}")
+	@PatchMapping("/comment/{commentId}")
 	public ResponseEntity<SuccessResponseDto> updateComment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@PathVariable("comment_id") Long commentId,
+		@PathVariable("commentId") Long commentId,
 		@Valid @RequestBody CommentRequestDto commentRequestDto) {
 		return commentService.updateComment(userDetails, commentId, commentRequestDto);
 	}
 	// 댓글 삭제
 	@Operation(summary = "delete ticket comment", description = "comment 삭제 delete 메서드 체크")
-	@DeleteMapping("/comment/{comment_id}")
+	@DeleteMapping("/comment/{commentId}")
 	public ResponseEntity<SuccessResponseDto> deleteComment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@PathVariable("comment_id") Long commentId) {
+		@PathVariable("commentId") Long commentId) {
 		return commentService.deleteComment(userDetails, commentId);
 	}
 }
