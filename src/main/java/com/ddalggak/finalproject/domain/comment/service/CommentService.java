@@ -61,7 +61,7 @@ public class CommentService {
 		// 삭제
 		commentRepository.delete(comment);
 		// 상태 반환
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
+		return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
 	}
 
 	/* == 반복 로직 == */
