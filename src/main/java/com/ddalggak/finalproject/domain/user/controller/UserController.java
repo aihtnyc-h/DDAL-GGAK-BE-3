@@ -2,6 +2,7 @@ package com.ddalggak.finalproject.domain.user.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,6 +25,7 @@ import com.ddalggak.finalproject.domain.user.dto.EmailRequestDto;
 import com.ddalggak.finalproject.domain.user.dto.NicknameRequestDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
+import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.domain.user.service.UserService;
 import com.ddalggak.finalproject.global.dto.SuccessCode;
@@ -31,6 +33,8 @@ import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.error.ErrorResponse;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
+import com.ddalggak.finalproject.global.jwt.token.entity.Token;
+import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
 import com.ddalggak.finalproject.global.mail.MailService;
 import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeDto;
 import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeService;
@@ -48,6 +52,7 @@ public class UserController {
 	private final UserRepository userRepository;
 	private final MailService mailService;
 	private final RandomCodeService randomCodeService;
+	private final TokenRepository tokenRepository;
 
 	@PostMapping("/auth/email")
 	public ResponseEntity<?> emailAuthentication(@Valid @RequestBody EmailRequestDto emailRequestDto,
@@ -142,6 +147,14 @@ public class UserController {
 	@GetMapping("/user")
 	public ResponseEntity<?> getMyPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return userService.getMyPage(userDetails.getEmail());
+	}
+
+	@GetMapping("/auth/validToken")
+	public ResponseEntity<?> validToken(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		Token token = tokenRepository.findByEmail(userDetails.getEmail());
+		if(token == null) {throw new UserException(ErrorCode.INVALID_REQUEST);
+		}
+		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_UPLOAD);
 	}
 
 }
