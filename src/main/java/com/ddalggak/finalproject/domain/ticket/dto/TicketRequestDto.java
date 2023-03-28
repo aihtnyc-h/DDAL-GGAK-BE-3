@@ -19,9 +19,9 @@ public class TicketRequestDto {
 	@Schema(name = "ticket Description", example = "ticket Description")
 	private String ticketDescription;
 	@Schema(name = "ticket priority", example = "ticket priority")
-	private int totalPriority;
+	private int priority;
 	@Schema(name = "ticket difficulty", example = "ticket difficulty")
-	private int totalDifficulty;
+	private int dfficulty;
 	@Schema(name = "ticket assigned", example = "ticket assigned")
 	private String assigned;
 	@Schema(name = "when does this project expired at", example = "2023-03-22")
