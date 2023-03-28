@@ -40,21 +40,24 @@ public class CommentService {
 		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 	}
 	// 댓글 수정
-	public ResponseEntity<SuccessResponseDto> updateComment(UserDetailsImpl userDetails, Long commentId, Long ticketId,
-		CommentRequestDto commentRequestDto) {
-		Ticket ticket = TicketValidation(ticketId);
+	public ResponseEntity<SuccessResponseDto> updateComment(UserDetailsImpl userDetails, Long commentId, CommentRequestDto commentRequestDto) {
+		Ticket ticket = TicketValidation(commentRequestDto.getTicketId());
 		Comment comment = getComment(commentId);
-		checkValidation(ticket, comment, userDetails);
-		// 삭제
+		if (!comment.getUser().getUserId().equals(userDetails.getUser().getUserId())) {
+			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+		}
+		// 수정
 		commentRepository.save(comment);
 		// 상태 반환
 		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 	}
 	// 댓글 삭제
-	public ResponseEntity<SuccessResponseDto> deleteComment(UserDetailsImpl userDetails, Long commentId, Long ticketId) {
-		Ticket ticket = TicketValidation(ticketId);
+	public ResponseEntity<SuccessResponseDto> deleteComment(UserDetailsImpl userDetails, Long commentId) {
 		Comment comment = getComment(commentId);
-		checkValidation(ticket, comment, userDetails);
+		// checkValidation(ticket, comment, userDetails);
+		if (!comment.getUser().getUserId().equals(userDetails.getUser().getUserId())){
+			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+		}
 		// 삭제
 		commentRepository.delete(comment);
 		// 상태 반환
