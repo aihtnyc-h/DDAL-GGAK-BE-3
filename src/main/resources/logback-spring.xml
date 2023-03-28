@@ -46,10 +46,10 @@
         <!--        <file>${LOG_DIR}/daily_error/%d{yyyy-MM-dd}.log</file>-->
         <!--        <append>true</append>-->
         <!--디렉토리, 모듈ID, logback, 압축 형식, 날짜 등 지정-->
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOG_DIR}/${MODULE_ID}/logback/%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
-            <totalSizeCap>100MB</totalSizeCap>
+            <totalSizeCap>3GB</totalSizeCap>
         </rollingPolicy>
         <!--pattern을 사용하여 원하는 형식으로 로그 찍을 수 있음-->
         <encoder>
