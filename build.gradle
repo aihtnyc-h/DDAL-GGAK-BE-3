@@ -40,7 +40,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-junit-jupiter:4.8.0'
 
     //logback
-    implementation 'com.github.maricn:logback-slack-appender:1.6.1'
+    //implementation 'com.github.maricn:logback-slack-appender:1.6.1'
 
     //AWS S3
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
