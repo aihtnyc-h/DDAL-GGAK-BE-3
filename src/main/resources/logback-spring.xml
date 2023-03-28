@@ -38,27 +38,27 @@
         </encoder>
     </appender>
 
-    <appender name="INFO_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <!--임계값 밑의 필터는 저장되지 않는다.-->
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>INFO</level>
-        </filter>
-        <!--        <file>${LOG_DIR}/daily_error/%d{yyyy-MM-dd}.log</file>-->
-        <!--        <append>true</append>-->
-        <!--디렉토리, 모듈ID, logback, 압축 형식, 날짜 등 지정-->
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_DIR}/${MODULE_ID}/logback/%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>30</maxHistory>
-            <totalSizeCap>1GB</totalSizeCap>
-        </rollingPolicy>
-        <!--pattern을 사용하여 원하는 형식으로 로그 찍을 수 있음-->
-        <encoder>
-            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] %logger %msg%n</pattern>
-        </encoder>
-    </appender>
+    <!--    <appender name="INFO_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+    <!--        &lt;!&ndash;임계값 밑의 필터는 저장되지 않는다.&ndash;&gt;-->
+    <!--        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+    <!--            <level>INFO</level>-->
+    <!--        </filter>-->
+    <!--        &lt;!&ndash;        <file>${LOG_DIR}/daily_error/%d{yyyy-MM-dd}.log</file>&ndash;&gt;-->
+    <!--        &lt;!&ndash;        <append>true</append>&ndash;&gt;-->
+    <!--        &lt;!&ndash;디렉토리, 모듈ID, logback, 압축 형식, 날짜 등 지정&ndash;&gt;-->
+    <!--        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+    <!--            <fileNamePattern>${LOG_DIR}/${MODULE_ID}/logback/%d{yyyy-MM-dd}.log</fileNamePattern>-->
+    <!--            <maxHistory>30</maxHistory>-->
+    <!--            <totalSizeCap>1GB</totalSizeCap>-->
+    <!--        </rollingPolicy>-->
+    <!--        &lt;!&ndash;pattern을 사용하여 원하는 형식으로 로그 찍을 수 있음&ndash;&gt;-->
+    <!--        <encoder>-->
+    <!--            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] %logger %msg%n</pattern>-->
+    <!--        </encoder>-->
+    <!--    </appender>-->
     <!--설정한 Appender를 참조하여 로그의 레벨을 설정할 수 있다. root는 전역 설정, 지역 설정을 logger로 사용한다. DEBUG이면 DEBUG 레벨부터 출력한다. -->
     <root level="INFO">
-        <appender-ref ref="INFO_LOG"/>
+        <!--        <appender-ref ref="INFO_LOG"/>-->
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="SLACK"/>
     </root>
