@@ -2,7 +2,6 @@ package com.ddalggak.finalproject.domain.user.controller;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -152,7 +151,8 @@ public class UserController {
 	@GetMapping("/auth/validToken")
 	public ResponseEntity<?> validToken(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		Token token = tokenRepository.findByEmail(userDetails.getEmail());
-		if(token == null) {throw new UserException(ErrorCode.INVALID_REQUEST);
+		if (token == null) {
+			throw new UserException(ErrorCode.INVALID_REQUEST);
 		}
 		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_UPLOAD);
 	}
