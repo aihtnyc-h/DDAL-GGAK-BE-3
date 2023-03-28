@@ -18,8 +18,8 @@ import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.domain.user.role.UserRole;
 import com.ddalggak.finalproject.global.error.ErrorCode;
-import com.ddalggak.finalproject.global.jwt.token.dto.Token;
 import com.ddalggak.finalproject.global.jwt.token.entity.RefreshToken;
+import com.ddalggak.finalproject.global.jwt.token.entity.Token;
 import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
 import com.ddalggak.finalproject.global.security.UserDetailsServiceImpl;
 
