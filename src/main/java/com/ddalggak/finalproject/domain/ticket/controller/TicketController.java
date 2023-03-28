@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketRequestDto;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.service.TicketService;
+import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -72,10 +73,7 @@ public class TicketController {
 	// 티켓 삭제
 	@Operation(summary = "delete ticket", description = "Ticket 삭제 delete 메서드 체크")
 	@DeleteMapping("/ticket/{ticketId}")
-	public ResponseEntity<?> deleteTicket(
-		@PathVariable Long ticketId,
-		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@Valid @RequestBody TicketRequestDto ticketRequestDto) {
-		return ticketService.deleteTicket(ticketId, ticketRequestDto, userDetails.getUser());
+	public ResponseEntity<?> deleteTicket(@PathVariable Long ticketId,	@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		return ticketService.deleteTicket(userDetails.getUser(), ticketId);
 	}
 }
