@@ -28,6 +28,7 @@ import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
+import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import lombok.RequiredArgsConstructor;
@@ -48,9 +49,9 @@ public class TicketService {
 		System.out.println("--------user = " + user.getNickname());
 		Task task = validateTask(ticketRequestDto.getTaskId());
 
-		TaskUserRequestDto taskUserRequestDto = TaskUserRequestDto.create(user);
-		User userList = TaskUser.create(taskUserRequestDto).getUser();
-		Ticket ticket = Ticket.create(ticketRequestDto, userList, task);
+		// TaskUserRequestDto taskUserRequestDto = TaskUserRequestDto.create(user);
+		// User owner = TaskUser.create(taskUserRequestDto).getUser();
+		Ticket ticket = Ticket.create(ticketRequestDto, user, task);
 		ticketRepository.save(ticket);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 
@@ -143,6 +144,7 @@ public class TicketService {
 	// 	TicketResponseDto ticketResponseDto = new TicketResponseDto(ticket, commentResponseDtoList);
 	// 	return ResponseEntity.ok().body(ticketResponseDto);
 	// }
+	
 	// 티켓 상세조회 (해당되는 티켓만 조회 // 로직 다시 짜보기)
 	@Transactional(readOnly = true)
 	public ResponseEntity<TicketResponseDto> getTicket(Long ticketId, User user, TicketRequestDto ticketRequestDto) {
@@ -154,7 +156,6 @@ public class TicketService {
 		return ResponseEntity.ok().body(ticketResponseDto);
 
 	}
-
 	private List<CommentResponseDto> getComment(Ticket ticket) {
 		List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
 		List<Comment> commentList = commentRepository.findAllByTicketOrderByCreatedAtDesc(ticket);
@@ -241,26 +242,62 @@ public class TicketService {
 	// 	else throw new CustomException(UNAUTHORIZED_USER);
 	// 	return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
 	// }
+	
 	// 티켓 삭제하기
 	@Transactional
-	public ResponseEntity<SuccessResponseDto> deleteTicket(Long ticketId, @Valid TicketRequestDto ticketRequestDto,
-		User user) {
+	public ResponseEntity<?> deleteTicket(User user, Long ticketId) {
+		user = validateUserByEmail(user.getEmail());
+		Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(
+			() -> new CustomException(TICKET_NOT_FOUND));
+		// if (ticket.getTask().getTaskLeader().equals(user.getEmail()) ||
+		// 	ticket.getLabelLeader().equals(user.getEmail())) {//|| {
+			// ticket.getOwner().getEmail().equals(user.getEmail())) {
+			ticketRepository.delete(ticket);
+		// } else {
+		// 	throw new CustomException(UNAUTHORIZED_USER);
+		// }
+		return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
+
+		// 	// if (!ticket.getTask().getTaskLeader().equals(user.getEmail())){
+		// 	if (!ticket.getLabelLeader().equals(user.getEmail())) {
+		// 		// if (!ticket.getOwner().equals(user.getEmail())) {
+		// 			throw new CustomException(UNAUTHORIZED_USER);
+		// 		// }
+		// 	}
+		// }
+		// ticketRepository.deleteById(ticketId);
+		// // else throw new CustomException(UNAUTHORIZED_USER);
+		// return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
+
+			// getTicket(ticketId);
+		// if (!ticket.getTask().getTaskLeader().equals(userDetails.getUser().getEmail())){
+		// 	if (!ticket.getLabelLeader().equals(userDetails.getUser().getEmail())) {
+		// 		if (!ticket.getOwner().getUserId().equals(userDetails.getUser().getEmail())) {
+		// 			throw new CustomException(UNAUTHORIZED_USER);
+		// 		}
+		// 	}
+		// }
+		// if (!(ticket.getOwner().getEmail().equals(userDetails.getEmail()))) {
+		// 	throw new CustomException(UNAUTHORIZED_USER);
+		// }
+		// ticketRepository.delete(ticket);
+		// return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
 		// Ticket ticket = validateTicket(ticketId);
 		// if (ticket.getTask().getTaskLeader().equals(user.getEmail()) ||
 		// 	Objects.equals(ticket.getLabelLeader(), user.getEmail())) {
 		// 	ticket.getTask().deleteLabelLeader(ticket);
-		// 	ticketRepository.delete(ticket);
+		// 	ticketRepository.delete(ticket);	-> null point 생성 될 수도 있어서 다른방법
 		// } else {
 		// 	throw new CustomException(UNAUTHORIZED_USER);
 		// }
 		// return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
-		Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(
-			() -> new CustomException(TICKET_NOT_FOUND));
-		if (user.getEmail().equals(ticket.getUserList().getEmail()))
-			ticketRepository.deleteById(ticketId);
-		else
-			throw new CustomException(UNAUTHORIZED_USER);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
+		// Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(
+		// 	() -> new CustomException(TICKET_NOT_FOUND));
+		// if (user.getEmail().equals(ticket.getOwner().getEmail()))
+		// 	ticketRepository.deleteById(ticketId);
+		// else
+		// 	throw new CustomException(UNAUTHORIZED_USER);
+		// return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 	}
 	/* == 반복 로직 == */
 	// task 유무 확인
@@ -268,7 +305,7 @@ public class TicketService {
 		return taskRepository.findById(taskId).orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
 	}
 	// ticket 유무 확인
-	public Ticket getTicket(User user, Long ticketId) {
+	public Ticket getTicket(Long ticketId) {
 		return ticketRepository.findById(ticketId).orElseThrow(() -> new CustomException(TICKET_NOT_FOUND));
 	}
 	// User Email 유무 확인

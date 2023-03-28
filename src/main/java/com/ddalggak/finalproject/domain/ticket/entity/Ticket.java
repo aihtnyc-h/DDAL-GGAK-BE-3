@@ -40,9 +40,9 @@ public class Ticket extends BaseEntity {
 	// 티켓 내용 notnull
 	private String ticketDescription;
 	// 중요도 null 허용 -> int 로 변경 필요
-	private int totalPriority;
+	private int priority;
 	// 난이도  null 허용 -> int 로 변경 필요
-	private int totalDifficulty;
+	private int difficulty;
 	// 태그(이름 변경 해야함)  null 허용
 	private String assigned;
 	// 마감 날짜  null 허용 -> 최신 생성순으로
@@ -58,7 +58,7 @@ public class Ticket extends BaseEntity {
 	// user 연관관계 // FE에서 user -> onwer 로 변경요청
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "userId")
-	private User userList;
+	private User owner;
 
 	// @Column(nullable = true)
 	// @Enumerated(value = EnumType.STRING)
@@ -77,8 +77,8 @@ public class Ticket extends BaseEntity {
 	public Ticket(TicketRequestDto ticketRequestDto, User user, List<Comment> comment) {
 		this.ticketTitle = ticketRequestDto.getTicketTitle();
 		this.ticketDescription = ticketRequestDto.getTicketDescription();
-		this.totalPriority = ticketRequestDto.getTotalPriority();
-		this.totalDifficulty = ticketRequestDto.getTotalDifficulty();
+		this.priority = ticketRequestDto.getPriority();
+		this.difficulty = ticketRequestDto.getDfficulty();
 		this.assigned = ticketRequestDto.getAssigned();
 		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
 		// this.taskLeader = user.getEmail();
@@ -87,8 +87,8 @@ public class Ticket extends BaseEntity {
 	public void update(TicketRequestDto ticketRequestDto, User user) {
 		this.ticketTitle = ticketRequestDto.getTicketTitle();
 		this.ticketDescription = ticketRequestDto.getTicketDescription();
-		this.totalPriority = ticketRequestDto.getTotalPriority();
-		this.totalDifficulty = ticketRequestDto.getTotalDifficulty();
+		this.priority = ticketRequestDto.getPriority();
+		this.difficulty = ticketRequestDto.getDfficulty();
 		this.assigned = ticketRequestDto.getAssigned();
 		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
 		// this.addTask(task);
