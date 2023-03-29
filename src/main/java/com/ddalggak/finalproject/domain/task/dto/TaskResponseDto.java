@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
+import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -40,8 +41,8 @@ public class TaskResponseDto {
 		taskTitle = task.getTaskTitle();
 		taskLeader = task.getTaskLeader();
 		expiredAt = task.getExpiredAt();
-		totalDifficulty = task.getTotalDifficulty();
-		totalPriority = task.getTotalPriority();
+		totalDifficulty = task.getTicketList().stream().mapToInt(Ticket::getDifficulty).sum();
+		totalPriority = task.getTicketList().stream().mapToInt(Ticket::getPriority).sum();
 		tickets = task.getTicketList().stream().map(TicketResponseDto::of).collect(Collectors.toList());
 	}
 
