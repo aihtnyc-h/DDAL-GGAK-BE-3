@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -36,7 +39,6 @@ public class Ticket extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long ticketId;
-
 	// 티켓 제목 notnull
 	private String ticketTitle;
 	// 티켓 내용 notnull
@@ -62,14 +64,14 @@ public class Ticket extends BaseEntity {
 	@JoinColumn(name = "userId")
 	private User user;
 
-	// @Column(nullable = true)
-	// @Enumerated(value = EnumType.STRING)
-	// private TicketStatus status;
+	@Column(nullable = true)
+	@Enumerated(value = EnumType.STRING)
+	private TicketStatus status;
 	// @OneToMany(mappedBy = "ticket")
 	// private List<User> User = new ArrayList<>();
 
-	//label 연관관계 //티켓에 라벨이 필요한가? // 단방향으로 연관관계? 양방향?
-	@OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+
+	@OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL)
 	private List<Label> labelList = new ArrayList<>();
 	// 댓글 연관관계
 	@OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
