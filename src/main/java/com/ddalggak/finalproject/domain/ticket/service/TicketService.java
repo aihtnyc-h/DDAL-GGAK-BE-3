@@ -352,7 +352,7 @@ public class TicketService {
 
 	private Label validateExistTeam(Label label, User user) {
 		if(!label.getLabelLeader().contains(user.toString())) {
-			throw new CustomException(UNAUTHORIZED_USER);
+			throw new CustomException(UNAUTHENTICATED_USER);
 		}
 		return label;
 	}
