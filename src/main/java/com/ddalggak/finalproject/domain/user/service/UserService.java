@@ -41,7 +41,7 @@ public class UserService {
 		Optional<User> foundUser = userRepository.findByEmail(email);
 
 		if (foundUser.isPresent()) {
-			throw new UserException(ErrorCode.DUPLICATE_MEMBER);
+			throw new UserException(ErrorCode.DUPLICATE_EMAIL);
 		}
 
 		String nickname = "anonymous";
@@ -60,12 +60,13 @@ public class UserService {
 	@Transactional
 	public ResponseEntity<UserPageDto> login(UserRequestDto userRequestDto, HttpServletResponse response) {
 		String email = userRequestDto.getEmail();
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
+		User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new RuntimeException("Invalid email or password"));
 		String password = userRequestDto.getPassword();
 		String dbPassword = user.getPassword();
 
 		if (!passwordEncoder.matches(password, dbPassword)) {
-			throw new UserException(ErrorCode.INVALID_PASSWORD);
+			throw new RuntimeException("Invalid email or password");
 		}
 
 		response.addHeader(JwtUtil.AUTHORIZATION_HEADER,

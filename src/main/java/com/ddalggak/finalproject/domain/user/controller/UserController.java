@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.user.dto.EmailRequestDto;
 import com.ddalggak.finalproject.domain.user.dto.NicknameRequestDto;
+import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
@@ -92,10 +93,8 @@ public class UserController {
 	}
 
 	@PostMapping("/auth/login")
-	public ResponseEntity<?> login(@RequestBody UserRequestDto userRequestDto, HttpServletResponse response) {
-		userService.login(userRequestDto, response);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_LOGIN);
-
+	public ResponseEntity<UserPageDto> login(@RequestBody UserRequestDto userRequestDto, HttpServletResponse response) {
+		return userService.login(userRequestDto, response);
 	}
 
 	@PostMapping("/auth/logout")
