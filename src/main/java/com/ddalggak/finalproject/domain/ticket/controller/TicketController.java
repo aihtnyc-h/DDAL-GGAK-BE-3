@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketRequestDto;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.service.TicketService;
-import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import io.swagger.v3.oas.annotations.Operation;

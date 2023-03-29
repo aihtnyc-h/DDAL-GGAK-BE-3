@@ -5,17 +5,12 @@ import static com.ddalggak.finalproject.global.error.ErrorCode.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.Valid;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ddalggak.finalproject.domain.label.entity.Label;
-import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
-import com.ddalggak.finalproject.domain.task.dto.TaskUserRequestDto;
 import com.ddalggak.finalproject.domain.task.entity.Task;
-import com.ddalggak.finalproject.domain.task.entity.TaskUser;
 import com.ddalggak.finalproject.domain.task.repository.TaskRepository;
 import com.ddalggak.finalproject.domain.comment.dto.CommentResponseDto;
 import com.ddalggak.finalproject.domain.comment.entity.Comment;
@@ -29,7 +24,6 @@ import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
-import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import lombok.RequiredArgsConstructor;
@@ -157,7 +151,17 @@ public class TicketService {
 		TicketResponseDto ticketResponseDto = new TicketResponseDto(ticket, commentList);
 		return ResponseEntity.ok().body(ticketResponseDto);
 	}
-
+	// 티켓에 있는 댓글 가져오기
+	private List<CommentResponseDto> getComment(Ticket ticket) {
+		List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
+		List<Comment> commentList = commentRepository.findAllByTicketOrderByCreatedAtDesc(ticket);
+		for (Comment c : commentList) {
+			log.info("comment = {}", c.getComment());
+			commentResponseDtoList.add(new CommentResponseDto(c));
+			log.info("comment = {}", c.getComment());
+		}
+		return commentResponseDtoList; //.add(new CommentResponseDto(commentList));
+	}
 	// @Transactional(readOnly = true)
 	// 	public ResponseEntity<TicketResponseDto> getTicket(User user, Long taskId, Long ticketId) {
 	// 	// User user = userDetails.getUser();
@@ -224,7 +228,6 @@ public class TicketService {
 		user = validateUserByEmail(user.getEmail());
 		Task task = validateTask(ticketRequestDto.getTaskId());
 		Ticket ticket = validateTicket(ticketId);
-		// if (user.getEmail().equals(ticket.getUser().getEmail()))
 			ticket.update(ticketRequestDto);
 		// else throw new CustomException(UNAUTHORIZED_USER);
 		// ticketRepository.save(ticket);
@@ -353,17 +356,7 @@ public class TicketService {
 		}
 		return label;
 	}
-	// 티켓에 있는 댓글 가져오기
-	private List<CommentResponseDto> getComment(Ticket ticket) {
-		List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
-		List<Comment> commentList = commentRepository.findAllByTicketOrderByCreatedAtDesc(ticket);
-		for (Comment c : commentList) {
-			log.info("comment = {}", c.getComment());
-			commentResponseDtoList.add(new CommentResponseDto(c));
-			log.info("comment = {}", c.getComment());
-		}
-		return commentResponseDtoList; //.add(new CommentResponseDto(commentList));
-	}
+
 
 	// private void validateExistMember(Task task, TaskUser taskUser) {
 	// 	if (!task.getTaskUserList().contains(taskUser)) {
