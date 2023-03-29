@@ -9,8 +9,8 @@ on:
 env:
   AWS_REGION: ap-northeast-2
   S3_BUCKET_NAME: ddal-ggak-codedeploy-app
-  CODE_DEPLOY_APPLICATION_NAME: codedeploy
-  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: codedeploy_g
+  CODE_DEPLOY_APPLICATION_NAME: test1
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: test1-g
   ZIP_NAME: zip -r ./finalproject.zip .
   APPLICATION: ./src/main/resources/application.yml
 
