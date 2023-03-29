@@ -33,7 +33,7 @@ public class CommentController {
 	public ResponseEntity<SuccessResponseDto> createComment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody CommentRequestDto commentRequestDto) {
-		return commentService.createComment(userDetails, commentRequestDto);
+		return commentService.createComment(userDetails.getUser(), commentRequestDto);
 	}
 	// 댓글 수정
 	@Operation(summary = "patch ticket comment", description = "comment 수정 get 메서드 체크")
@@ -42,7 +42,7 @@ public class CommentController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable("commentId") Long commentId,
 		@Valid @RequestBody CommentRequestDto commentRequestDto) {
-		return commentService.updateComment(userDetails, commentId, commentRequestDto);
+		return commentService.updateComment(userDetails.getUser(), commentId, commentRequestDto);
 	}
 	// 댓글 삭제
 	@Operation(summary = "delete ticket comment", description = "comment 삭제 delete 메서드 체크")
