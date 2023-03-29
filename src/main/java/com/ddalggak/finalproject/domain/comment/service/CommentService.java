@@ -1,5 +1,7 @@
 package com.ddalggak.finalproject.domain.comment.service;
 
+import static com.ddalggak.finalproject.global.error.ErrorCode.*;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +13,7 @@ import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.comment.repository.CommentRepository;
 import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
 import com.ddalggak.finalproject.domain.user.entity.User;
+import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
@@ -26,12 +29,13 @@ public class CommentService {
 
 	private final CommentRepository commentRepository;
 	private final TicketRepository ticketRepository;
+	private final UserRepository userRepository;
 
 	// 댓글 작성
-	public ResponseEntity<SuccessResponseDto> createComment(UserDetailsImpl userDetails,
+	public ResponseEntity<SuccessResponseDto> createComment(User user,
 		CommentRequestDto commentRequestDto) {
-		System.out.println("---------commment = " + userDetails.getEmail());
-		User user = userDetails.getUser();
+		System.out.println("---------commment = " + user.getEmail());
+		user = validateUserByEmail(user.getEmail());
 		Ticket ticket = TicketValidation(commentRequestDto.getTicketId());
 		// comment 작성
 		Comment comment = new Comment(user, ticket, commentRequestDto);
@@ -40,20 +44,29 @@ public class CommentService {
 		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 	}
 	// 댓글 수정
-	public ResponseEntity<SuccessResponseDto> updateComment(UserDetailsImpl userDetails, Long commentId, CommentRequestDto commentRequestDto) {
+	public ResponseEntity<SuccessResponseDto> updateComment(User user, Long commentId, CommentRequestDto commentRequestDto) {
+		user = validateUserByEmail(user.getEmail());
 		Ticket ticket = TicketValidation(commentRequestDto.getTicketId());
-		Comment comment = getComment(commentId);
-		if (!comment.getUser().getUserId().equals(userDetails.getUser().getUserId())) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
-		}
+		Comment comment = CommnetValidation(commentId);
+		// if (!comment.getUser().getUserId().equals(userDetails.getUser().getUserId())) {
+		// 	throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+		// }
 		// 수정
-		commentRepository.save(comment);
+		// commentRepository.save(comment);
+		comment.update(commentRequestDto);
 		// 상태 반환
 		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 	}
+
+	private User validateUserByEmail(String email) {
+		return userRepository.findByEmail(email).orElseThrow(
+			() -> new CustomException(MEMBER_NOT_FOUND)
+		);
+	}
+
 	// 댓글 삭제
 	public ResponseEntity<SuccessResponseDto> deleteComment(UserDetailsImpl userDetails, Long commentId) {
-		Comment comment = getComment(commentId);
+		Comment comment = CommnetValidation(commentId);
 		// checkValidation(ticket, comment, userDetails);
 		if (!comment.getUser().getUserId().equals(userDetails.getUser().getUserId())){
 			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
@@ -71,7 +84,7 @@ public class CommentService {
 		return ticketRepository.findById(ticketId).orElseThrow(() -> new CustomException(ErrorCode.TICKET_NOT_FOUND));
 	}
 	// comment 유무 확인
-	private Comment getComment(Long commentId) {
+	private Comment CommnetValidation(Long commentId) {
 		return commentRepository.findById(commentId).orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
 	}
 
