@@ -28,10 +28,10 @@ public class TicketResponseDto {
 	private String assigned;
 	@Schema(name = "ticket assigned", example = "ticket assigned")
 	private LocalDate ticketExpiredAt;
-	@Schema(name = "total comments")
-	private List<CommentResponseDto> commentList;
 	@Schema(name = "label leader", example = "label leader")
 	private String labelLeader;
+	@Schema(name = "total comments")
+	private List<CommentResponseDto> commentList;
 
 	@Builder
 	public TicketResponseDto(Ticket ticket, List<CommentResponseDto> commentList) {
