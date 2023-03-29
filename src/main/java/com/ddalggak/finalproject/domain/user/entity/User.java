@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import com.ddalggak.finalproject.domain.label.entity.LabelUser;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
+import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.user.role.UserRole;
 import com.ddalggak.finalproject.global.entity.BaseTimeEntity;
 
@@ -28,7 +29,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity(name = "Users")
 @Builder
-
 public class User extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,6 +57,9 @@ public class User extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "user")
 	List<LabelUser> labelUserList = new ArrayList<>();
+
+	@OneToMany(mappedBy = "user")
+	List<Ticket> ticketList = new ArrayList<>();
 
 	public User(Long userId, String email, String nickname, String password, String profile, UserRole role) {
 		this.userId = userId;
