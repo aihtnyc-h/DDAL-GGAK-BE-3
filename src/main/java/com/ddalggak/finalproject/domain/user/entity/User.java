@@ -3,6 +3,7 @@ package com.ddalggak.finalproject.domain.user.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -29,6 +30,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity(name = "Users")
 @Builder
+
 public class User extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,9 +59,6 @@ public class User extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "user")
 	List<LabelUser> labelUserList = new ArrayList<>();
-
-	@OneToMany(mappedBy = "user")
-	List<Ticket> ticketList = new ArrayList<>();
 
 	public User(Long userId, String email, String nickname, String password, String profile, UserRole role) {
 		this.userId = userId;
