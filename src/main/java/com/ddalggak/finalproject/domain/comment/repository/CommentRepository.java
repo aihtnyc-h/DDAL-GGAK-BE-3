@@ -11,3 +11,4 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 	List<Comment> findAllByTicketOrderByCreatedAtDesc(Ticket ticket);
 	void deleteAllByTicket(Ticket ticket);
 }
+
