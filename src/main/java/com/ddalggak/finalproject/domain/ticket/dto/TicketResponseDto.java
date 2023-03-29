@@ -50,4 +50,15 @@ public class TicketResponseDto {
 			.ticket(ticket)
 			.build();
 	}
+
+
+	// public static ResponseEntity<TicketResponseDto>ticketResponseDtoResponseEntity of(Ticket ticket) {
+	// 	return ResponseEntity
+	// 		.status(200)
+	// 		.body(TicketResponseDto.builder()
+	// 			.ticket(ticket)
+	// 			.build());
+	// }
+
+
 }

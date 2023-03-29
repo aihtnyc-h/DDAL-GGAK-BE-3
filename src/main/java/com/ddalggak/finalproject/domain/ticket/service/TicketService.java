@@ -242,7 +242,7 @@ public class TicketService {
 		// else throw new CustomException(UNAUTHORIZED_USER);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
 	}
-	
+
 	// 티켓 삭제하기
 	@Transactional
 	public ResponseEntity<?> deleteTicket(User user, Long ticketId) {
@@ -352,7 +352,7 @@ public class TicketService {
 
 	private Label validateExistTeam(Label label, User user) {
 		if(!label.getLabelLeader().contains(user.toString())) {
-			throw new CustomException(UNAUTHORIZED_USER);
+			throw new CustomException(UNAUTHENTICATED_USER);
 		}
 		return label;
 	}

@@ -29,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 public class TicketController {
 	private final TicketService ticketService;
 
-
 	// 티켓 등록
 	@Operation(summary = "ticket 생성", description = "Ticket 등록 post 메서드 체크")
 	@PostMapping("/ticket")

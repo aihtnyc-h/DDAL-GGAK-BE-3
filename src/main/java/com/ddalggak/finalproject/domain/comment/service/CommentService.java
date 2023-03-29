@@ -69,7 +69,7 @@ public class CommentService {
 		Comment comment = CommnetValidation(commentId);
 		// checkValidation(ticket, comment, userDetails);
 		if (!comment.getUser().getUserId().equals(userDetails.getUser().getUserId())){
-			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+			throw new CustomException(UNAUTHORIZED_MEMBER);
 		}
 		// 삭제
 		commentRepository.delete(comment);
