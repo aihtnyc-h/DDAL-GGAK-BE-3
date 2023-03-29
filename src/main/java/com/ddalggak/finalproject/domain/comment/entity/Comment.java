@@ -38,7 +38,7 @@ public class Comment extends BaseEntity {
 		this.ticket = ticket;
 		this.comment = commentList.getComment();
 	}
-	public void update(CommentRequestDto comment) {
-		this.comment = getComment();
+	public void update(CommentRequestDto commentRequestDto) {
+		this.comment = commentRequestDto.getComment();
 	}
 }
