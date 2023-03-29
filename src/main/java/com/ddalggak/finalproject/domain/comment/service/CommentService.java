@@ -69,7 +69,7 @@ public class CommentService {
 		Comment comment = CommnetValidation(commentId);
 		// checkValidation(ticket, comment, userDetails);
 		if (!comment.getUser().getUserId().equals(userDetails.getUser().getUserId())){
-			throw new CustomException(UNAUTHORIZED_MEMBER);
+			throw new CustomException(UNAUTHENTICATED_USER);
 		}
 		// 삭제
 		commentRepository.delete(comment);
@@ -95,6 +95,6 @@ public class CommentService {
 			throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
 		// comment 작성자와 요청자의 일치 여부 검사
 		if(!comment.getUser().getUserId().equals(userDetails.getUser().getUserId()))
-			throw new CustomException(ErrorCode.UNAUTHORIZED_MEMBER);
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 	}
 }
