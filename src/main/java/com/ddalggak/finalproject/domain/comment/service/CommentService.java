@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ddalggak.finalproject.domain.comment.dto.CommentRequestDto;
 import com.ddalggak.finalproject.domain.comment.entity.Comment;
+import com.ddalggak.finalproject.domain.ticket.dto.TicketRequestDto;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 
 import com.ddalggak.finalproject.domain.comment.repository.CommentRepository;
@@ -44,15 +45,10 @@ public class CommentService {
 		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 	}
 	// 댓글 수정
-	public ResponseEntity<SuccessResponseDto> updateComment(User user, Long commentId, CommentRequestDto commentRequestDto) {
-		user = validateUserByEmail(user.getEmail());
-		Ticket ticket = TicketValidation(commentRequestDto.getTicketId());
+	public ResponseEntity<?> updateComment(User user, Long commentId, CommentRequestDto commentRequestDto) {
+		validateUserByEmail(user.getEmail());
+		TicketValidation(commentRequestDto.getTicketId());
 		Comment comment = CommnetValidation(commentId);
-		// if (!comment.getUser().getUserId().equals(userDetails.getUser().getUserId())) {
-		// 	throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
-		// }
-		// 수정
-		// commentRepository.save(comment);
 		comment.update(commentRequestDto);
 		// 상태 반환
 		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);

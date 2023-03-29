@@ -38,7 +38,7 @@ public class CommentController {
 	// 댓글 수정
 	@Operation(summary = "patch ticket comment", description = "comment 수정 get 메서드 체크")
 	@PatchMapping("/comment/{commentId}")
-	public ResponseEntity<SuccessResponseDto> updateComment(
+	public ResponseEntity<?> updateComment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable("commentId") Long commentId,
 		@Valid @RequestBody CommentRequestDto commentRequestDto) {
