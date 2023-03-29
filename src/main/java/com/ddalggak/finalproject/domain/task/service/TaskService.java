@@ -38,7 +38,7 @@ public class TaskService {
 		validateExistMember(project, ProjectUser.create(project, user));
 		if (!(project.getProjectLeader().equals(user.getEmail())) || project.getTaskLeadersList()
 			.contains(user.getEmail())) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		TaskUserRequestDto taskUserRequestDto = TaskUserRequestDto.create(user);
 		TaskUser taskUser = TaskUser.create(taskUserRequestDto);
@@ -62,7 +62,7 @@ public class TaskService {
 			.equals(user.getEmail())) {
 			taskRepository.delete(task);
 		} else {
-			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
 	}
@@ -86,7 +86,7 @@ public class TaskService {
 			task.addTaskUser(taskUser); // task에 넣기
 			taskRepository.save(task);
 		} else {
-			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		return SuccessResponseDto.toResponseEntity(SuccessCode.JOINED_SUCCESSFULLY);
 	}
@@ -109,13 +109,13 @@ public class TaskService {
 
 	private void validateExistMember(Task task, TaskUser taskUser) {
 		if (!task.getTaskUserList().contains(taskUser)) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 	}
 
 	private void validateExistMember(Project project, ProjectUser projectUser) {
 		if (!project.getProjectUserList().contains(projectUser)) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 	}
 
