@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ddalggak.finalproject.domain.label.entity.Label;
-import com.ddalggak.finalproject.domain.task.dto.TaskUserRequestDto;
 import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.task.repository.TaskRepository;
 import com.ddalggak.finalproject.domain.comment.dto.CommentResponseDto;
@@ -151,7 +150,6 @@ public class TicketService {
 		List<CommentResponseDto> commentList = getComment(ticket);
 		TicketResponseDto ticketResponseDto = new TicketResponseDto(ticket, commentList);
 		return ResponseEntity.ok().body(ticketResponseDto);
-
 	}
 	// 티켓에 있는 댓글 가져오기
 	private List<CommentResponseDto> getComment(Ticket ticket) {
@@ -164,7 +162,6 @@ public class TicketService {
 		}
 		return commentResponseDtoList; //.add(new CommentResponseDto(commentList));
 	}
-
 	// @Transactional(readOnly = true)
 	// 	public ResponseEntity<TicketResponseDto> getTicket(User user, Long taskId, Long ticketId) {
 	// 	// User user = userDetails.getUser();
@@ -231,7 +228,6 @@ public class TicketService {
 		user = validateUserByEmail(user.getEmail());
 		Task task = validateTask(ticketRequestDto.getTaskId());
 		Ticket ticket = validateTicket(ticketId);
-		// if (user.getEmail().equals(ticket.getUser().getEmail()))
 			ticket.update(ticketRequestDto);
 		// else throw new CustomException(UNAUTHORIZED_USER);
 		// ticketRepository.save(ticket);
@@ -338,11 +334,11 @@ public class TicketService {
 	// }
 	// 티켓에 있는 댓글 가져오기
 	// 권한 부여
-	private void validateExistUser(Task task, User user) {
-		if (!(task.getLabelLeadersList().equals(user.getEmail())) || task.getLabelLeadersList().contains(user.getEmail())) {
-			throw new CustomException(UNAUTHORIZED_USER);
-		}
-	}
+	// private void validateExistUser(Task task, User user) {
+	// 	if (!(task.getLabelLeadersList().equals(user.getEmail())) || task.getLabelLeadersList().contains(user.getEmail())) {
+	// 		throw new CustomException(UNAUTHORIZED_USER);
+	// 	}
+	// }
 
 	// 	if (!ticket.getTeamLeader().equals(userDetails.getUser().getUserId()))
 	// 		// equals(userDetails.getUser().getUserId()))
@@ -360,7 +356,6 @@ public class TicketService {
 		}
 		return label;
 	}
-
 
 
 	// private void validateExistMember(Task task, TaskUser taskUser) {

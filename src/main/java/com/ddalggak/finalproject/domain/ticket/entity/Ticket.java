@@ -14,7 +14,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.label.entity.Label;
 import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
 import com.ddalggak.finalproject.domain.task.entity.Task;
@@ -93,7 +92,7 @@ public class Ticket extends BaseEntity {
 		this.assigned = ticketRequestDto.getAssigned();
 		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
 		this.comment = getComment();
-
+	}
 	@Builder
 	public static Ticket create(TicketRequestDto ticketRequestDto, User user, Task task) {
 		return Ticket.builder()

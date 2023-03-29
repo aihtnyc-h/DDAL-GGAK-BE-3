@@ -50,7 +50,6 @@ public class TicketController {
 		return ticketService.getTicket(ticketId, userDetails.getUser(), ticketRequestDto);
 	}
 	// 티켓 수정
-
 	@Operation(summary = "patch ticket", description = "Ticket 수정 patch 메서드 체크")
 	@PatchMapping("/ticket/{ticketId}")
 	public ResponseEntity<?> updateTicket(
@@ -59,15 +58,6 @@ public class TicketController {
 		@Valid @RequestBody TicketRequestDto ticketRequestDto) {
 		return ticketService.updateTicket(ticketId, ticketRequestDto, userDetails.getUser());
 	}
-
-	// @Operation(summary = "patch ticket", description = "Ticket 수정 patch 메서드 체크")
-	// @PatchMapping("/ticket/{ticketId}")
-	// public ResponseEntity<?> updateTicket(
-	// 	@PathVariable Long ticketId,
-	// 	@AuthenticationPrincipal UserDetailsImpl userDetails,
-	// 	@Valid @RequestBody TicketRequestDto ticketRequestDto) {
-	// 	return ticketService.updateTicket(ticketId, ticketRequestDto, userDetails.getUser());
-	// }
 
 	// 티켓 삭제
 	@Operation(summary = "delete ticket", description = "Ticket 삭제 delete 메서드 체크")
