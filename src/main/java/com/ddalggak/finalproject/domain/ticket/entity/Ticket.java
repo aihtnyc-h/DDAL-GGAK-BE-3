@@ -102,12 +102,4 @@ public class Ticket extends BaseEntity {
 			// .task(task)
 			.build();
 	}
-	// private void addTicketUser(TaskUser taskUser) {
-	// 	taskUser.addTask(taskUser.getTask());
-	// 	task.addTicket(this);
-	// }
-	// private void addTask(Task task) {
-	// 	this.task = task;
-	// 	task.addTicket(this);
-	// }
 }

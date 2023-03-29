@@ -231,6 +231,7 @@ public class TicketService {
 		user = validateUserByEmail(user.getEmail());
 		Task task = validateTask(ticketRequestDto.getTaskId());
 		Ticket ticket = validateTicket(ticketId);
+		// if (user.getEmail().equals(ticket.getUser().getEmail()))
 			ticket.update(ticketRequestDto);
 		// else throw new CustomException(UNAUTHORIZED_USER);
 		// ticketRepository.save(ticket);
