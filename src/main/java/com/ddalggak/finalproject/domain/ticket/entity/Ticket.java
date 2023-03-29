@@ -58,7 +58,7 @@ public class Ticket extends BaseEntity {
 	// user 연관관계 // FE에서 user -> onwer 로 변경요청
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "userId")
-	private User owner;
+	private User user;
 
 	// @Column(nullable = true)
 	// @Enumerated(value = EnumType.STRING)
