@@ -1,8 +1,10 @@
 package com.ddalggak.finalproject.domain.project.dto;
 
 import com.ddalggak.finalproject.domain.project.entity.Project;
+import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
@@ -17,9 +19,16 @@ public class ProjectBriefResponseDto {
 	@Schema(name = "프로젝트 이름")
 	public String projectTitle;
 
+	@Builder
 	public ProjectBriefResponseDto(Project project) {
 		this.id = project.getProjectId();
 		this.thumbnail = project.getThumbnail();
 		this.projectTitle = project.getProjectTitle();
+	}
+
+	public static ProjectBriefResponseDto of(ProjectUser projectUser) {
+		return ProjectBriefResponseDto.builder()
+			.project(projectUser.getProject())
+			.build();
 	}
 }
