@@ -3,7 +3,6 @@ package com.ddalggak.finalproject.domain.comment.dto;
 import javax.validation.constraints.NotNull;
 
 import com.ddalggak.finalproject.domain.comment.entity.Comment;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
