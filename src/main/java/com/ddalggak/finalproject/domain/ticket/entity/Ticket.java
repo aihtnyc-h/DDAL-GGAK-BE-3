@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import com.ddalggak.finalproject.domain.label.entity.Label;
+import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
 import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketRequestDto;
@@ -74,27 +75,23 @@ public class Ticket extends BaseEntity {
 	private List<Comment> comment = new ArrayList<>();
 
 	@Builder
-	public Ticket(TicketRequestDto ticketRequestDto, User user, List<Comment> comment) {
+	public Ticket(TicketRequestDto ticketRequestDto, User user, List<Comment> commentList) {
 		this.ticketTitle = ticketRequestDto.getTicketTitle();
 		this.ticketDescription = ticketRequestDto.getTicketDescription();
 		this.priority = ticketRequestDto.getPriority();
-		this.difficulty = ticketRequestDto.getDfficulty();
+		this.difficulty = ticketRequestDto.getDifficulty();
 		this.assigned = ticketRequestDto.getAssigned();
 		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
-		// this.taskLeader = user.getEmail();
-		// this.labelLeader = user.getEmail();
+		this.comment = commentList;
 	}
-	public void update(TicketRequestDto ticketRequestDto, User user) {
+	public void update(TicketRequestDto ticketRequestDto) {
 		this.ticketTitle = ticketRequestDto.getTicketTitle();
 		this.ticketDescription = ticketRequestDto.getTicketDescription();
 		this.priority = ticketRequestDto.getPriority();
-		this.difficulty = ticketRequestDto.getDfficulty();
+		this.difficulty = ticketRequestDto.getDifficulty();
 		this.assigned = ticketRequestDto.getAssigned();
 		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
-		// this.addTask(task);
-		// this.status = ticketRequestDto.getStatus();
-		// this.taskLeader = user.getEmail();
-		// this.teamLeader = user.getEmail();
+		this.comment = getComment();
 	}
 	@Builder
 	public static Ticket create(TicketRequestDto ticketRequestDto, User user, Task task) {
