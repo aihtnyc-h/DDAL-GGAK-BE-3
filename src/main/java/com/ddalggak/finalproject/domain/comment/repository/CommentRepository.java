@@ -1,7 +1,5 @@
 package com.ddalggak.finalproject.domain.comment.repository;
 
-
-
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;

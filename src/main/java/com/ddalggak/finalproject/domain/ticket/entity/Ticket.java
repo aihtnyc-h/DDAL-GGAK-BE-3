@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import com.ddalggak.finalproject.domain.label.entity.Label;
+import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
 import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketRequestDto;
@@ -40,9 +41,9 @@ public class Ticket extends BaseEntity {
 	// 티켓 내용 notnull
 	private String ticketDescription;
 	// 중요도 null 허용 -> int 로 변경 필요
-	private int totalPriority;
+	private int priority;
 	// 난이도  null 허용 -> int 로 변경 필요
-	private int totalDifficulty;
+	private int difficulty;
 	// 태그(이름 변경 해야함)  null 허용
 	private String assigned;
 	// 마감 날짜  null 허용 -> 최신 생성순으로
@@ -58,7 +59,7 @@ public class Ticket extends BaseEntity {
 	// user 연관관계 // FE에서 user -> onwer 로 변경요청
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "userId")
-	private User userList;
+	private User user;
 
 	// @Column(nullable = true)
 	// @Enumerated(value = EnumType.STRING)
@@ -74,27 +75,23 @@ public class Ticket extends BaseEntity {
 	private List<Comment> comment = new ArrayList<>();
 
 	@Builder
-	public Ticket(TicketRequestDto ticketRequestDto, User user, List<Comment> comment) {
+	public Ticket(TicketRequestDto ticketRequestDto, User user, List<Comment> commentList) {
 		this.ticketTitle = ticketRequestDto.getTicketTitle();
 		this.ticketDescription = ticketRequestDto.getTicketDescription();
-		this.totalPriority = ticketRequestDto.getTotalPriority();
-		this.totalDifficulty = ticketRequestDto.getTotalDifficulty();
+		this.priority = ticketRequestDto.getPriority();
+		this.difficulty = ticketRequestDto.getDifficulty();
 		this.assigned = ticketRequestDto.getAssigned();
 		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
-		// this.taskLeader = user.getEmail();
-		// this.labelLeader = user.getEmail();
+		this.comment = commentList;
 	}
-	public void update(TicketRequestDto ticketRequestDto, User user) {
+	public void update(TicketRequestDto ticketRequestDto) {
 		this.ticketTitle = ticketRequestDto.getTicketTitle();
 		this.ticketDescription = ticketRequestDto.getTicketDescription();
-		this.totalPriority = ticketRequestDto.getTotalPriority();
-		this.totalDifficulty = ticketRequestDto.getTotalDifficulty();
+		this.priority = ticketRequestDto.getPriority();
+		this.difficulty = ticketRequestDto.getDifficulty();
 		this.assigned = ticketRequestDto.getAssigned();
 		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
-		// this.addTask(task);
-		// this.status = ticketRequestDto.getStatus();
-		// this.taskLeader = user.getEmail();
-		// this.teamLeader = user.getEmail();
+		this.comment = getComment();
 	}
 	@Builder
 	public static Ticket create(TicketRequestDto ticketRequestDto, User user, Task task) {
