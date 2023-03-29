@@ -37,7 +37,7 @@ public class LabelService {
 		Task task = validateTask(labelRequestDto.getTaskId());
 		validateExistMember(task, TaskUser.create(task, user));
 		if (!(task.getTaskLeader().equals(user.getEmail()) || task.getLabelLeadersList().contains(user.getEmail()))) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		LabelUserRequestDto labelUserRequestDto = LabelUserRequestDto.create(user);
 		LabelUser labelUser = LabelUser.create(labelUserRequestDto);
@@ -53,7 +53,7 @@ public class LabelService {
 		if (!(task.getTaskLeader().equals(user.getEmail()) || label.getLabelLeader().equals(user.getEmail()))) {
 			labelRepository.delete(label);
 		} else {
-			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
 	}
@@ -72,7 +72,7 @@ public class LabelService {
 
 	private void validateExistMember(Task task, TaskUser taskUser) {
 		if (!task.getTaskUserList().contains(taskUser)) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 	}
 }

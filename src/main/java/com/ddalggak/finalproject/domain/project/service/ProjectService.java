@@ -79,7 +79,7 @@ public class ProjectService {
 			projectRepository.delete(project);
 			return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
 		} else {
-			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 	}
 
@@ -97,7 +97,7 @@ public class ProjectService {
 		ProjectRequestDto projectRequestDto) {
 		Project project = validateProject(projectId);
 		if (!project.getProjectLeader().equals(user.getEmail())) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		projectRepository.update(
 			projectRequestDto.getProjectTitle(),
@@ -112,7 +112,7 @@ public class ProjectService {
 			() -> new UserException(ErrorCode.EMPTY_CLIENT)
 		);
 		if (!project.getProjectLeader().equals(user.getEmail())) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		project.getProjectUserList().remove(ProjectUser.create(project, projectUser));
 		return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
@@ -135,7 +135,7 @@ public class ProjectService {
 
 	private void validateExistMember(Project project, ProjectUser projectUser) {
 		if (!project.getProjectUserList().contains(projectUser)) {
-			throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 	}
 
