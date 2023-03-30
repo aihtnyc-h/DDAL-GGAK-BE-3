@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--N초마다 파일 변화를 체크하여 갱신시킴 todo 시간초 바꿔주기-->
+<configuration scan="true" scanPeriod="30 seconds">
+    <!-- <include resource="org/springframework/boot/logging/logback/defaults.xml"/> -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <conversionRule conversionWord="wex"
+                    converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+    <conversionRule conversionWord="wEx"
+                    converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+    <!--property는 쓰고자 하는 변수들을 설정한다. todo 패키지명으로 나중에 바꿔주기-->
+    <springProperty name="MODULE_ID" source="custom.logging.moduleId"/>
+    <springProperty name="LOG_DIR" source="custom.logging.dir"/> <!--todo 나중에 저장할 패키지 바꿔주기 -->
+    <springProperty name="SLACK_WEBHOOK_URI" source="logging.slack.webhook-uri"/>
+    <!--스프링 로그처럼 찍음-->
+    <property name="CONSOLE_LOG_PATTERN"
+              value="${CONSOLE_LOG_PATTERN:-%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+    <property name="CONSOLE_LOG_CHARSET" value="${CONSOLE_LOG_CHARSET:-default}"/>
+
+    <appender name="SLACK" class="com.github.maricn.logback.SlackAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <webhookUri>${SLACK_WEBHOOK_URI}</webhookUri>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] %msg %n</pattern>
+        </layout>
+        <username>DDALGGAKBOT</username>
+        <colorCoding>true</colorCoding>
+    </appender>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level> <!-- todo 나중에 운영시 high level로 바꿔주자. -->
+        </filter>
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>${CONSOLE_LOG_CHARSET}</charset>
+        </encoder>
+    </appender>
+
+    <!--    <appender name="INFO_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+    <!--        &lt;!&ndash;임계값 밑의 필터는 저장되지 않는다.&ndash;&gt;-->
+    <!--        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+    <!--            <level>INFO</level>-->
+    <!--        </filter>-->
+    <!--        &lt;!&ndash;        <file>${LOG_DIR}/daily_error/%d{yyyy-MM-dd}.log</file>&ndash;&gt;-->
+    <!--        &lt;!&ndash;        <append>true</append>&ndash;&gt;-->
+    <!--        &lt;!&ndash;디렉토리, 모듈ID, logback, 압축 형식, 날짜 등 지정&ndash;&gt;-->
+    <!--        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+    <!--            <fileNamePattern>${LOG_DIR}/${MODULE_ID}/logback/%d{yyyy-MM-dd}.log</fileNamePattern>-->
+    <!--            <maxHistory>30</maxHistory>-->
+    <!--            <totalSizeCap>1GB</totalSizeCap>-->
+    <!--        </rollingPolicy>-->
+    <!--        &lt;!&ndash;pattern을 사용하여 원하는 형식으로 로그 찍을 수 있음&ndash;&gt;-->
+    <!--        <encoder>-->
+    <!--            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] %logger %msg%n</pattern>-->
+    <!--        </encoder>-->
+    <!--    </appender>-->
+    <!--설정한 Appender를 참조하여 로그의 레벨을 설정할 수 있다. root는 전역 설정, 지역 설정을 logger로 사용한다. DEBUG이면 DEBUG 레벨부터 출력한다. -->
+    <root level="INFO">
+        <!--        <appender-ref ref="INFO_LOG"/>-->
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="SLACK"/>
+    </root>
+</configuration>
