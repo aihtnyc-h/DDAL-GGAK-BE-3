@@ -44,7 +44,7 @@ public class TicketService {
 		System.out.println("--------user = " + user.getNickname());
 		validateUserByEmail(user.getEmail());
 		Task task = validateTask(ticketRequestDto.getTaskId());
-		Ticket ticket = Ticket.create(ticketRequestDto, user, task);
+		Ticket ticket = Ticket.create(ticketRequestDto, task);
 		ticketRepository.save(ticket);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 	}
@@ -65,9 +65,7 @@ public class TicketService {
 		List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
 		List<Comment> commentList = commentRepository.findAllByTicketOrderByCreatedAtDesc(ticket);
 		for (Comment c : commentList) {
-			log.info("comment = {}", c.getComment());
 			commentResponseDtoList.add(new CommentResponseDto(c));
-			log.info("comment = {}", c.getComment());
 		}
 		return commentResponseDtoList;
 	}
