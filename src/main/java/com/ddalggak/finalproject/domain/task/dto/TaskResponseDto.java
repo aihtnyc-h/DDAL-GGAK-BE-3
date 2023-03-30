@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 
+import com.ddalggak.finalproject.domain.label.dto.LabelResponseDto;
 import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
@@ -32,6 +33,10 @@ public class TaskResponseDto {
 
 	@Schema(name = "total priority", example = "10", defaultValue = "0")
 	public int totalPriority;
+
+	@Schema(name = "labels", example = "front-end", defaultValue = "null")
+	public List<LabelResponseDto> labels;
+
 	@Schema(name = "total tickets")
 	public List<TicketResponseDto> tickets;
 
@@ -43,6 +48,7 @@ public class TaskResponseDto {
 		expiredAt = task.getExpiredAt();
 		totalDifficulty = task.getTicketList().stream().mapToInt(Ticket::getDifficulty).sum();
 		totalPriority = task.getTicketList().stream().mapToInt(Ticket::getPriority).sum();
+		labels = task.getLabelList().stream().map(LabelResponseDto::of).collect(Collectors.toList());
 		tickets = task.getTicketList().stream().map(TicketResponseDto::of).collect(Collectors.toList());
 	}
 
