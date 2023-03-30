@@ -41,10 +41,10 @@ public class UserService {
 		Optional<User> foundUser = userRepository.findByEmail(email);
 
 		if (foundUser.isPresent()) {
-			throw new UserException(ErrorCode.DUPLICATE_EMAIL);
+			throw new UserException(ErrorCode.DUPLICATE_MEMBER);
 		}
-
-		String nickname = "anonymous";
+		String[] parts = email.split("@");
+		String nickname = parts[0];
 		String password = passwordEncoder.encode(userRequestDto.getPassword());
 
 		User user = User.builder()

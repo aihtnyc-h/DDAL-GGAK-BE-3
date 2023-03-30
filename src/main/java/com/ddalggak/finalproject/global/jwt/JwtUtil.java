@@ -65,7 +65,7 @@ public class JwtUtil {
 		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
 			return bearerToken.substring(7);
 		}
-		return ErrorCode.INVALID_AUTH_TOKEN.getMessage();
+		return null;
 	}
 
 	public String resolveRefreshToken(HttpServletRequest request) {
@@ -73,7 +73,7 @@ public class JwtUtil {
 		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
 			return bearerToken.substring(7);
 		}
-		return ErrorCode.INVALID_AUTH_TOKEN.getMessage();
+		return null;
 	}
 
 	public String login(String email, UserRole role) {
@@ -130,6 +130,8 @@ public class JwtUtil {
 			log.info("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
 		} catch (IllegalArgumentException e) {
 			log.info("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
+		} catch (Exception e) {
+			log.info("Invalid token, 유효하지 않은 토큰입니다.");
 		}
 		return false;
 	}
@@ -151,6 +153,8 @@ public class JwtUtil {
 			log.info("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
 		} catch (IllegalArgumentException e) {
 			log.info("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
+		} catch (Exception e) {
+			log.info("Invalid token, 유효하지 않은 토큰입니다.");
 		}
 		return null;
 	}

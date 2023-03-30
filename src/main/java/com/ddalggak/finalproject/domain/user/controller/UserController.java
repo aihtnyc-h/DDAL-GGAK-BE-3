@@ -33,7 +33,6 @@ import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.error.ErrorResponse;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
-import com.ddalggak.finalproject.global.jwt.token.entity.Token;
 import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
 import com.ddalggak.finalproject.global.mail.MailService;
 import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeDto;
@@ -148,12 +147,19 @@ public class UserController {
 	}
 
 	@GetMapping("/auth/validToken")
-	public ResponseEntity<?> validToken(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-		Token token = tokenRepository.findByEmail(userDetails.getEmail());
-		if (token == null) {
-			throw new UserException(ErrorCode.INVALID_REQUEST);
-		}
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_UPLOAD);
+	public ResponseEntity<?> validToken(HttpServletRequest request) {
+		String token = jwtUtil.resolveToken(request);
+		Claims claims;
+		if (token != null) {
+			if (jwtUtil.validateToken(token)) {
+				claims = jwtUtil.getUserInfo(token);
+			} else {
+				return ErrorResponse.from(ErrorCode.INVALID_AUTH_TOKEN);
+			}
+			userRepository.findByEmail(claims.getSubject())
+				.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+		} else
+			throw new UserException(ErrorCode.INVALID_AUTH_TOKEN);
+		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_LOGIN);
 	}
-
 }
