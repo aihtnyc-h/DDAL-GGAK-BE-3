@@ -65,7 +65,7 @@ public class JwtUtil {
 		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
 			return bearerToken.substring(7);
 		}
-		return null;
+		return ErrorCode.INVALID_AUTH_TOKEN.getMessage();
 	}
 
 	public String resolveRefreshToken(HttpServletRequest request) {
@@ -73,7 +73,7 @@ public class JwtUtil {
 		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
 			return bearerToken.substring(7);
 		}
-		return null;
+		return ErrorCode.INVALID_AUTH_TOKEN.getMessage();
 	}
 
 	public String login(String email, UserRole role) {
