@@ -19,13 +19,12 @@ import javax.persistence.OneToMany;
 
 import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.label.entity.Label;
-import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
 import com.ddalggak.finalproject.domain.task.entity.Task;
-import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketRequestDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.global.entity.BaseEntity;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,7 +33,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @Entity
-
+@AllArgsConstructor
 public class Ticket extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,14 +69,12 @@ public class Ticket extends BaseEntity {
 	// @OneToMany(mappedBy = "ticket")
 	// private List<User> User = new ArrayList<>();
 
-
 	@OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL)
 	private List<Label> labelList = new ArrayList<>();
 	// 댓글 연관관계
 	@OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
 	private List<Comment> comment = new ArrayList<>();
 
-	@Builder
 	public Ticket(TicketRequestDto ticketRequestDto, User user, List<Comment> commentList) {
 		this.ticketTitle = ticketRequestDto.getTicketTitle();
 		this.ticketDescription = ticketRequestDto.getTicketDescription();
@@ -87,6 +84,18 @@ public class Ticket extends BaseEntity {
 		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
 		this.comment = commentList;
 	}
+
+	@Builder
+	public Ticket(TicketRequestDto ticketRequestDto, Task task) {
+		this.ticketTitle = ticketRequestDto.getTicketTitle();
+		this.ticketDescription = ticketRequestDto.getTicketDescription();
+		this.priority = ticketRequestDto.getPriority();
+		this.difficulty = ticketRequestDto.getDifficulty();
+		this.assigned = ticketRequestDto.getAssigned();
+		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
+		this.task = task;
+	}
+
 	public void update(TicketRequestDto ticketRequestDto) {
 		this.ticketTitle = ticketRequestDto.getTicketTitle();
 		this.ticketDescription = ticketRequestDto.getTicketDescription();
@@ -96,12 +105,12 @@ public class Ticket extends BaseEntity {
 		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
 		this.comment = getComment();
 	}
-	@Builder
-	public static Ticket create(TicketRequestDto ticketRequestDto, User user, Task task) {
+
+
+	public static Ticket create(TicketRequestDto ticketRequestDto, Task task) {
 		return Ticket.builder()
 			.ticketRequestDto(ticketRequestDto)
-			.user(user)
-			// .task(task)
+			.task(task)
 			.build();
 	}
 }

@@ -14,13 +14,6 @@ public class CommentRequestDto{
 	@Schema(name = "ticket Id")
 	@NotNull(message = "ticket Id is required")
 	private Long ticketId;
-
 	private String comment;
-	private String email;
-	@Builder
-	public CommentRequestDto(Comment c) {
-		this.ticketId = c.getTicket().getTicketId();
-		this.comment = c.getComment();
-		this.email = c.getUser().getEmail();
-	}
+
 }

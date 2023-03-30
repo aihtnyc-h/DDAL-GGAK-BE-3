@@ -86,7 +86,7 @@ public class CommentService {
 
 	// comment 유효성 검사
 	private void checkValidation(Ticket ticket, Comment comment, UserDetailsImpl userDetails) {
-		// post에 해당 comment가 있는지 검사
+		// ticket에 해당 comment가 있는지 검사
 		if(!comment.getTicket().getTicketId().equals(ticket.getTicketId()))
 			throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
 		// comment 작성자와 요청자의 일치 여부 검사
