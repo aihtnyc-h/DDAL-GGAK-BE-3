@@ -34,8 +34,7 @@ public class ProjectService {
 	private final ProjectRepository projectRepository;
 
 	private final UserRepository userRepository;
-
-	@Transactional
+	
 	public ResponseEntity<SuccessResponseDto> createProject(User user, ProjectRequestDto projectRequestDto) {
 		//1. user로 projectUserRequestDto 생성
 		ProjectUserRequestDto projectUserRequestDto = ProjectUserRequestDto.create(user);

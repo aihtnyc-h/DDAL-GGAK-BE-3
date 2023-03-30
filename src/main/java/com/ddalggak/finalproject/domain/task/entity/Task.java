@@ -77,6 +77,7 @@ public class Task extends BaseEntity {
 	public Task(TaskRequestDto taskRequestDto, TaskUser taskUser, Project project) {
 		taskTitle = taskRequestDto.getTaskTitle();
 		expiredAt = taskRequestDto.getExpiredAt();
+		taskLeader = taskUser.getUser().getEmail();
 		addProject(project);
 		addTaskUser(taskUser);
 	}
