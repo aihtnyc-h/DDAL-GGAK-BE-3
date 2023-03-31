@@ -25,6 +25,7 @@ public class ReviewResponseDto {
 		this.reviewId = review.getReviewId();
 		this.reviewTitle = review.getReviewTitle();
 		this.reviewDescription = review.getReviewDescription();
+		this.reviewCommentList = reviewCommentList;
 	}
 	public static ReviewResponseDto of(Review review) {
 		return ReviewResponseDto.builder()
