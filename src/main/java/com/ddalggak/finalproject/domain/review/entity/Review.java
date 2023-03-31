@@ -33,10 +33,10 @@ public class Review extends BaseEntity {
 	// 티켓 완료 내용
 	private String reviewDescription;
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "userId")
+	@JoinColumn(name = "user_Id")
 	private User user;
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "ticketId")
+	@JoinColumn(name = "ticket_Id")
 	private Ticket ticket;
 	@OneToMany(mappedBy = "reviewComment", cascade = CascadeType.REMOVE)
 	private List<ReviewComment> reviewComments = new ArrayList<>();
