@@ -9,12 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ddalggak.finalproject.domain.label.entity.Label;
-import com.ddalggak.finalproject.domain.task.entity.Task;
-import com.ddalggak.finalproject.domain.task.repository.TaskRepository;
 import com.ddalggak.finalproject.domain.comment.dto.CommentResponseDto;
 import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.comment.repository.CommentRepository;
+import com.ddalggak.finalproject.domain.label.entity.Label;
+import com.ddalggak.finalproject.domain.label.repository.LabelRepository;
+import com.ddalggak.finalproject.domain.task.entity.Task;
+import com.ddalggak.finalproject.domain.task.repository.TaskRepository;
+import com.ddalggak.finalproject.domain.ticket.dto.TicketLabelRequestDto;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketRequestDto;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
@@ -37,6 +39,7 @@ public class TicketService {
 	private final TaskRepository taskRepository;
 	private final TicketRepository ticketRepository;
 	private final CommentRepository commentRepository;
+	private final LabelRepository labelRepository;
 
 	// 티켓 등록
 	@Transactional
@@ -60,6 +63,7 @@ public class TicketService {
 		TicketResponseDto ticketResponseDto = new TicketResponseDto(ticket, commentList);
 		return ResponseEntity.ok().body(ticketResponseDto);
 	}
+
 	// 티켓에 있는 댓글 가져오기
 	private List<CommentResponseDto> getComment(Ticket ticket) {
 		List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
@@ -69,7 +73,6 @@ public class TicketService {
 		}
 		return commentResponseDtoList;
 	}
-
 
 	// private void validateGetTicket(Task task, Ticket ticket,  UserDetailsImpl userDetails, Long taskId, Long ticketId) {
 	// 	// task에 해당 ticket이 있는지 검사
@@ -116,14 +119,13 @@ public class TicketService {
 	// 	// return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 	// }
 
-
 	// 티켓 수정하기
 	@Transactional
 	public ResponseEntity<?> updateTicket(Long ticketId, TicketRequestDto ticketRequestDto, User user) {
 		validateUserByEmail(user.getEmail());
 		validateTask(ticketRequestDto.getTaskId());
 		Ticket ticket = validateTicket(ticketId);
-			ticket.update(ticketRequestDto);
+		ticket.update(ticketRequestDto);
 		// else throw new CustomException(UNAUTHORIZED_USER);
 		// ticketRepository.save(ticket);
 		// 	ticketRepository.findById(ticketId).orElseThrow(
@@ -143,12 +145,12 @@ public class TicketService {
 	public ResponseEntity<?> deleteTicket(User user, Long ticketId) {
 		user = validateUserByEmail(user.getEmail());
 		Ticket ticket = validateTicket(ticketId); //ticketRepository.findById(ticketId).orElseThrow(
-			// () -> new CustomException(TICKET_NOT_FOUND));
+		// () -> new CustomException(TICKET_NOT_FOUND));
 		// if (//ticket.getTask().getTaskLeader().equals(user.getEmail()) ||
 		// 	// ticket.getTask().getTaskLeader().equals(user.getEmail()) ||
 		// 	// ticket.getLabelLeader().equals(user.getEmail()) ||
 		// 	ticket.getUser().getEmail().equals(user.getEmail())) {
-			ticketRepository.delete(ticket);
+		ticketRepository.delete(ticket);
 		// } else {
 		// 	throw new CustomException(UNAUTHORIZED_USER);
 		// }
@@ -165,7 +167,7 @@ public class TicketService {
 		// // else throw new CustomException(UNAUTHORIZED_USER);
 		// return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
 
-			// getTicket(ticketId);
+		// getTicket(ticketId);
 		// if (!ticket.getTask().getTaskLeader().equals(userDetails.getUser().getEmail())){
 		// 	if (!ticket.getLabelLeader().equals(userDetails.getUser().getEmail())) {
 		// 		if (!ticket.getOwner().getUserId().equals(userDetails.getUser().getEmail())) {
@@ -195,15 +197,18 @@ public class TicketService {
 		// 	throw new CustomException(UNAUTHORIZED_USER);
 		// return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 	}
+
 	/* == 반복 로직 == */
 	// task 유무 확인
 	private Task validateTask(Long taskId) {
 		return taskRepository.findById(taskId).orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
 	}
+
 	// ticket 유무 확인
 	public Ticket validateTicket(Long ticketId) {
 		return ticketRepository.findById(ticketId).orElseThrow(() -> new CustomException(TICKET_NOT_FOUND));
 	}
+
 	// User Email 유무 확인
 	private User validateUserByEmail(String email) {
 		return userRepository.findByEmail(email).orElseThrow(
@@ -246,12 +251,46 @@ public class TicketService {
 	}
 
 	private Label validateExistTeam(Label label, User user) {
-		if(!label.getLabelLeader().contains(user.toString())) {
+		if (!label.getLabelLeader().contains(user.toString())) {
 			throw new CustomException(UNAUTHENTICATED_USER);
 		}
 		return label;
 	}
 
+	/*
+	 * 임시 api
+	 */
+	@Transactional
+	public ResponseEntity<?> completeTicket(User user, Long ticketId) {
+		Ticket ticket = validateTicket(ticketId);
+		if (ticket.getUser().getUserId().equals(user.getUserId())) {
+			ticket.completeTicket();
+		} else {
+			throw new CustomException(UNAUTHORIZED_MEMBER);
+		}
+		;
+		ticketRepository.save(ticket);
+		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
+	}
+
+	@Transactional
+	public ResponseEntity<?> assignTicket(User user, Long ticketId) {
+		Ticket ticket = validateTicket(ticketId);
+		//todo task에 유저 있는지 검사
+		ticket.assignTicket(user);
+		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
+	}
+
+	@Transactional
+	public ResponseEntity<?> getLabelForTicket(User user, Long ticketId, TicketLabelRequestDto ticketLabelRequestDto) {
+		Ticket ticket = validateTicket(ticketId);
+		//todo task에 유저 있는지 검사, 로직 수정 매우필요
+		Label label = labelRepository.findById(ticketLabelRequestDto.labelId).orElseThrow(
+			() -> new CustomException(LABEL_NOT_FOUND)
+		);
+		ticket.addLabel(label);
+		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
+	}
 
 	// private void validateExistMember(Task task, TaskUser taskUser) {
 	// 	if (!task.getTaskUserList().contains(taskUser)) {
