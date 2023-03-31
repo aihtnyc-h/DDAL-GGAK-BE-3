@@ -28,7 +28,6 @@ public class ReviewCommentController {
 
 	// 리뷰 댓글 등록
 	@Operation(summary = "review comment 생성", description = "review comment 등록 post 메서드 체크")
-
 	@PostMapping("/review_comment")
 	public ResponseEntity<?> createReviewComment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody ReviewCommentRequestDto reviewCommentRequestDto) {
@@ -36,6 +35,7 @@ public class ReviewCommentController {
 	}
 
 	// 리뷰 댓글 수정
+	@Operation(summary = "review comment 수정", description = "review comment 수정 post 메서드 체크")
 	@PostMapping("/review_comment/{review_commentId}")
 	public ResponseEntity<?> updateReviewComment(
 		@PathVariable Long review_commentId,
@@ -44,6 +44,7 @@ public class ReviewCommentController {
 		return reviewCommentService.updateReviewComment(review_commentId, userDetails.getUser(), reviewCommentRequestDto);
 	}
 	// 리뷰 댓글 삭제
+	@Operation(summary = "review comment 삭제", description = "review comment 삭제 delete 메서드 체크")
 	@DeleteMapping("/review_comment/{review_commentId}")
 	public ResponseEntity<?> deleteReviewComment(
 		@PathVariable Long review_commentId,

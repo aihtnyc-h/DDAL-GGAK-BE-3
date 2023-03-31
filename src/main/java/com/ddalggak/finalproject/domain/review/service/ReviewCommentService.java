@@ -4,9 +4,9 @@ import static com.ddalggak.finalproject.global.error.ErrorCode.*;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ddalggak.finalproject.domain.review.dto.ReviewCommentRequestDto;
-import com.ddalggak.finalproject.domain.review.dto.ReviewRequestDto;
 import com.ddalggak.finalproject.domain.review.entity.Review;
 import com.ddalggak.finalproject.domain.review.entity.ReviewComment;
 import com.ddalggak.finalproject.domain.review.repository.ReviewCommentRepository;
@@ -29,6 +29,7 @@ public class ReviewCommentService {
 	private final UserRepository userRepository;
 
 	// 리뷰 댓글 등록
+	@Transactional
 	public ResponseEntity<?> createReviewComment(User user, ReviewCommentRequestDto reviewCommentRequestDto) {
 		validateUserByEmail(user.getEmail());
 		Review review = validateReview(reviewCommentRequestDto.getReviewId());
@@ -38,19 +39,27 @@ public class ReviewCommentService {
 		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 	}
 	// 리뷰 댓글 수정
+	@Transactional
+
 	public ResponseEntity<?> updateReviewComment(Long review_commentId, User user, ReviewCommentRequestDto reviewCommentRequestDto) {
 		validateUserByEmail(user.getEmail());
 		validateReview(reviewCommentRequestDto.getReviewId());
 		ReviewComment reviewComment = validateReviewComment(review_commentId);
 		reviewComment.update(reviewCommentRequestDto);
+		reviewCommentRepository.save(reviewComment);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
 	}
 	// 리뷰 댓글 삭제
+	@Transactional
+
 	public ResponseEntity<?> deleteReviewComment(Long review_commentId, User user) {
 		validateUserByEmail(user.getEmail());
-		validateReviewComment(review_commentId);
+		ReviewComment reviewComment = validateReviewComment(review_commentId);
+		reviewCommentRepository.delete(reviewComment);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
 	}
+
+	// 반복 로직
 	private ReviewComment validateReviewComment(Long reviewCommentId) {
 		return reviewCommentRepository.findById(reviewCommentId).orElseThrow(
 			() -> new CustomException(REVIEW_COMMENT_NOT_FOUND));
@@ -61,8 +70,8 @@ public class ReviewCommentService {
 			() -> new CustomException(REVIEW_NOT_FOUND));
 	}
 
-	private User validateUserByEmail(String email) {
-		return userRepository.findByEmail(email).orElseThrow(
+	private void validateUserByEmail(String email) {
+		userRepository.findByEmail(email).orElseThrow(
 			() -> new CustomException(UNAUTHORIZED_MEMBER));
 	}
 }
