@@ -19,6 +19,7 @@ public enum SuccessCode {
 	DELETED_SUCCESSFULLY(HttpStatus.OK, "successfully deleted"),
 	GET_ACCESS_TOKEN(HttpStatus.OK, "get access token success"),
 	UPDATED_SUCCESSFULLY(HttpStatus.OK, "successfully updated"),
+	SUCCESS_AUTH(HttpStatus.OK, "successfully authentication"),
 
 	/*201 CREATED : REQUEST COMPLETE, RESOURCE SUCCESSFULLY CREATED*/
 	CREATED_SUCCESSFULLY(HttpStatus.CREATED, "successfully created"),
