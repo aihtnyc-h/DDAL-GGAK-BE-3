@@ -13,7 +13,6 @@ import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
 import com.ddalggak.finalproject.domain.task.repository.TaskRepository;
 import com.ddalggak.finalproject.domain.user.entity.User;
-import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
@@ -28,8 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 public class LabelService {
 	private final TaskRepository taskRepository;
 
-	private final UserRepository userRepository;
-
 	private final LabelRepository labelRepository;
 
 	@Transactional
@@ -38,6 +35,10 @@ public class LabelService {
 		validateExistMember(task, TaskUser.create(task, user));
 		if (!(task.getTaskLeader().equals(user.getEmail()) || task.getLabelLeadersList().contains(user.getEmail()))) {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
+		}
+		for (Label label : task.getLabelList()) {
+			if (label.getLabelTitle().equals(labelRequestDto.getLabelTitle()))
+				throw new CustomException(ErrorCode.DUPLICATE_RESOURCE);
 		}
 		LabelUserRequestDto labelUserRequestDto = LabelUserRequestDto.create(user);
 		LabelUser labelUser = LabelUser.create(labelUserRequestDto);
@@ -64,7 +65,7 @@ public class LabelService {
 		);
 	}
 
-	private Label validateLabel(Long id) { // todo LabelRepository 삭제하고 연관관계만으로 긁어오게 만들기
+	private Label validateLabel(Long id) {
 		return labelRepository.findById(id).orElseThrow(
 			() -> new CustomException(ErrorCode.LABEL_NOT_FOUND)
 		);
