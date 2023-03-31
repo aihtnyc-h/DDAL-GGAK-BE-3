@@ -35,6 +35,8 @@ public enum ErrorCode {
 	PROJECT_NOT_FOUND(NOT_FOUND, "D-006", "The project could not be found."),
 	TASK_NOT_FOUND(NOT_FOUND, "D-007", "The task could not be found."),
 	LABEL_NOT_FOUND(NOT_FOUND, "D-008", "The label could not be found"),
+	REVIEW_NOT_FOUND(NOT_FOUND, "D-009", "The review could not be found"),
+	REVIEW_COMMENT_NOT_FOUND(NOT_FOUND, "D-010", "The review comment could not be found"),
 
 	/* 409 CONFLICT : Resource 의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
 	DUPLICATE_RESOURCE(CONFLICT, "E-001", "Data already exists."),
