@@ -76,7 +76,7 @@ public class ReviewService {
 		validateUserByEmail(user.getEmail());
 		validateTicket(reviewRequestDto.getTicketId());
 		Review review = validateReview(reviewId);
-			review.update(reviewRequestDto);
+		review.update(reviewRequestDto);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
 	}
 	// 리뷰 삭제 (리뷰 작성자만 작성가능)
