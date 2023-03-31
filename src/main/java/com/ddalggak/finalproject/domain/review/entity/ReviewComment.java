@@ -28,10 +28,10 @@ public class ReviewComment extends BaseEntity {
 	private String reviewComment;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "reviewId")
+	@JoinColumn(name = "review_Id")
 	private Review review;
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "userId")
+	@JoinColumn(name = "user_Id")
 	private User user;
 
 	@Builder
@@ -41,15 +41,7 @@ public class ReviewComment extends BaseEntity {
 		this.review = review;
 		this.reviewComment = reviewCommentList.getReviewComment();
 	}
-
-	public ReviewComment create(ReviewCommentRequestDto reviewCommentRequestDto, Review review) {
-		return ReviewComment.builder()
-			.reviewCommentList(reviewCommentRequestDto)
-			.review(review)
-			.build();
-	}
-
 	public void update(ReviewCommentRequestDto reviewCommentRequestDto) {
-		this.reviewComment =reviewCommentRequestDto.getReviewComment();
+		this.reviewComment = reviewCommentRequestDto.getReviewComment();
 	}
 }
