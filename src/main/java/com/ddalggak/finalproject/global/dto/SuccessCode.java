@@ -20,6 +20,7 @@ public enum SuccessCode {
 	GET_ACCESS_TOKEN(HttpStatus.OK, "get access token success"),
 	UPDATED_SUCCESSFULLY(HttpStatus.OK, "successfully updated"),
 	SUCCESS_AUTH(HttpStatus.OK, "successfully authentication"),
+	SUCCESS_RECREATE_TOKEN(HttpStatus.OK, "successfully recreate"),
 
 	/*201 CREATED : REQUEST COMPLETE, RESOURCE SUCCESSFULLY CREATED*/
 	CREATED_SUCCESSFULLY(HttpStatus.CREATED, "successfully created"),

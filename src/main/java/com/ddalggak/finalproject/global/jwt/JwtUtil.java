@@ -18,13 +18,13 @@ import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.domain.user.role.UserRole;
 import com.ddalggak.finalproject.global.error.ErrorCode;
-import com.ddalggak.finalproject.global.jwt.token.entity.RefreshToken;
 import com.ddalggak.finalproject.global.jwt.token.entity.Token;
 import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
 import com.ddalggak.finalproject.global.security.UserDetailsServiceImpl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -40,7 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtUtil {
 	private final UserRepository userRepository;
 	private final TokenRepository tokenRepository;
-	// private final RefreshTokenRepository refreshTokenRepository;
 	private final UserDetailsServiceImpl userDetailsService;
 	public static final String AUTHORIZATION_HEADER = "Authorization";
 	public static final String REFRESH_TOKEN_HEADER = "RefreshToken";
@@ -76,11 +75,23 @@ public class JwtUtil {
 		return null;
 	}
 
-	public String login(String email, UserRole role) {
-		return createToken(email, role).getAccessToken();
+	public Token login(String email, UserRole role) {
+		if (tokenRepository.existsById(email)) {
+			log.info("기존의 존재하는 모든 토큰 삭제");
+			tokenRepository.deleteById(email);
+		}
+
+		String accessToken = createAccessToken(email, role).getAccessToken();
+		String refreshToken = createRefreshToken(email, role).getRefreshToken();
+
+		return Token.builder()
+			.email(email)
+			.accessToken(accessToken)
+			.refreshToken(refreshToken)
+			.build();
 	}
 
-	private Token createToken(String email, UserRole role) {
+	public Token createAccessToken(String email, UserRole role) {
 		Date date = new Date();
 
 		String accessToken = BEARER_PREFIX +
@@ -92,6 +103,20 @@ public class JwtUtil {
 				.signWith(key, signatureAlgorithm)
 				.compact();
 
+		Token toSaveAccessToken = Token.builder()
+			.email(email)
+			.accessToken(accessToken)
+			.build();
+
+		tokenRepository.save(toSaveAccessToken);
+
+		return toSaveAccessToken;
+
+	}
+
+	public Token createRefreshToken(String email, UserRole role) {
+		Date date = new Date();
+
 		String refreshToken = BEARER_PREFIX +
 			Jwts.builder()
 				.setSubject(email)
@@ -101,21 +126,26 @@ public class JwtUtil {
 				.signWith(key, signatureAlgorithm)
 				.compact();
 
-		Token token = Token.builder()
+		Token toSaveRefreshToken = Token.builder()
 			.email(email)
-			.accessToken(accessToken)
 			.refreshToken(refreshToken)
 			.build();
 
-		tokenRepository.save(token);
+		tokenRepository.save(toSaveRefreshToken);
 
-		return token;
+		return toSaveRefreshToken;
 
 	}
 
-	public void logoutToken(Long userId) {
-		Long now = new Date().getTime();
-		// refreshTokenRepository.deleteById(userId);
+	public void logout(String email) {
+		Token token = tokenRepository.findById(email).orElseThrow(()-> new UserException(ErrorCode.INVALID_REQUEST));
+		String accessToken = token.getAccessToken();
+		String refreshToken = token.getRefreshToken();
+
+		if (accessToken != null || refreshToken != null) {
+			log.info("기존의 존재하는 토큰 모두 삭제");
+			tokenRepository.deleteById(email);
+		}
 	}
 
 	public boolean validateToken(String token) {
@@ -131,20 +161,22 @@ public class JwtUtil {
 		} catch (IllegalArgumentException e) {
 			log.info("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
 		} catch (Exception e) {
-			log.info("Invalid token, 유효하지 않은 토큰입니다.");
+			log.info("Invalid token, d.");
 		}
 		return false;
 	}
 
-	public String validateRefreshToken(RefreshToken refreshTokenObj) {
-		String token = refreshTokenObj.getRefreshToken();
-		String email = refreshTokenObj.getEmail();
-		UserRole role = userRepository.findByEmail(email)
-			.orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND))
-			.getRole();
+	public boolean validateRefreshToken(String refreshToken) {
+		Claims claims = getUserInfo(refreshToken);
+		String email = claims.getSubject();
+
+		userRepository.findByEmail(email)
+			.orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
 		try {
-			Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-			return recreationAccessToken(email, role);
+			Jws<Claims> claim = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(refreshToken);
+			if (!claim.getBody().getExpiration().before(new Date())) {
+				return true;
+			}
 		} catch (SecurityException | MalformedJwtException e) {
 			log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
 		} catch (ExpiredJwtException e) {
@@ -153,10 +185,21 @@ public class JwtUtil {
 			log.info("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
 		} catch (IllegalArgumentException e) {
 			log.info("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
-		} catch (Exception e) {
-			log.info("Invalid token, 유효하지 않은 토큰입니다.");
 		}
-		return null;
+		return false;
+	}
+
+	public String recreateAccessToken(String accessToken) {
+		Claims claims = getUserInfo(accessToken);
+		String email = claims.getSubject();
+		UserRole role = userRepository.findByEmail(email)
+			.orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND))
+			.getRole();
+
+		Jws<Claims> claim = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken);
+
+		return recreationAccessToken(claim.getBody().get("sub").toString(), role);
+
 	}
 
 	private String recreationAccessToken(String email, UserRole role) {
