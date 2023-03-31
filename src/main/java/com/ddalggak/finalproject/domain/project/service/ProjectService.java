@@ -34,7 +34,7 @@ public class ProjectService {
 	private final ProjectRepository projectRepository;
 
 	private final UserRepository userRepository;
-	
+
 	public ResponseEntity<SuccessResponseDto> createProject(User user, ProjectRequestDto projectRequestDto) {
 		//1. user로 projectUserRequestDto 생성
 		ProjectUserRequestDto projectUserRequestDto = ProjectUserRequestDto.create(user);
@@ -51,14 +51,10 @@ public class ProjectService {
 
 	@Transactional(readOnly = true)
 	public ResponseEntity<List<ProjectBriefResponseDto>> viewProjectAll(User user) {
-		List<ProjectBriefResponseDto> projectResponseDtoList = projectRepository.findAllByUserId(user.getUserId())
-			.stream()
-			.map(ProjectBriefResponseDto::new)
-			.collect(Collectors.toList());
-
+		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(user.getUserId());
 		return ResponseEntity
 			.status(HttpStatus.OK)
-			.body(projectResponseDtoList);
+			.body(result);
 	}
 
 	@Transactional(readOnly = true)
