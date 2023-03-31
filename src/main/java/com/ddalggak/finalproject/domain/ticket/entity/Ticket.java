@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -16,6 +15,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+
+import org.hibernate.annotations.DynamicUpdate;
 
 import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.label.entity.Label;
@@ -28,12 +29,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
 @Entity
 @AllArgsConstructor
+@DynamicUpdate
 public class Ticket extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,52 +48,47 @@ public class Ticket extends BaseEntity {
 	// 난이도  null 허용 -> int 로 변경 필요
 	private int difficulty;
 	// 태그(이름 변경 해야함)  null 허용
-	private String assigned;
-	// 마감 날짜  null 허용 -> 최신 생성순으로
-	private LocalDate ticketExpiredAt;
-	@Setter
-	private String labelLeader;
-
+	private LocalDate expiredAt;
+	private LocalDate completedAt;
 	// task 연관관계
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "taskId")
+	@JoinColumn(name = "task_Id")
 	private Task task;
 
 	// user 연관관계 // FE에서 user -> onwer 로 변경요청
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "userId")
+	@JoinColumn(name = "user_Id")
 	private User user;
 
-	@Column(nullable = true)
 	@Enumerated(value = EnumType.STRING)
 	private TicketStatus status;
-	// @OneToMany(mappedBy = "ticket")
-	// private List<User> User = new ArrayList<>();
 
-	@OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL)
-	private List<Label> labelList = new ArrayList<>();
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "label_Id")
+	private Label label;
 	// 댓글 연관관계
 	@OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
 	private List<Comment> comment = new ArrayList<>();
 
+	// todo 이거 어디서 쓸라고 만든거에요?
 	public Ticket(TicketRequestDto ticketRequestDto, User user, List<Comment> commentList) {
-		this.ticketTitle = ticketRequestDto.getTicketTitle();
-		this.ticketDescription = ticketRequestDto.getTicketDescription();
-		this.priority = ticketRequestDto.getPriority();
-		this.difficulty = ticketRequestDto.getDifficulty();
-		this.assigned = ticketRequestDto.getAssigned();
-		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
-		this.comment = commentList;
+		ticketTitle = ticketRequestDto.getTicketTitle();
+		ticketDescription = ticketRequestDto.getTicketDescription();
+		priority = ticketRequestDto.getPriority();
+		difficulty = ticketRequestDto.getDifficulty();
+		expiredAt = ticketRequestDto.getTicketExpiredAt();
+		comment = commentList;
+		status = TicketStatus.TODO;
 	}
 
 	@Builder
 	public Ticket(TicketRequestDto ticketRequestDto, Task task) {
-		this.ticketTitle = ticketRequestDto.getTicketTitle();
-		this.ticketDescription = ticketRequestDto.getTicketDescription();
-		this.priority = ticketRequestDto.getPriority();
-		this.difficulty = ticketRequestDto.getDifficulty();
-		this.assigned = ticketRequestDto.getAssigned();
-		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
+		ticketTitle = ticketRequestDto.getTicketTitle();
+		ticketDescription = ticketRequestDto.getTicketDescription();
+		priority = ticketRequestDto.getPriority();
+		difficulty = ticketRequestDto.getDifficulty();
+		expiredAt = ticketRequestDto.getTicketExpiredAt();
+		status = TicketStatus.TODO;
 		this.task = task;
 	}
 
@@ -101,16 +97,32 @@ public class Ticket extends BaseEntity {
 		this.ticketDescription = ticketRequestDto.getTicketDescription();
 		this.priority = ticketRequestDto.getPriority();
 		this.difficulty = ticketRequestDto.getDifficulty();
-		this.assigned = ticketRequestDto.getAssigned();
-		this.ticketExpiredAt = ticketRequestDto.getTicketExpiredAt();
+		this.expiredAt = ticketRequestDto.getTicketExpiredAt();
 		this.comment = getComment();
 	}
-
 
 	public static Ticket create(TicketRequestDto ticketRequestDto, Task task) {
 		return Ticket.builder()
 			.ticketRequestDto(ticketRequestDto)
 			.task(task)
 			.build();
+	}
+
+	public void completeTicket() {
+		status = TicketStatus.DONE;
+		completedAt = LocalDate.now();
+	}
+
+	public void assignTicket(User user) {
+		this.user = user;
+	}
+
+	/**
+	 * 양방향 연관관계 메소드
+	 */
+
+	public void addLabel(Label label) {
+		label.addTicket(this);
+		this.label = label;
 	}
 }
