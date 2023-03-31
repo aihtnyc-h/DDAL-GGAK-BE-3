@@ -14,11 +14,9 @@ public class ReviewCommentResponseDto {
 	private Long reviewCommentId;
 	@Schema(name = "reviewComment", example = "review comment")
 	private String reviewComment;
-	// private String email;
 	@Builder
 	public ReviewCommentResponseDto(ReviewComment rc) {
 		this.reviewCommentId = rc.getReviewCommentId();
 		this.reviewComment = rc.getReviewComment();
-		// this.email = rc.getUser().getEmail();
 	}
 }

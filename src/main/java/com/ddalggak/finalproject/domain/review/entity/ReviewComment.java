@@ -42,7 +42,7 @@ public class ReviewComment extends BaseEntity {
 		this.reviewComment = reviewCommentList.getReviewComment();
 	}
 
-	public static ReviewComment create(ReviewCommentRequestDto reviewCommentRequestDto, Review review) {
+	public ReviewComment create(ReviewCommentRequestDto reviewCommentRequestDto, Review review) {
 		return ReviewComment.builder()
 			.reviewCommentList(reviewCommentRequestDto)
 			.review(review)
@@ -50,6 +50,6 @@ public class ReviewComment extends BaseEntity {
 	}
 
 	public void update(ReviewCommentRequestDto reviewCommentRequestDto) {
-		this.reviewComment = reviewCommentRequestDto.getReviewComment();
+		this.reviewComment =reviewCommentRequestDto.getReviewComment();
 	}
 }
