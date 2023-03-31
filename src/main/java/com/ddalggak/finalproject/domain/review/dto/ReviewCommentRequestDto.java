@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class ReviewCommentRequestDto {
-	@Schema(name = "review Id")
-	@NotNull(message = "")
+	@Schema(name = "review Id", example = "1")
+	@NotNull(message = "review is required")
 	private Long reviewId;
 	@Schema(name = "comment", example = "comment")
 	private String reviewComment;
