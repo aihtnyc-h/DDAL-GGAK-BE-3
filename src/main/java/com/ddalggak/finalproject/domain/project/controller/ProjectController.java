@@ -1,5 +1,6 @@
 package com.ddalggak.finalproject.domain.project.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -12,7 +13,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
@@ -46,8 +49,9 @@ public class ProjectController {
 	@PostMapping("/project")
 	public ResponseEntity<SuccessResponseDto> createProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestBody ProjectRequestDto projectRequestDto) {
-		return projectService.createProject(userDetails.getUser(), projectRequestDto);
+		@RequestPart(value = "image") MultipartFile image,
+		@RequestPart(value = "projectRequestDto") ProjectRequestDto projectRequestDto) throws IOException {
+		return projectService.createProject(image, userDetails.getUser(), projectRequestDto);
 	}
 
 	@Operation(summary = "프로젝트 전체조회", description = "api for view all projects")

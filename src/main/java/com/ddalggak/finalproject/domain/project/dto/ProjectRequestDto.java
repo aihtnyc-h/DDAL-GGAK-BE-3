@@ -18,5 +18,6 @@ public class ProjectRequestDto {
 
 	@Schema(name = "프로젝트 썸네일", example = "http://ddalggak.ap-northeast-1.amazonaws.com/thumbnail/projects/~")
 	public String thumbnail;
-
+	@Schema(name = "프로젝트 썸네일 이미지", example = "project.jpg")
+	private String imageUrl;
 }
