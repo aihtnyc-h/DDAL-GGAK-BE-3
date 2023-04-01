@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +25,6 @@ import com.ddalggak.finalproject.domain.user.dto.EmailRequestDto;
 import com.ddalggak.finalproject.domain.user.dto.NicknameRequestDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
-import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.domain.user.service.UserService;
@@ -95,26 +95,10 @@ public class UserController {
 	}
 
 	@PostMapping("/auth/logout")
-	public ResponseEntity<?> logout(HttpServletRequest request, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-		String token = jwtUtil.resolveToken(request);
-		Claims claims;
-		if (token != null) {
-			if (jwtUtil.validateToken(token)) {
-				claims = jwtUtil.getUserInfo(token);
-			} else {
-				return ErrorResponse.from(ErrorCode.INVALID_REQUEST);
-			}
-			User user = userRepository.findByEmail(claims.getSubject())
-				.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-			if (user.equals(userDetails.getUser())) {
-				jwtUtil.logoutToken(user.getUserId());
-				// jwtUtil.deleteToken(user.getUserId());
-			} else {
-				return ErrorResponse.from(ErrorCode.INVALID_REQUEST);
-			}
-		} else {
-			return ErrorResponse.from(ErrorCode.INVALID_REQUEST);
-		}
+	public ResponseEntity<?> logout(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		String email = userDetails.getEmail();
+		SecurityContextHolder.clearContext();
+		jwtUtil.logout(email);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_LOGOUT);
 	}
 
