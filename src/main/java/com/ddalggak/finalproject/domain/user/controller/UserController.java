@@ -33,7 +33,6 @@ import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.error.ErrorResponse;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
-import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
 import com.ddalggak.finalproject.global.mail.MailService;
 import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeDto;
 import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeService;
@@ -51,7 +50,6 @@ public class UserController {
 	private final UserRepository userRepository;
 	private final MailService mailService;
 	private final RandomCodeService randomCodeService;
-	private final TokenRepository tokenRepository;
 
 	@PostMapping("/auth/email")
 	public ResponseEntity<?> emailAuthentication(@Valid @RequestBody EmailRequestDto emailRequestDto,
@@ -71,7 +69,7 @@ public class UserController {
 	@GetMapping("/auth/email")
 	public ResponseEntity<?> randomCoedAuthentication(@RequestBody RandomCodeDto randomCodeDto) {
 		randomCodeService.authenticate(randomCodeDto);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_SEND);
+		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_AUTH);
 	}
 
 	@PostMapping("/auth/signup")
