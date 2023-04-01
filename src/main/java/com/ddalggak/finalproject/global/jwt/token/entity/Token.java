@@ -1,31 +1,25 @@
 package com.ddalggak.finalproject.global.jwt.token.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.Column;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
+
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Entity
 @Getter
+@Setter
+@Builder
 @NoArgsConstructor
-// @RedisHash(value = "refreshToken", timeToLive = 60 * 60 * 24 * 30)
+@AllArgsConstructor
+@RedisHash(value = "token", timeToLive = 60 * 60 * 2 * 1000L)
 public class Token {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long tokenId;
 	private String email;
 	private String accessToken;
 	private String refreshToken;
-
-	@Builder
-	public Token(Long tokenId, String email, String accessToken, String refreshToken) {
-		this.tokenId = tokenId;
-		this.email = email;
-		this.accessToken = accessToken;
-		this.refreshToken = refreshToken;
-	}
 }
