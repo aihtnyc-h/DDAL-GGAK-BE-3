@@ -16,9 +16,9 @@ public class RandomCodeService {
 		String email = randomCodeDto.getEmail();
 		String randomCode = randomCodeDto.getRandomCode();
 
-		RandomCode user = randomCodeRepository.findByRandomCode(randomCode);
-		if (user == null)
-			throw new UserException(ErrorCode.INVALID_RANDOM_CODE);
+		RandomCode user = randomCodeRepository.findById(email)
+			.orElseThrow(() -> new UserException(ErrorCode.INVALID_RANDOM_CODE));
+		
 		if (randomCode.equals(user.getRandomCode()) && email.equals(user.getEmail())) {
 			randomCodeRepository.delete(user);
 		}

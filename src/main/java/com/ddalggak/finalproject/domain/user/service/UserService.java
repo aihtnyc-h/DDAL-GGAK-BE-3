@@ -20,6 +20,7 @@ import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
+import com.ddalggak.finalproject.global.jwt.token.entity.Token;
 import com.ddalggak.finalproject.infra.aws.S3Uploader;
 
 import lombok.RequiredArgsConstructor;
@@ -69,8 +70,9 @@ public class UserService {
 			throw new RuntimeException("Invalid email or password");
 		}
 
-		response.addHeader(JwtUtil.AUTHORIZATION_HEADER,
-			jwtUtil.login(email, user.getRole()));
+		Token token = jwtUtil.login(email, user.getRole());
+		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token.getAccessToken());
+		response.addHeader(JwtUtil.REFRESH_TOKEN_HEADER, token.getRefreshToken());
 
 		UserPageDto userPage = new UserPageDto(user);
 
