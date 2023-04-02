@@ -49,9 +49,9 @@ public class ProjectController {
 	@PostMapping("/project")
 	public ResponseEntity<SuccessResponseDto> createProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestPart(value = "image") MultipartFile image,
-		@RequestPart(value = "projectRequestDto") ProjectRequestDto projectRequestDto) throws IOException {
-		return projectService.createProject(image, userDetails.getUser(), projectRequestDto);
+		@RequestPart(value = "thumbnail") MultipartFile image,
+		@Valid @RequestPart(value = "data") ProjectRequestDto projectRequestDto) throws IOException {
+		return projectService.createProject(userDetails.getUser(), image, projectRequestDto);
 	}
 
 	@Operation(summary = "프로젝트 전체조회", description = "api for view all projects")
@@ -92,8 +92,9 @@ public class ProjectController {
 	public ResponseEntity<SuccessResponseDto> updateProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId,
-		@Valid @RequestBody ProjectRequestDto projectRequestDto) {
-		return projectService.updateProject(userDetails.getUser(), projectId, projectRequestDto);
+		@RequestPart(value = "thumbnail") MultipartFile image,
+		@Valid @RequestPart(value = "data") ProjectRequestDto projectRequestDto) throws IOException {
+		return projectService.updateProject(userDetails.getUser(), projectId, image, projectRequestDto);
 	}
 
 	@ApiResponses(
