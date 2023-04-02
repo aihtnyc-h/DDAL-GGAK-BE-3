@@ -37,6 +37,12 @@ public class ProjectUser {
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "ProjectId")
 	private Project project;
+	
+	@QueryProjection
+	public ProjectUser(User user, Project project) {
+		this.user = user;
+		this.project = project;
+	}
 
 	public static ProjectUser create(ProjectUserRequestDto projectUserDto) {
 		return ProjectUser.builder()
