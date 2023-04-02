@@ -2,17 +2,17 @@ name: Deploy to Amazon EC2
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "feature" ]
 #   pull_request:
 #     branches: [ "dev" ]
 
 env:
   AWS_REGION: ap-northeast-2
-  S3_BUCKET_NAME: ddal-ggak-codedeploy-app
-  CODE_DEPLOY_APPLICATION_NAME: test1
-  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: test1-g
+  S3_BUCKET_NAME2: ddalggaktest2
+  CODE_DEPLOY_APPLICATION_NAME: test2-g
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: test2-g
   ZIP_NAME: zip -r ./finalproject.zip .
-  APPLICATION: ./src/main/resources/application.yml
+  APPLICATION2: ./src/main/resources/application.yml
 
 permissions:
   contents: read
@@ -30,7 +30,7 @@ jobs:
       
     # (2) application.yml 추가
     - run: touch ./src/main/resources/application.yml
-    - run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
+    - run: echo "${{ secrets.APPLICATION2 }}" > ./src/main/resources/application.yml
     - run: cat ./src/main/resources/application.yml
     
     # (3) JDK 11 세팅
@@ -75,7 +75,7 @@ jobs:
         aws deploy push \
           --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
           --ignore-hidden-files \
-          --s3-location s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip \
+          --s3-location s3://$S3_BUCKET_NAME2/$GITHUB_SHA.zip \
           --source .
     # (7) S3 버킷에 있는 파일을 대상으로 CodeDeploy 실행
     - name: Deploy to AWS EC2 from S3
@@ -84,5 +84,5 @@ jobs:
           --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
           --deployment-config-name CodeDeployDefault.AllAtOnce \
           --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
-          --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip
+          --s3-location bucket=$S3_BUCKET_NAME2,key=$GITHUB_SHA.zip,bundleType=zip
 
