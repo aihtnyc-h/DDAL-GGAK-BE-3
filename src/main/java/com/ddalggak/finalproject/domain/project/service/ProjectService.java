@@ -48,9 +48,9 @@ public class ProjectService {
 		//2. projectUserDto로 projectUser생성
 		ProjectUser projectUser = ProjectUser.create(projectUserRequestDto);
 		//2.5 image S3 서버에 업로드 -> 분기처리
-		fileCheck(image);
 		String imageUrl = null;
-		if (!image.isEmpty()) {
+		if (!(image == null)) {
+			fileCheck(image);
 			imageUrl = s3Uploader.upload(image, "project");
 		}
 		projectRequestDto.setThumbnail(imageUrl);
@@ -159,16 +159,15 @@ public class ProjectService {
 		);
 	}
 	
-	private boolean fileCheck(MultipartFile file) {
+	private void fileCheck(MultipartFile file) { //todo type check하고 415 던지기, 분기처리 노션에
 		String fileName = StringUtils.getFilenameExtension(file.getOriginalFilename());
 		if (fileName != null) {
 			String exe = fileName.toLowerCase();
-			if (exe.equals("jpg") || exe.equals("png") || exe.equals("jpeg") || exe.equals("gif") || exe.equals(
-				"webp")) {
-				return false;
+			if (!(exe.equals("jpg") || exe.equals("png") || exe.equals("jpeg") || exe.equals("gif") || exe.equals(
+				"webp"))) {
+				throw new CustomException(ErrorCode.TYPE_MISMATCH);
 			}
 		}
-		return false;
 	}
 }
 
