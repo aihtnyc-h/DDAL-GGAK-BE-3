@@ -16,7 +16,8 @@ public class ProjectRequestDto {
 	@NotBlank(message = "프로젝트 이름은 필수 입력값입니다.")
 	public String projectTitle;
 
-	@Schema(name = "프로젝트 썸네일", example = "http://ddalggak.ap-northeast-1.amazonaws.com/thumbnail/projects/~")
+	@Schema(name = "프로젝트 썸네일")
+	@Setter
 	public String thumbnail;
 	@Schema(name = "프로젝트 썸네일 이미지", example = "project.jpg")
 	private String imageUrl;
