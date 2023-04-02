@@ -40,6 +40,9 @@ public enum ErrorCode {
 	DUPLICATE_RESOURCE(CONFLICT, "E-001", "Data already exists."),
 	DUPLICATE_MEMBER(CONFLICT, "E-002", "Duplicate user exists."),
 	DUPLICATE_EMAIL(CONFLICT, "E-003", "Email address is already in use. Please try a different email address."),
+	
+	/* 415 UNSUPPORTED_MEDIA_TYPE : 지원하지 않는 미디어 타입 */
+	TYPE_MISMATCH(UNSUPPORTED_MEDIA_TYPE, "F-001", "Unsupported media type."),
 
 	/* 500 INTERNAL_SERVER_ERROR : 서버에서 문제 일어남 */
 	SERVER_ERROR(INTERNAL_SERVER_ERROR, "F-001", "Please check your input value.");
