@@ -2,11 +2,20 @@ package com.ddalggak.finalproject.domain.project.repository;
 
 import static com.ddalggak.finalproject.domain.project.entity.QProject.*;
 import static com.ddalggak.finalproject.domain.project.entity.QProjectUser.*;
+import static com.ddalggak.finalproject.domain.task.entity.QTask.*;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
+import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
+import com.ddalggak.finalproject.domain.project.dto.ProjectResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.QProjectBriefResponseDto;
+import com.ddalggak.finalproject.domain.project.entity.Project;
+import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
+import com.ddalggak.finalproject.domain.task.entity.Task;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -29,7 +38,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 			.where(projectUser.user.userId.eq(userId))
 			.fetch();
 	}
-	
+
 	@Override
 	public ProjectResponseDto findDtoByProjectId(Long projectId) {
 		List<ProjectUser> result1 = queryFactory

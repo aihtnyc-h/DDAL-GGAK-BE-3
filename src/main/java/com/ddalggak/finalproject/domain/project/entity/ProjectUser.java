@@ -12,6 +12,7 @@ import javax.persistence.Table;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectUserRequestDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
+import com.querydsl.core.annotations.QueryProjection;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
