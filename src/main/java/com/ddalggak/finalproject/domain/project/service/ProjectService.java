@@ -39,38 +39,27 @@ public class ProjectService {
 	private final UserRepository userRepository;
 	private long fileSizeLimit = 10 * 1024 * 1024;
 
-	public ResponseEntity<SuccessResponseDto> createProject(MultipartFile image, User user, ProjectRequestDto projectRequestDto) {
+	public ResponseEntity<SuccessResponseDto> createProject(User user, MultipartFile image,
+		ProjectRequestDto projectRequestDto) throws
+		IOException {
 		//1. user로 projectUserRequestDto 생성
 		ProjectUserRequestDto projectUserRequestDto = ProjectUserRequestDto.create(user);
 		//2. projectUserDto로 projectUser생성
 		ProjectUser projectUser = ProjectUser.create(projectUserRequestDto);
+		//2.5 image S3 서버에 업로드 -> 분기처리
+		fileCheck(image);
+		String imageUrl = null;
+		if (!image.isEmpty()) {
+			imageUrl = s3Uploader.upload(image, "project");
+		}
+		projectRequestDto.setThumbnail(imageUrl);
 		//3. projectUser로 project생성
 		Project project = Project.create(projectRequestDto, projectUser);
 		//4. projectLeader 주입
 		project.setProjectLeader(user.getEmail());
-		fileSizeCheck(image);
-		fileCheck(image);
 		//5. projectRepository에 project 저장
 		projectRepository.save(project);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
-	}
-
-	private boolean fileCheck(MultipartFile file) {
-		String fileName = StringUtils.getFilenameExtension(file.getOriginalFilename());
-		if (fileName != null) {
-			String exe = fileName.toLowerCase();
-			if (exe.equals("jpg") || exe.equals("png") || exe.equals("jpeg") || exe.equals("webp")) {
-				return false;
-			}
-		}
-		return false;
-	}
-
-	private void fileSizeCheck(MultipartFile image) {
-		 long fileSize = image.getSize();
-		 if (fileSize > fileSizeLimit) {
-			 throw new IllegalArgumentException("총 용량 10MB이하만 업로드 가능합니다.");
-		 }
 	}
 
 	@Transactional(readOnly = true)
@@ -113,15 +102,20 @@ public class ProjectService {
 
 	@Transactional
 	public ResponseEntity<SuccessResponseDto> updateProject(User user, Long projectId,
-		ProjectRequestDto projectRequestDto) {
+		MultipartFile image, ProjectRequestDto projectRequestDto) throws IOException {
 		Project project = validateProject(projectId);
 		if (!project.getProjectLeader().equals(user.getEmail())) {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
-		projectRepository.update(
-			projectRequestDto.getProjectTitle(),
-			projectRequestDto.getThumbnail(),
-			projectId); // todo 근데 이거 null 들어오면 어쩔건데? factory pattern 조져?
+		//todo logic : project에 있는 thumbnail과 이미지값 비교해서 같으면 업로드 안하고 다르면 업로드
+		// 아 근데 이거 파일 이름 같게 하고 다른 이미지 던지면 어쩔건데?
+		// String filename = URLDecoder.decode(project.getThumbnail().substring(47), StandardCharsets.UTF_8);
+		// if (filename.equals()) {
+		// 	imageUrl = s3Uploader.upload(image, "project");
+		// }
+		String imageUrl = s3Uploader.upload(image, "project");
+		projectRequestDto.setThumbnail(imageUrl);
+		projectRepository.update(projectId, projectRequestDto);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_SEND);
 	}
 
@@ -162,6 +156,18 @@ public class ProjectService {
 		return projectRepository.findById(id).orElseThrow(
 			() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND)
 		);
+	}
+	
+	private boolean fileCheck(MultipartFile file) {
+		String fileName = StringUtils.getFilenameExtension(file.getOriginalFilename());
+		if (fileName != null) {
+			String exe = fileName.toLowerCase();
+			if (exe.equals("jpg") || exe.equals("png") || exe.equals("jpeg") || exe.equals("gif") || exe.equals(
+				"webp")) {
+				return false;
+			}
+		}
+		return false;
 	}
 }
 
