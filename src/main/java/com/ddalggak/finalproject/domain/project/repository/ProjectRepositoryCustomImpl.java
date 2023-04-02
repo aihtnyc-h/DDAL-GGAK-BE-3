@@ -29,4 +29,48 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 			.where(projectUser.user.userId.eq(userId))
 			.fetch();
 	}
+	
+	@Override
+	public ProjectResponseDto findDtoByProjectId(Long projectId) {
+		List<ProjectUser> result1 = queryFactory
+			.selectFrom(projectUser)
+			.where(projectUser.project.projectId.eq(projectId))
+			.fetch();
+		List<Task> result2 = queryFactory.selectFrom(task)
+			.where(task.project.projectId.eq(projectId))
+			.fetch();
+		Project project1 = queryFactory
+			.selectFrom(project)
+			.where(project.projectId.eq(projectId))
+			.fetchOne();
+
+		List<Tuple> fetchedResult = queryFactory.select(project, projectUser, task)
+			.from(project)
+			.leftJoin(project.projectUserList, projectUser)
+			.leftJoin(project.taskList, task)
+			.where(project.projectId.eq(projectId))
+			.fetch();
+		Project foundProject = fetchedResult.get(0).get(project);
+		List<ProjectUser> projectUsers = fetchedResult.stream()
+			.map(tuple -> tuple.get(projectUser))
+			.filter(Objects::nonNull)
+			.distinct()
+			.collect(Collectors.toList());
+		List<Task> tasks = fetchedResult.stream()
+			.map(tuple -> tuple.get(task))
+			.filter(Objects::nonNull)
+			.distinct()
+			.collect(Collectors.toList());
+
+		return new ProjectResponseDto(foundProject, projectUsers, tasks);
+	}
+
+	@Override
+	public void update(Long projectId, ProjectRequestDto projectRequestDto) {
+		queryFactory.update(project)
+			.set(project.projectTitle, projectRequestDto.projectTitle)
+			.set(project.thumbnail, projectRequestDto.thumbnail)
+			.where(project.projectId.eq(projectId))
+			.execute();
+	}
 }
