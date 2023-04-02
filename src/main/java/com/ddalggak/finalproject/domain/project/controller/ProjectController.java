@@ -49,7 +49,7 @@ public class ProjectController {
 	@PostMapping("/project")
 	public ResponseEntity<SuccessResponseDto> createProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestPart(value = "thumbnail") MultipartFile image,
+		@RequestPart(value = "thumbnail"), required = false MultipartFile image,
 		@Valid @RequestPart(value = "data") ProjectRequestDto projectRequestDto) throws IOException {
 		return projectService.createProject(userDetails.getUser(), image, projectRequestDto);
 	}
