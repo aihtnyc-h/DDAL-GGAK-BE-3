@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
@@ -23,6 +25,7 @@ import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
 import com.ddalggak.finalproject.global.error.ErrorCode;
+import com.ddalggak.finalproject.infra.aws.S3Uploader;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,10 +35,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ProjectService {
 	private final ProjectRepository projectRepository;
-
+	private final S3Uploader s3Uploader;
 	private final UserRepository userRepository;
+	private long fileSizeLimit = 10 * 1024 * 1024;
 
-	public ResponseEntity<SuccessResponseDto> createProject(User user, ProjectRequestDto projectRequestDto) {
+	public ResponseEntity<SuccessResponseDto> createProject(MultipartFile image, User user, ProjectRequestDto projectRequestDto) {
 		//1. user로 projectUserRequestDto 생성
 		ProjectUserRequestDto projectUserRequestDto = ProjectUserRequestDto.create(user);
 		//2. projectUserDto로 projectUser생성
@@ -44,9 +48,29 @@ public class ProjectService {
 		Project project = Project.create(projectRequestDto, projectUser);
 		//4. projectLeader 주입
 		project.setProjectLeader(user.getEmail());
+		fileSizeCheck(image);
+		fileCheck(image);
 		//5. projectRepository에 project 저장
 		projectRepository.save(project);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
+	}
+
+	private boolean fileCheck(MultipartFile file) {
+		String fileName = StringUtils.getFilenameExtension(file.getOriginalFilename());
+		if (fileName != null) {
+			String exe = fileName.toLowerCase();
+			if (exe.equals("jpg") || exe.equals("png") || exe.equals("jpeg") || exe.equals("webp")) {
+				return false;
+			}
+		}
+		return false;
+	}
+
+	private void fileSizeCheck(MultipartFile image) {
+		 long fileSize = image.getSize();
+		 if (fileSize > fileSizeLimit) {
+			 throw new IllegalArgumentException("총 용량 10MB이하만 업로드 가능합니다.");
+		 }
 	}
 
 	@Transactional(readOnly = true)

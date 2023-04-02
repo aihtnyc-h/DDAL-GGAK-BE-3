@@ -65,7 +65,11 @@ public class WebSecurityConfig {
 			.permitAll()
 			.antMatchers("/ddal-ggak.html")
 			.permitAll()
-
+			
+			//health check
+			.antMatchers("/").permitAll()
+			.anyRequest().authenticated()
+			
 			//                .antMatchers(HttpMethod.POST, "/api/logout").permitAll()
 			// JWT 인증/인가를 사용하기 위한 설정
 			.and()
