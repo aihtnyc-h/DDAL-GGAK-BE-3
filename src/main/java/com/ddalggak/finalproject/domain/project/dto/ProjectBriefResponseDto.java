@@ -15,25 +15,23 @@ public class ProjectBriefResponseDto {
 
 	@Schema(name = "프로젝트 id", example = "1")
 	public Long id;
-
+	@Schema(name = "프로젝트 이름")
+	public String projectTitle;
 	@Schema(name = "프로젝트 썸네일", example = "http://ddalggak.ap-northeast-1.amazonaws.com/thumbnail/projects/~.jpg")
 	public String thumbnail;
 
-	@Schema(name = "프로젝트 이름")
-	public String projectTitle;
-
 	@QueryProjection
-	public ProjectBriefResponseDto(Long id, String thumbnail, String projectTitle) {
+	public ProjectBriefResponseDto(Long id, String projectTitle, String thumbnail) {
 		this.id = id;
-		this.thumbnail = thumbnail;
 		this.projectTitle = projectTitle;
+		this.thumbnail = thumbnail;
 	}
 
 	@Builder
 	public ProjectBriefResponseDto(Project project) {
 		id = project.getProjectId();
-		thumbnail = project.getThumbnail();
 		projectTitle = project.getProjectTitle();
+		thumbnail = project.getThumbnail();
 	}
 
 	public static ProjectBriefResponseDto of(ProjectUser projectUser) {
