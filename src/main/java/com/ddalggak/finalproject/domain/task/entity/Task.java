@@ -26,8 +26,8 @@ import com.ddalggak.finalproject.domain.project.entity.Project;
 import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.global.entity.BaseEntity;
+import com.querydsl.core.annotations.QueryProjection;
 
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,7 +35,7 @@ import lombok.Setter;
 
 @Getter
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @DynamicUpdate
 public class Task extends BaseEntity {
 
@@ -45,8 +45,10 @@ public class Task extends BaseEntity {
 
 	private String taskTitle;
 
+	@Setter
 	private int totalPriority;
 
+	@Setter
 	private int totalDifficulty;
 
 	private LocalDate expiredAt;
@@ -72,6 +74,14 @@ public class Task extends BaseEntity {
 	@ElementCollection
 	@CollectionTable(name = "LABEL_LEADER", joinColumns = @JoinColumn(name = "user_email"))
 	private Set<String> labelLeadersList = new HashSet<>();
+
+	@QueryProjection
+	public Task(Long id, String taskTitle, LocalDate expiredAt, String taskLeader) {
+		this.taskId = id;
+		this.taskTitle = taskTitle;
+		this.expiredAt = expiredAt;
+		this.taskLeader = taskLeader;
+	}
 
 	@Builder
 	public Task(TaskRequestDto taskRequestDto, TaskUser taskUser, Project project) {
@@ -105,4 +115,17 @@ public class Task extends BaseEntity {
 	public void addLabel(Label label) {
 		labelList.add(label);
 	}
+
+	public void addTicket(Ticket ticket) {
+		ticketList.add(ticket);
+		totalDifficulty += ticket.getDifficulty();
+		totalPriority += ticket.getPriority();
+	}
+
+	public void deleteTicket(Ticket ticket) {
+		ticketList.remove(ticket);
+		totalDifficulty -= ticket.getDifficulty();
+		totalPriority -= ticket.getPriority();
+	}
+
 }

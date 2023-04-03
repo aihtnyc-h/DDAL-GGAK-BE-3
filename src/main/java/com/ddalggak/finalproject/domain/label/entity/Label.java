@@ -45,13 +45,13 @@ public class Label extends BaseEntity {
 	@BatchSize(size = 100)
 	private List<LabelUser> labelUserList = new ArrayList<>();
 
-	@ManyToOne
-	@JoinColumn(name = "ticket_id")
-	private Ticket ticket;
+	@OneToMany(mappedBy = "label", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Ticket> tickets = new ArrayList<>();
 
 	@Builder
 	public Label(LabelRequestDto labelRequestDto, LabelUser labelUser, Task task) {
 		labelTitle = labelRequestDto.getLabelTitle();
+		labelLeader = labelUser.getUser().getEmail();
 		addTask(task);
 		addLabelUser(labelUser);
 	}
@@ -74,4 +74,7 @@ public class Label extends BaseEntity {
 		labelUser.addLabel(this);
 	}
 
+	public void addTicket(Ticket ticket) {
+		tickets.add(ticket);
+	}
 }
