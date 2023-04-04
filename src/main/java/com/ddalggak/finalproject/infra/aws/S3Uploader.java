@@ -75,9 +75,9 @@ public class S3Uploader {
 		return Optional.empty();
 	}
 
-	public ResponseEntity<?> delete(String filePath) {
+	public ResponseEntity<SuccessResponseDto> delete(String filePath) {
 		try {
-			String filename = URLDecoder.decode(filePath.substring(45), StandardCharsets.UTF_8);
+			String filename = URLDecoder.decode(filePath.substring(47), StandardCharsets.UTF_8);
 			amazonS3Client.deleteObject(new DeleteObjectRequest(bucket, filename));
 		} catch (SdkClientException e) {
 			e.printStackTrace();
