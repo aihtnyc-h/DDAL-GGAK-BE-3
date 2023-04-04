@@ -67,19 +67,8 @@ public class Ticket extends BaseEntity {
 	@JoinColumn(name = "label_Id")
 	private Label label;
 	// 댓글 연관관계
-	@OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy = "ticket", cascade = CascadeType.REMOVE)
 	private List<Comment> comment = new ArrayList<>();
-
-	// todo 이거 어디서 쓸라고 만든거에요?
-	public Ticket(TicketRequestDto ticketRequestDto, User user, List<Comment> commentList) {
-		ticketTitle = ticketRequestDto.getTicketTitle();
-		ticketDescription = ticketRequestDto.getTicketDescription();
-		priority = ticketRequestDto.getPriority();
-		difficulty = ticketRequestDto.getDifficulty();
-		expiredAt = ticketRequestDto.getTicketExpiredAt();
-		comment = commentList;
-		status = TicketStatus.TODO;
-	}
 
 	@Builder
 	public Ticket(TicketRequestDto ticketRequestDto, Task task) {
@@ -89,7 +78,7 @@ public class Ticket extends BaseEntity {
 		difficulty = ticketRequestDto.getDifficulty();
 		expiredAt = ticketRequestDto.getTicketExpiredAt();
 		status = TicketStatus.TODO;
-		this.task = task;
+		addTask(task);
 	}
 
 	public void update(TicketRequestDto ticketRequestDto) {
@@ -98,7 +87,6 @@ public class Ticket extends BaseEntity {
 		this.priority = ticketRequestDto.getPriority();
 		this.difficulty = ticketRequestDto.getDifficulty();
 		this.expiredAt = ticketRequestDto.getTicketExpiredAt();
-		this.comment = getComment();
 	}
 
 	public static Ticket create(TicketRequestDto ticketRequestDto, Task task) {
@@ -125,4 +113,10 @@ public class Ticket extends BaseEntity {
 		label.addTicket(this);
 		this.label = label;
 	}
+
+	public void addTask(Task task) {
+		this.task = task;
+		task.addTicket(this);
+	}
+
 }
