@@ -1,6 +1,7 @@
 package com.ddalggak.finalproject.global.jwt;
 
 import java.io.IOException;
+import java.util.Date;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -13,8 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.ddalggak.finalproject.global.error.ErrorCode;
-import com.ddalggak.finalproject.global.error.ErrorResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +31,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 		ServletException, IOException {
 
 		String token = jwtUtil.resolveToken(request);
+		Date now = new Date();
 
-		if (token != null) {
-			if (!jwtUtil.validateToken(token)) {
-				jwtExceptionHandler(response, ErrorCode.INVALID_AUTH_TOKEN);
-			}
+		if (token != null && jwtUtil.validateToken(token)) {
 			Claims info = jwtUtil.getUserInfo(token);
 			setAuthentication(info.getSubject());
+		}
+
+		if (token != null && jwtUtil.getTokenExpiration(token).getTime() <= now.getTime()) {
+			throw new TokenException(ErrorCode.INVALID_AUTH_TOKEN);
 		}
 		filterChain.doFilter(request, response);
 	}
@@ -49,17 +50,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 		context.setAuthentication(authentication);
 
 		SecurityContextHolder.setContext(context);
-	}
-
-	public void jwtExceptionHandler(HttpServletResponse response, ErrorCode errorCode) {
-		response.setStatus(errorCode.getHttpStatus().value());
-		response.setContentType("application/json");
-		try {
-			String json = new ObjectMapper().writeValueAsString(ErrorResponse.from(errorCode, errorCode.getMessage()));
-			response.getWriter().write(json);
-		} catch (Exception e) {
-			log.error(e.getMessage());
-		}
 	}
 
 }

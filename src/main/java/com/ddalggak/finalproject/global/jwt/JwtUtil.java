@@ -3,6 +3,7 @@ package com.ddalggak.finalproject.global.jwt;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -20,6 +22,7 @@ import com.ddalggak.finalproject.domain.user.role.UserRole;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.jwt.token.entity.Token;
 import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
+import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 import com.ddalggak.finalproject.global.security.UserDetailsServiceImpl;
 
 import io.jsonwebtoken.Claims;
@@ -59,22 +62,6 @@ public class JwtUtil {
 		key = Keys.hmacShaKeyFor(bytes);
 	}
 
-	public String resolveToken(HttpServletRequest request) {
-		String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-			return bearerToken.substring(7);
-		}
-		return null;
-	}
-
-	public String resolveRefreshToken(HttpServletRequest request) {
-		String bearerToken = request.getHeader(REFRESH_TOKEN_HEADER);
-		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-			return bearerToken.substring(7);
-		}
-		return null;
-	}
-
 	public Token login(String email, UserRole role) {
 		if (tokenRepository.existsById(email)) {
 			log.info("기존의 존재하는 모든 토큰 삭제");
@@ -89,6 +76,22 @@ public class JwtUtil {
 			.accessToken(accessToken)
 			.refreshToken(refreshToken)
 			.build();
+	}
+
+	public String resolveToken(HttpServletRequest request) {
+		String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+			return bearerToken.substring(7);
+		}
+		return null;
+	}
+
+	private String resolveRefreshToken(HttpServletRequest request) {
+		String bearerToken = request.getHeader(REFRESH_TOKEN_HEADER);
+		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+			return bearerToken.substring(7);
+		}
+		return null;
 	}
 
 	public Token createAccessToken(String email, UserRole role) {
@@ -114,6 +117,25 @@ public class JwtUtil {
 
 	}
 
+	public String createAccessToken(Authentication authentication) {
+		Date date = new Date();
+
+		UserDetailsImpl user = (UserDetailsImpl)authentication.getPrincipal();
+
+		String email = user.getEmail();
+		String role = authentication.getAuthorities().stream()
+			.map(GrantedAuthority::getAuthority)
+			.collect(Collectors.joining(","));
+
+		return Jwts.builder()
+			.setSubject(email)
+			.claim(AUTHORIZATION_KEY, role)
+			.setExpiration(new Date(date.getTime() + ACCESS_TOKEN_TIME))
+			.setIssuedAt(date)
+			.signWith(key, signatureAlgorithm)
+			.compact();
+	}
+
 	public Token createRefreshToken(String email, UserRole role) {
 		Date date = new Date();
 
@@ -137,8 +159,27 @@ public class JwtUtil {
 
 	}
 
+	public String createRefreshToken(Authentication authentication) {
+		Date date = new Date();
+
+		UserDetailsImpl user = (UserDetailsImpl)authentication.getPrincipal();
+
+		String email = user.getEmail();
+		String role = authentication.getAuthorities().stream()
+			.map(GrantedAuthority::getAuthority)
+			.collect(Collectors.joining(","));
+
+		return Jwts.builder()
+			.setSubject(email)
+			.claim(AUTHORIZATION_KEY, role)
+			.setExpiration(new Date(date.getTime() + REFRESH_TOKEN_TIME))
+			.setIssuedAt(date)
+			.signWith(key, signatureAlgorithm)
+			.compact();
+	}
+
 	public void logout(String email) {
-		Token token = tokenRepository.findById(email).orElseThrow(()-> new UserException(ErrorCode.INVALID_REQUEST));
+		Token token = tokenRepository.findById(email).orElseThrow(() -> new UserException(ErrorCode.INVALID_REQUEST));
 		String accessToken = token.getAccessToken();
 		String refreshToken = token.getRefreshToken();
 
@@ -196,13 +237,6 @@ public class JwtUtil {
 			.orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND))
 			.getRole();
 
-		Jws<Claims> claim = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken);
-
-		return recreationAccessToken(claim.getBody().get("sub").toString(), role);
-
-	}
-
-	private String recreationAccessToken(String email, UserRole role) {
 		Date date = new Date();
 
 		return BEARER_PREFIX +
@@ -223,6 +257,11 @@ public class JwtUtil {
 
 	public Claims getUserInfo(String token) {
 		return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+	}
+
+	public Date getTokenExpiration(String token) {
+		Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
+		return claims.getExpiration();
 	}
 
 }

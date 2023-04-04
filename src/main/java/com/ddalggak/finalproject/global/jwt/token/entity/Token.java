@@ -1,7 +1,5 @@
 package com.ddalggak.finalproject.global.jwt.token.entity;
 
-import javax.persistence.Column;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
@@ -22,4 +20,12 @@ public class Token {
 	private String email;
 	private String accessToken;
 	private String refreshToken;
+
+	public static void update(Token token, String accessToken, String refreshToken) {
+		builder()
+			.email(token.getEmail())
+			.accessToken(accessToken)
+			.refreshToken(refreshToken)
+			.build();
+	}
 }

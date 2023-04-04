@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
 import com.ddalggak.finalproject.domain.label.entity.LabelUser;
+import com.ddalggak.finalproject.domain.oauth.entity.ProviderType;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
 import com.ddalggak.finalproject.domain.user.role.UserRole;
@@ -40,7 +41,7 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private String nickname;
 
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private String password;
 
 	@Column(nullable = true)
@@ -49,6 +50,11 @@ public class User extends BaseTimeEntity {
 	@Column
 	@Enumerated(value = EnumType.STRING)
 	private UserRole role;
+
+	@Column
+	@Enumerated(value = EnumType.STRING)
+	private ProviderType providerType;
+
 	@OneToMany(mappedBy = "user")
 	List<ProjectUser> projectUserList = new ArrayList<>();
 

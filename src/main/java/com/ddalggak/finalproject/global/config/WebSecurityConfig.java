@@ -4,21 +4,31 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.BeanIds;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.ddalggak.finalproject.domain.oauth.handler.OAuth2AuthenticationFailureHandler;
+import com.ddalggak.finalproject.domain.oauth.handler.OAuth2AuthenticationSuccessHandler;
+import com.ddalggak.finalproject.domain.oauth.repository.CookieAuthorizationRequestRepository;
+import com.ddalggak.finalproject.domain.oauth.service.CustomOAuth2UserService;
 import com.ddalggak.finalproject.global.jwt.JwtAuthFilter;
+import com.ddalggak.finalproject.global.jwt.JwtExceptionFilter;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
+import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
+import com.ddalggak.finalproject.global.security.UserDetailsServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,8 +36,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @EnableWebSecurity // 스프링 Security 지원을 가능하게 함
 @EnableGlobalMethodSecurity(securedEnabled = true) // @Secured 어노테이션 활성화
-public class WebSecurityConfig {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	private final JwtUtil jwtUtil;
+	private final CustomOAuth2UserService customOAuth2UserService;
+	private final UserDetailsServiceImpl userDetailsService;
+	private final JwtExceptionFilter jwtExceptionFilter;
+	private final TokenRepository tokenRepository;
+
+	/*
+	 * UserDetailsService 설정
+	 * */
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth.userDetailsService(userDetailsService)
+			.passwordEncoder(passwordEncoder());
+	}
 
 	//
 	@Bean
@@ -39,12 +62,12 @@ public class WebSecurityConfig {
 	public WebSecurityCustomizer webSecurityCustomizer() {
 		// h2-console 사용 및 resources 접근 허용 설정
 		return (web) -> web.ignoring()
-			// .requestMatchers(PathRequest.toH2Console())
+			.requestMatchers(PathRequest.toH2Console())
 			.requestMatchers(PathRequest.toStaticResources().atCommonLocations());
 	}
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
 		// CSRF 설정
 		http.csrf().disable();
 		// 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
@@ -61,20 +84,35 @@ public class WebSecurityConfig {
 			.permitAll()
 			.antMatchers(HttpMethod.GET, "/api/ticket/**")
 			.permitAll()
+			.antMatchers("/oauth2/**")
+			.permitAll()
 			.antMatchers("/ddal-ggak/docs")
 			.permitAll()
 			.antMatchers("/ddal-ggak.html")
 			.permitAll()
-			
-			//health check
-			.antMatchers("/").permitAll()
-			.anyRequest().authenticated()
-			
+			.antMatchers("/?accessToken=*")
+			.permitAll()
+			.and()
+			.oauth2Login()
+			.authorizationEndpoint()
+			.baseUri("/oauth2/authorization/*")
+			.authorizationRequestRepository(cookieAuthorizationRequestRepository())
+			.and()
+			.redirectionEndpoint()
+			.baseUri("/api/login/oauth2/code/*")
+			.and()
+			.userInfoEndpoint()
+			.userService(customOAuth2UserService)
+			.and()
+			.successHandler(oAuth2AuthenticationSuccessHandler())
+			.failureHandler(oAuth2AuthenticationFailureHandler())
+
 			//                .antMatchers(HttpMethod.POST, "/api/logout").permitAll()
 			// JWT 인증/인가를 사용하기 위한 설정
 			.and()
 			.addFilterBefore(new JwtAuthFilter(jwtUtil),
-				UsernamePasswordAuthenticationFilter.class); //    private final JwtUtil jwtUtil; 추가하기!
+				UsernamePasswordAuthenticationFilter.class) //    private final JwtUtil jwtUtil; 추가하기!
+			.addFilterBefore(jwtExceptionFilter, JwtAuthFilter.class);
 		http.cors();
 		// 로그인 사용
 		http.formLogin().permitAll();// 로그인 페이지가 있을 경우 넣기!.loginPage(".api/user/login-page").permitAll();
@@ -86,7 +124,6 @@ public class WebSecurityConfig {
 			.logoutSuccessUrl("/api/auth/login") // 로그아웃 성공 후 이동페이지
 			.deleteCookies("JSESSIONID", "remember-me");
 
-		return http.build();
 	}
 	//    protected void cofigure(HttpSecurity http) throws Exception {
 	//        // 로그아웃
@@ -141,6 +178,45 @@ public class WebSecurityConfig {
 
 		return source;
 	}
+
+	/*
+	 * auth 매니저 설정
+	 * */
+	@Override
+	@Bean(BeanIds.AUTHENTICATION_MANAGER)
+	protected AuthenticationManager authenticationManager() throws Exception {
+		return super.authenticationManager();
+	}
+
+	/*
+	 * 쿠키 기반 인가 Repository
+	 * 인가 응답을 연계 하고 검증할 때 사용.
+	 * */
+	@Bean
+	public CookieAuthorizationRequestRepository cookieAuthorizationRequestRepository() {
+		return new CookieAuthorizationRequestRepository();
+	}
+
+	/*
+	 * Oauth 인증 성공 핸들러
+	 * */
+	@Bean
+	public OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler() {
+		return new OAuth2AuthenticationSuccessHandler(
+			jwtUtil,
+			tokenRepository,
+			cookieAuthorizationRequestRepository()
+		);
+	}
+
+	/*
+	 * Oauth 인증 실패 핸들러
+	 * */
+	@Bean
+	public OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler() {
+		return new OAuth2AuthenticationFailureHandler(cookieAuthorizationRequestRepository());
+	}
+
 }
 
 
