@@ -6,10 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 
 @Repository
-public interface TicketRepository extends JpaRepository<Ticket, Long> {
-	// Ticket findAllBytaskIdByticketId( Long taskId, Long ticketId);
+public interface TicketRepository extends JpaRepository<Ticket, Long>, TicketRepositoryCustom {
 
-	// List<Ticket> findAllByTicketOrderByCratedAtDesc(Ticket ticket);
-
-	// List<Ticket> findAllByOrderByModifiedAtDesc();
 }
