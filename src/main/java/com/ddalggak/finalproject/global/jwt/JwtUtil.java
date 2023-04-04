@@ -161,7 +161,7 @@ public class JwtUtil {
 		} catch (IllegalArgumentException e) {
 			log.info("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
 		} catch (Exception e) {
-			log.info("Invalid token, d.");
+			log.info("Invalid token, 유효하지 않은 토큰입니다.");
 		}
 		return false;
 	}
