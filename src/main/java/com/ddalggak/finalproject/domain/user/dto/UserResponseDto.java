@@ -3,6 +3,7 @@ package com.ddalggak.finalproject.domain.user.dto;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
 import com.mysql.cj.util.StringUtils;
+import com.querydsl.core.annotations.QueryProjection;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +23,7 @@ public class UserResponseDto {
 
 	public String role;
 
+	@QueryProjection
 	public UserResponseDto(ProjectUser projectUser) {
 		this.id = projectUser.getUser().getUserId();
 		this.email = projectUser.getUser().getEmail();

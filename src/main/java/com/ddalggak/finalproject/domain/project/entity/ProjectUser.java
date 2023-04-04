@@ -12,6 +12,7 @@ import javax.persistence.Table;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectUserRequestDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
+import com.querydsl.core.annotations.QueryProjection;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,6 +38,12 @@ public class ProjectUser {
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "ProjectId")
 	private Project project;
+
+	@QueryProjection
+	public ProjectUser(User user, Project project) {
+		this.user = user;
+		this.project = project;
+	}
 
 	public static ProjectUser create(ProjectUserRequestDto projectUserDto) {
 		return ProjectUser.builder()
