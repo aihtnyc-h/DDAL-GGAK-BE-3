@@ -4,17 +4,14 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.BeanIds;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -36,21 +33,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @EnableWebSecurity // 스프링 Security 지원을 가능하게 함
 @EnableGlobalMethodSecurity(securedEnabled = true) // @Secured 어노테이션 활성화
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig {
 	private final JwtUtil jwtUtil;
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final UserDetailsServiceImpl userDetailsService;
 	private final JwtExceptionFilter jwtExceptionFilter;
 	private final TokenRepository tokenRepository;
-
-	/*
-	 * UserDetailsService 설정
-	 * */
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.userDetailsService(userDetailsService)
-			.passwordEncoder(passwordEncoder());
-	}
 
 	//
 	@Bean
@@ -62,12 +50,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	public WebSecurityCustomizer webSecurityCustomizer() {
 		// h2-console 사용 및 resources 접근 허용 설정
 		return (web) -> web.ignoring()
-			.requestMatchers(PathRequest.toH2Console())
+			// .requestMatchers(PathRequest.toH2Console())
 			.requestMatchers(PathRequest.toStaticResources().atCommonLocations());
 	}
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		// CSRF 설정
 		http.csrf().disable();
 		// 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
@@ -123,7 +111,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.logoutUrl("Logout") // 로그아웃 처리 URL, default: /logout, 원칙적으로 post 방식만 지원
 			.logoutSuccessUrl("/api/auth/login") // 로그아웃 성공 후 이동페이지
 			.deleteCookies("JSESSIONID", "remember-me");
-
+		return http.build();
 	}
 	//    protected void cofigure(HttpSecurity http) throws Exception {
 	//        // 로그아웃
@@ -177,15 +165,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		source.registerCorsConfiguration("/**", config);
 
 		return source;
-	}
-
-	/*
-	 * auth 매니저 설정
-	 * */
-	@Override
-	@Bean(BeanIds.AUTHENTICATION_MANAGER)
-	protected AuthenticationManager authenticationManager() throws Exception {
-		return super.authenticationManager();
 	}
 
 	/*
