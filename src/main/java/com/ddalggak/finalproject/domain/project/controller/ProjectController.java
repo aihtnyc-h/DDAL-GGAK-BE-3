@@ -48,7 +48,7 @@ public class ProjectController {
 	@PostMapping("/project")
 	public ResponseEntity<SuccessResponseDto> createProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestPart(value = "thumbnail") MultipartFile image,
+		@RequestPart(value = "thumbnail", required = false) MultipartFile image,
 		@Valid @RequestPart(value = "data") ProjectRequestDto projectRequestDto) throws IOException {
 		return projectService.createProject(userDetails.getUser(), image, projectRequestDto);
 	}
@@ -91,8 +91,8 @@ public class ProjectController {
 	public ResponseEntity<SuccessResponseDto> updateProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId,
-		@RequestPart(value = "thumbnail") MultipartFile image,
-		@Valid @RequestPart(value = "data") ProjectRequestDto projectRequestDto) throws IOException {
+		@RequestPart(value = "thumbnail", required = false) MultipartFile image,
+		@Valid @RequestPart(value = "data", required = false) ProjectRequestDto projectRequestDto) throws IOException {
 		return projectService.updateProject(userDetails.getUser(), projectId, image, projectRequestDto);
 	}
 
