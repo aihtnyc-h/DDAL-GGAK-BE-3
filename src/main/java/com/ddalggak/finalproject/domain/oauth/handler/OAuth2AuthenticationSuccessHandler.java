@@ -27,9 +27,9 @@ import com.ddalggak.finalproject.global.jwt.token.entity.Token;
 import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
-@Log4j2
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -46,7 +46,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 		String targetUrl = determineTargetUrl(request, response, authentication);
 
 		if (response.isCommitted()) {
-			logger.debug("Response has already been committed. Unable to redirect to " + targetUrl);
+			log.debug("Response has already been committed. Unable to redirect to {}", targetUrl);
 			return;
 		}
 
