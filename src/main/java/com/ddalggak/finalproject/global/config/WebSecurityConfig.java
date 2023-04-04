@@ -70,7 +70,8 @@ public class WebSecurityConfig {
 			// JWT 인증/인가를 사용하기 위한 설정
 			.and()
 			.addFilterBefore(new JwtAuthFilter(jwtUtil),
-				UsernamePasswordAuthenticationFilter.class); //    private final JwtUtil jwtUtil; 추가하기!
+				UsernamePasswordAuthenticationFilter.class) //    private final JwtUtil jwtUtil; 추가하기!
+			.addFilterBefore(jwtExceptionFilter, JwtAuthFilter.class);
 		http.cors();
 		// 로그인 사용
 		http.formLogin().permitAll();// 로그인 페이지가 있을 경우 넣기!.loginPage(".api/user/login-page").permitAll();
