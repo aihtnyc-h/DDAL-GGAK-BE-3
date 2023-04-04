@@ -1,7 +1,5 @@
 package com.ddalggak.finalproject.global.jwt.token.entity;
 
-import javax.persistence.Column;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
