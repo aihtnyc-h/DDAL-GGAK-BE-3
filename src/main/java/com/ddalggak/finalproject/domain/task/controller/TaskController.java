@@ -17,6 +17,8 @@ import com.ddalggak.finalproject.domain.task.dto.TaskResponseDto;
 import com.ddalggak.finalproject.domain.task.service.TaskService;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
+import com.ddalggak.finalproject.global.view.Views;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,6 +41,7 @@ public class TaskController {
 
 	@Operation(summary = "Task 조회", description = "api for view one task")
 	@GetMapping("/task/{taskId}")
+	@JsonView(Views.Task.class)
 	public ResponseEntity<TaskResponseDto> viewTask(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody TaskRequestDto taskRequestDto,
