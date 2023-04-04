@@ -8,6 +8,7 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
+
   S3_BUCKET_NAME2: ddalggaktest2
   CODE_DEPLOY_APPLICATION_NAME: test2-g
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: test2-g

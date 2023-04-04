@@ -18,6 +18,8 @@ import com.ddalggak.finalproject.domain.ticket.dto.TicketRequestDto;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.service.TicketService;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
+import com.ddalggak.finalproject.global.view.Views;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,6 +44,7 @@ public class TicketController {
 	// 티켓 상세 조회
 	@Operation(summary = "get ticket", description = "Ticket 상세조회 get 메서드 체크")
 	@GetMapping("/ticket/{ticketId}")
+	@JsonView(Views.Ticket.class)
 	public ResponseEntity<TicketResponseDto> getTicket(
 		@PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
