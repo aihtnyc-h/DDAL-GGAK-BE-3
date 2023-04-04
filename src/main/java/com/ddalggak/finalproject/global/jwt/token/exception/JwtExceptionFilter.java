@@ -1,4 +1,4 @@
-package com.ddalggak.finalproject.global.jwt;
+package com.ddalggak.finalproject.global.jwt.token.exception;
 
 import java.io.IOException;
 
@@ -18,17 +18,18 @@ import io.jsonwebtoken.JwtException;
 public class JwtExceptionFilter extends OncePerRequestFilter {
 
 	@Override
-	protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+		FilterChain filterChain) throws
 		ServletException, IOException {
 		try {
-			chain.doFilter(req, res); // go to 'JwtAuthenticationFilter'
+			filterChain.doFilter(request, response); // go to 'JwtAuthenticationFilter'
 		} catch (JwtException ex) {
-			setErrorResponse(res, ex);
+			setErrorResponse(response);
 		}
 	}
 
-	public void setErrorResponse(HttpServletResponse res, Throwable ex) throws IOException {
-		res.setStatus(999);
+	public void setErrorResponse(HttpServletResponse res) throws IOException {
+		res.setStatus(1002);
 		res.setContentType("application/json; charset=UTF-8");
 
 		JwtExceptionResponse jwtExceptionResponse = new JwtExceptionResponse(ErrorCode.INVALID_AUTH_TOKEN);

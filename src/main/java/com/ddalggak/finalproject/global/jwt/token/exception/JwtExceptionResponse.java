@@ -1,4 +1,4 @@
-package com.ddalggak.finalproject.global.jwt;
+package com.ddalggak.finalproject.global.jwt.token.exception;
 
 import java.io.IOException;
 
