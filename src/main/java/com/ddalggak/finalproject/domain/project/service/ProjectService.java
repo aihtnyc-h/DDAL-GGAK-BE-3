@@ -36,10 +36,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ProjectService {
 	private final ProjectRepository projectRepository;
-
-	private final UserRepository userRepository;
-
 	private final S3Uploader s3Uploader;
+	private final UserRepository userRepository;
+	private long fileSizeLimit = 10 * 1024 * 1024;
 
 	public ResponseEntity<SuccessResponseDto> createProject(User user, MultipartFile image,
 		ProjectRequestDto projectRequestDto) throws
@@ -49,9 +48,9 @@ public class ProjectService {
 		//2. projectUserDto로 projectUser생성
 		ProjectUser projectUser = ProjectUser.create(projectUserRequestDto);
 		//2.5 image S3 서버에 업로드 -> 분기처리
-		fileCheck(image);
 		String imageUrl = null;
-		if (!image.isEmpty()) {
+		if (!(image == null)) {
+			fileCheck(image);
 			imageUrl = s3Uploader.upload(image, "project");
 		}
 		projectRequestDto.setThumbnail(imageUrl);
@@ -118,6 +117,7 @@ public class ProjectService {
 		// if (filename.equals()) {
 		// 	imageUrl = s3Uploader.upload(image, "project");
 		// }
+		// 나중에 업데이트할때 S3 버킷에서 지우기
 		String imageUrl = s3Uploader.upload(image, "project");
 		projectRequestDto.setThumbnail(imageUrl);
 		projectRepository.update(projectId, projectRequestDto);
@@ -163,21 +163,16 @@ public class ProjectService {
 		);
 	}
 
-	private boolean fileCheck(MultipartFile file) {
+	private void fileCheck(MultipartFile file) {
 		String fileName = StringUtils.getFilenameExtension(file.getOriginalFilename());
 		if (fileName != null) {
 			String exe = fileName.toLowerCase();
-			if (exe.equals("jpg") || exe.equals("png") || exe.equals("jpeg") || exe.equals("gif") || exe.equals(
-				"webp")) {
-				return false;
+			if (!(exe.equals("jpg") || exe.equals("png") || exe.equals("jpeg") || exe.equals("gif") || exe.equals(
+				"webp"))) {
+				throw new CustomException(ErrorCode.TYPE_MISMATCH);
 			}
 		}
-		return false;
 	}
 
-	public ResponseEntity<?> test(User user, Long projectId) {
-		ProjectResponseDto dtoByUserId = projectRepository.findDtoByProjectId(projectId);
-		return ResponseEntity.ok(dtoByUserId);
-	}
 }
 
