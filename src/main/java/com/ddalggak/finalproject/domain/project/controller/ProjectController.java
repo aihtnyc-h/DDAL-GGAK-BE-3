@@ -1,5 +1,6 @@
 package com.ddalggak.finalproject.domain.project.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -10,9 +11,10 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
@@ -46,8 +48,9 @@ public class ProjectController {
 	@PostMapping("/project")
 	public ResponseEntity<SuccessResponseDto> createProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestBody ProjectRequestDto projectRequestDto) {
-		return projectService.createProject(userDetails.getUser(), projectRequestDto);
+		@RequestPart(value = "thumbnail", required = false) MultipartFile image,
+		@Valid @RequestPart(value = "data") ProjectRequestDto projectRequestDto) throws IOException {
+		return projectService.createProject(userDetails.getUser(), image, projectRequestDto);
 	}
 
 	@Operation(summary = "프로젝트 전체조회", description = "api for view all projects")
@@ -88,8 +91,9 @@ public class ProjectController {
 	public ResponseEntity<SuccessResponseDto> updateProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId,
-		@Valid @RequestBody ProjectRequestDto projectRequestDto) {
-		return projectService.updateProject(userDetails.getUser(), projectId, projectRequestDto);
+		@RequestPart(value = "thumbnail", required = false) MultipartFile image,
+		@Valid @RequestPart(value = "data", required = false) ProjectRequestDto projectRequestDto) throws IOException {
+		return projectService.updateProject(userDetails.getUser(), projectId, image, projectRequestDto);
 	}
 
 	@ApiResponses(
