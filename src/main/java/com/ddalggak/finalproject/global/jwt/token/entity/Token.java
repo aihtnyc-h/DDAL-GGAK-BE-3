@@ -20,4 +20,12 @@ public class Token {
 	private String email;
 	private String accessToken;
 	private String refreshToken;
+
+	public static void update(Token token, String accessToken, String refreshToken) {
+		builder()
+			.email(token.getEmail())
+			.accessToken(accessToken)
+			.refreshToken(refreshToken)
+			.build();
+	}
 }
