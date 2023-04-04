@@ -85,14 +85,7 @@ public class UserService {
 	public void updateNickname(String nickname, String email) {
 		User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
 
-		User updatedUser = User.builder()
-			.userId(user.getUserId())
-			.email(user.getEmail())
-			.password(user.getPassword())
-			.nickname(nickname)
-			.profile(user.getProfile())
-			.build();
-		userRepository.save(updatedUser);
+		User.updateNickname(user, nickname);
 	}
 
 	@Transactional
@@ -104,14 +97,7 @@ public class UserService {
 
 		String storedFileName = s3Uploader.upload(image, "profile");
 
-		User updatedUser = User.builder()
-			.userId(user.getUserId())
-			.email(user.getEmail())
-			.password(user.getPassword())
-			.nickname(user.getNickname())
-			.profile(storedFileName)
-			.build();
-		userRepository.save(updatedUser);
+		User.updateProfile(user, storedFileName);
 
 	}
 
