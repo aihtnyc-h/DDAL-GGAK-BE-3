@@ -14,4 +14,7 @@ public class LabelRequestDto {
 
 	@Schema(name = "label title", example = "label title")
 	public String labelTitle;
+
+	@Schema(name = "user email to invite", example = "kimdaehyun@abc.com")
+	public String email;
 }
