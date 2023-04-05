@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-PROJECT_ROOT="/home/ubuntu/app"
+PROJECT_ROOT="/home/root/app"
 #JAR_FILE="$PROJECT_ROOT/DDAL-GGAK-BE.jar"
 JAR_FILE="$PROJECT_ROOT/DDAL-GGAK-BE-0.0.1-SNAPSHOT.jar"
 
