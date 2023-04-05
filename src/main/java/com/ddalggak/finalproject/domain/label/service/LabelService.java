@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ddalggak.finalproject.domain.label.dto.LabelRequestDto;
+import com.ddalggak.finalproject.domain.label.dto.LabelResponseDto;
 import com.ddalggak.finalproject.domain.label.dto.LabelUserRequestDto;
 import com.ddalggak.finalproject.domain.label.entity.Label;
 import com.ddalggak.finalproject.domain.label.entity.LabelUser;
@@ -33,7 +34,7 @@ public class LabelService {
 	private final UserRepository userRepository;
 
 	@Transactional
-	public ResponseEntity<SuccessResponseDto> createLabel(User user, LabelRequestDto labelRequestDto) {
+	public ResponseEntity<LabelResponseDto> createLabel(User user, LabelRequestDto labelRequestDto) {
 		Task task = validateTask(labelRequestDto.getTaskId());
 		validateExistMember(task, TaskUser.create(task, user));
 		if (!(task.getTaskLeader().equals(user.getEmail()) || task.getLabelLeadersList().contains(user.getEmail()))) {
@@ -47,7 +48,7 @@ public class LabelService {
 		LabelUser labelUser = LabelUser.create(labelUserRequestDto);
 		Label label = Label.create(labelRequestDto, labelUser, task);
 		labelRepository.save(label);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
+		return ResponseEntity.ok(LabelResponseDto.of(label));
 	}
 
 	@Transactional
