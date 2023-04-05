@@ -58,12 +58,12 @@ public class User extends BaseTimeEntity {
 	@OneToMany(mappedBy = "user")
 	List<LabelUser> labelUserList = new ArrayList<>();
 
-	public static void updateOAuth(ProviderType providerType, String profile) {
-		builder()
-			.providerType(providerType)
-			.profile(profile)
-			.build();
-	}
+	// public static void updateOAuth(ProviderType providerType, String profile) {
+	// 	builder()
+	// 		.providerType(providerType)
+	// 		.profile(profile)
+	// 		.build();
+	// }
 
 	public static void updateNickname(User user, String nickname) {
 		builder()

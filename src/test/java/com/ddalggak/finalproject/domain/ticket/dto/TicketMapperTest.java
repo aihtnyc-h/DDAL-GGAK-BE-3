@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.label.entity.Label;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
@@ -53,6 +54,47 @@ class TicketMapperTest {
 		assertThat(ticketResponseDto.getAssigned()).isEqualTo(null);
 		Assertions.assertNull(ticketResponseDto.getCommentList(), "commentList should be null");
 
+	}
+
+	@Test
+	public void speedMapStruct() {
+		//given
+		Ticket ticket = mock(Ticket.class);
+		for (int i = 0; i < 100; i++) {
+			Comment comment = mock(Comment.class);
+			ticket.getComment().add(comment);
+		}
+
+		//when
+		long startMapstruct = System.currentTimeMillis();
+		for (int i = 0; i < 100000; i++) {
+			TicketResponseDto ticketResponseDto = ticketMapper.toDto(ticket);
+		}
+		long takenTimeWithMapStruct = System.currentTimeMillis() - startMapstruct;
+
+		//then
+
+		System.out.println("MapStruct로 걸린 시간: " + takenTimeWithMapStruct);
+
+	}
+
+	@Test
+	public void speedWithManual() {
+		//given
+		Ticket ticket = mock(Ticket.class);
+		for (int i = 0; i < 100; i++) {
+			Comment comment = mock(Comment.class);
+			ticket.getComment().add(comment);
+		}
+		//when
+		long startManual = System.currentTimeMillis();
+		for (int i = 0; i < 100000; i++) {
+			TicketResponseDto ticketResponseDto = new TicketResponseDto(ticket);
+		}
+		long takenTimeWithManual = System.currentTimeMillis() - startManual;
+
+		//then
+		System.out.println("Manual로 걸린 시간: " + takenTimeWithManual);
 	}
 
 }
