@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ddalggak.finalproject.domain.label.dto.LabelRequestDto;
+import com.ddalggak.finalproject.domain.label.dto.LabelResponseDto;
 import com.ddalggak.finalproject.domain.label.service.LabelService;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
@@ -27,7 +28,7 @@ public class LabelController {
 
 	@Operation(summary = "Label 생성", description = "api for creating label")
 	@PostMapping("/label")
-	public ResponseEntity<SuccessResponseDto> createLabel(
+	public ResponseEntity<LabelResponseDto> createLabel(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody LabelRequestDto labelRequestDto) {
 		return labelService.createLabel(userDetails.getUser(), labelRequestDto);
