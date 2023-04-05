@@ -8,7 +8,7 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
-  S3_BUCKET_NAME2: ddalggak
+  S3_BUCKET_NAME: ddalggak
   CODE_DEPLOY_APPLICATION_NAME: ddal-ggak-codedeploy-app
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: ddalggak-codedeploy-deployment-group
   ZIP_NAME: zip -r ./finalproject.zip .
@@ -85,4 +85,3 @@ jobs:
           --deployment-config-name CodeDeployDefault.AllAtOnce \
           --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
           --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip
-          
