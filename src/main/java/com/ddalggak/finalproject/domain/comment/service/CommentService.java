@@ -1,6 +1,7 @@
 package com.ddalggak.finalproject.domain.comment.service;
 
 import static com.ddalggak.finalproject.global.error.ErrorCode.*;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +20,14 @@ import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
+
 import lombok.RequiredArgsConstructor;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class CommentService {
+
 	private final CommentMapper commentMapper;
 	private final CommentRepository commentRepository;
 	private final TicketRepository ticketRepository;
@@ -50,11 +54,13 @@ public class CommentService {
 		// 상태 반환
 		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 	}
+
 	private User validateUserByEmail(String email) {
 		return userRepository.findByEmail(email).orElseThrow(
 			() -> new CustomException(MEMBER_NOT_FOUND)
 		);
 	}
+
 	// 댓글 삭제
 	public ResponseEntity<SuccessResponseDto> deleteComment(UserDetailsImpl userDetails, Long commentId) {
 		Comment comment = CommnetValidation(commentId);
@@ -67,16 +73,20 @@ public class CommentService {
 		// 상태 반환
 		return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
 	}
+
 	/* == 반복 로직 == */
+
 	// Ticket 유무 확인
 	private Ticket TicketValidation(Long ticketId) {
 		return ticketRepository.findById(ticketId).orElseThrow(() -> new CustomException(ErrorCode.TICKET_NOT_FOUND));
 	}
+
 	// comment 유무 확인
 	private Comment CommnetValidation(Long commentId) {
 		return commentRepository.findById(commentId)
 			.orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
 	}
+
 	// comment 유효성 검사
 	private void checkValidation(Ticket ticket, Comment comment, UserDetailsImpl userDetails) {
 		// ticket에 해당 comment가 있는지 검사

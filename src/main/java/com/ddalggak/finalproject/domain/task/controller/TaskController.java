@@ -18,8 +18,9 @@ import com.ddalggak.finalproject.domain.task.dto.TaskResponseDto;
 import com.ddalggak.finalproject.domain.task.service.TaskService;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
-import com.fasterxml.jackson.annotation.JsonView;
 import com.ddalggak.finalproject.global.view.Views;
+import com.fasterxml.jackson.annotation.JsonView;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class TaskController {
 		@Valid @RequestBody TaskRequestDto taskRequestDto) {
 		return taskService.createTask(userDetails.getUser(), taskRequestDto);
 	}
+
 	@Operation(summary = "Task 조회", description = "api for view one task")
 	@GetMapping("/task/{taskId}")
 	@JsonView(Views.Task.class)
@@ -45,7 +47,7 @@ public class TaskController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestParam Long projectId,
 		@PathVariable Long taskId) {
-		return taskService.viewTask(userDetails.getUser(), taskId);
+		return taskService.viewTask(userDetails.getUser(), projectId, taskId);
 	}
 
 	@Operation(summary = "Task 삭제", description = "api for delete one task")
@@ -58,7 +60,7 @@ public class TaskController {
 
 	@Operation(summary = "Task 리더 부여", description = "api for assign admin to task")
 	@PostMapping("/task/{taskId}/admin")
-	public ResponseEntity<SuccessResponseDto> assignAdmin(
+	public ResponseEntity<SuccessResponseDto> assignLeader(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@PathVariable Long taskId,
 		@Valid @RequestBody TaskRequestDto taskRequestDto) {

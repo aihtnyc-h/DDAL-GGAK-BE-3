@@ -40,7 +40,7 @@ public class ProjectService {
 	private final UserRepository userRepository;
 	private long fileSizeLimit = 10 * 1024 * 1024;
 
-	public ResponseEntity<SuccessResponseDto> createProject(User user, MultipartFile image,
+	public ResponseEntity<?> createProject(User user, MultipartFile image,
 		ProjectRequestDto projectRequestDto) throws
 		IOException {
 		//1. user로 projectUserRequestDto 생성
@@ -60,7 +60,7 @@ public class ProjectService {
 		project.setProjectLeader(user.getEmail());
 		//5. projectRepository에 project 저장
 		projectRepository.save(project);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
+		return ResponseEntity.ok(projectRepository.findProjectAllByUserId(user.getUserId()));
 	}
 
 	@Transactional(readOnly = true)
@@ -85,6 +85,9 @@ public class ProjectService {
 	public ResponseEntity<SuccessResponseDto> deleteProject(User user, Long projectId) {
 		Project project = validateProject(projectId);
 		if (project.getProjectLeader().equals(user.getEmail())) {
+			if (project.getThumbnail() != null) {
+				s3Uploader.delete(project.getThumbnail());
+			}
 			projectRepository.delete(project);
 			return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
 		} else {
@@ -102,22 +105,20 @@ public class ProjectService {
 	}
 
 	@Transactional
-	public ResponseEntity<SuccessResponseDto> updateProject(User user, Long projectId,
+	public ResponseEntity<ProjectBriefResponseDto> updateProject(User user, Long projectId,
 		MultipartFile image, ProjectRequestDto projectRequestDto) throws IOException {
 		Project project = validateProject(projectId);
 		if (!project.getProjectLeader().equals(user.getEmail())) {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
-		//todo logic : project에 있는 thumbnail과 이미지값 비교해서 같으면 업로드 안하고 다르면 업로드
-		// 아 근데 이거 파일 이름 같게 하고 다른 이미지 던지면 어쩔건데?
-		// String filename = URLDecoder.decode(project.getThumbnail().substring(47), StandardCharsets.UTF_8);
-		// if (filename.equals()) {
-		// 	imageUrl = s3Uploader.upload(image, "project");
-		// }
-		String imageUrl = s3Uploader.upload(image, "project");
+		String imageUrl = null;
+		if (!(image == null)) {
+			fileCheck(image);
+			imageUrl = s3Uploader.upload(image, "project");
+		}
 		projectRequestDto.setThumbnail(imageUrl);
 		projectRepository.update(projectId, projectRequestDto);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_SEND);
+		return ResponseEntity.ok(new ProjectBriefResponseDto(project));
 	}
 
 	public ResponseEntity<?> deleteProjectUser(User user, Long projectId, Long userId) {
@@ -153,13 +154,13 @@ public class ProjectService {
 		}
 	}
 
-	private Project validateProject(Long id) {
+	private Project validateProject(Long id) { // todo 로직 만들어서 participant가 3명 이상이면 3명까지만 출력하도록 method 작성
 		return projectRepository.findById(id).orElseThrow(
 			() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND)
 		);
 	}
-	
-	private void fileCheck(MultipartFile file) { //todo type check하고 415 던지기, 분기처리 노션에
+
+	private void fileCheck(MultipartFile file) {
 		String fileName = StringUtils.getFilenameExtension(file.getOriginalFilename());
 		if (fileName != null) {
 			String exe = fileName.toLowerCase();
@@ -169,5 +170,6 @@ public class ProjectService {
 			}
 		}
 	}
+
 }
 

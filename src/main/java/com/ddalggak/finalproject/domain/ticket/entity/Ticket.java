@@ -69,7 +69,15 @@ public class Ticket extends BaseEntity {
 	// 댓글 연관관계
 	@OneToMany(mappedBy = "ticket", cascade = CascadeType.REMOVE)
 	private List<Comment> comment = new ArrayList<>();
-
+	public Ticket(TicketRequestDto ticketRequestDto, User user, List<Comment> commentList) {
+		ticketTitle = ticketRequestDto.getTicketTitle();
+		ticketDescription = ticketRequestDto.getTicketDescription();
+		priority = ticketRequestDto.getPriority();
+		difficulty = ticketRequestDto.getDifficulty();
+		expiredAt = ticketRequestDto.getTicketExpiredAt();
+		comment = commentList;
+		status = TicketStatus.TODO;
+	}
 	@Builder
 	public Ticket(TicketRequestDto ticketRequestDto, Task task) {
 		ticketTitle = ticketRequestDto.getTicketTitle();
@@ -87,6 +95,7 @@ public class Ticket extends BaseEntity {
 		this.priority = ticketRequestDto.getPriority();
 		this.difficulty = ticketRequestDto.getDifficulty();
 		this.expiredAt = ticketRequestDto.getTicketExpiredAt();
+		this.comment = getComment();
 	}
 
 	public static Ticket create(TicketRequestDto ticketRequestDto, Task task) {

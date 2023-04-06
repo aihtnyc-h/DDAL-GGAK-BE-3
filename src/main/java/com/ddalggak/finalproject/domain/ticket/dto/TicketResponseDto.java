@@ -84,5 +84,4 @@ public class TicketResponseDto {
 		label = ticket.getLabel() == null ? null : ticket.getLabel().getLabelTitle();
 		commentList = ticket.getComment().stream().map(CommentResponseDto::new).collect(Collectors.toList());
 	}
-
 }

@@ -31,10 +31,10 @@ public class Comment extends BaseEntity {
 	@Column(nullable = false)
 	private String comment; //logDescription 바꾸기
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "ticketId")
+	@JoinColumn(name = "ticket_Id")
 	private Ticket ticket;
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "userId")
+	@JoinColumn(name = "user_Id")
 	private User user;
 
 	@Builder

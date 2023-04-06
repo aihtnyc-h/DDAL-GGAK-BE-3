@@ -5,20 +5,13 @@ import static com.ddalggak.finalproject.domain.project.entity.QProjectUser.*;
 import static com.ddalggak.finalproject.domain.task.entity.QTask.*;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
-import com.ddalggak.finalproject.domain.project.dto.ProjectResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.QProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.entity.Project;
-import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
-import com.ddalggak.finalproject.domain.task.entity.Task;
-import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,8 +25,8 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	public List<ProjectBriefResponseDto> findProjectAllByUserId(Long userId) {
 		return queryFactory.select(new QProjectBriefResponseDto(
 				project.projectId,
-				project.projectTitle,
-				project.thumbnail
+				project.thumbnail,
+				project.projectTitle
 			))
 			.from(project)
 			.join(project.projectUserList, projectUser)
@@ -42,38 +35,13 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	}
 
 	@Override
-	public ProjectResponseDto findDtoByProjectId(Long projectId) {
-		List<ProjectUser> result1 = queryFactory
-			.selectFrom(projectUser)
-			.where(projectUser.project.projectId.eq(projectId))
-			.fetch();
-		List<Task> result2 = queryFactory.selectFrom(task)
-			.where(task.project.projectId.eq(projectId))
-			.fetch();
-		Project project1 = queryFactory
+	public Optional<Project> findProjectByTaskId(Long taskId) {
+		Project result = queryFactory
 			.selectFrom(project)
-			.where(project.projectId.eq(projectId))
+			.join(project.taskList, task)
+			.where(task.taskId.eq(taskId))
 			.fetchOne();
-
-		List<Tuple> fetchedResult = queryFactory.select(project, projectUser, task)
-			.from(project)
-			.leftJoin(project.projectUserList, projectUser)
-			.leftJoin(project.taskList, task)
-			.where(project.projectId.eq(projectId))
-			.fetch();
-		Project foundProject = fetchedResult.get(0).get(project);
-		List<ProjectUser> projectUsers = fetchedResult.stream()
-			.map(tuple -> tuple.get(projectUser))
-			.filter(Objects::nonNull)
-			.distinct()
-			.collect(Collectors.toList());
-		List<Task> tasks = fetchedResult.stream()
-			.map(tuple -> tuple.get(task))
-			.filter(Objects::nonNull)
-			.distinct()
-			.collect(Collectors.toList());
-
-		return new ProjectResponseDto(foundProject, projectUsers, tasks);
+		return Optional.ofNullable(result);
 	}
 
 	@Override
@@ -83,14 +51,5 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 			.set(project.thumbnail, projectRequestDto.thumbnail)
 			.where(project.projectId.eq(projectId))
 			.execute();
-	}
-	@Override
-	public Optional<Project> findProjectByTaskId(Long taskId) {
-		Project result = queryFactory
-			.selectFrom(project)
-			.join(project.taskList, task)
-			.where(task.taskId.eq(taskId))
-			.fetchOne();
-		return Optional.ofNullable(result);
 	}
 }
