@@ -47,7 +47,7 @@ public class TicketService {
 		ticketRepository.save(ticket);
 		//5. return
 		return ResponseEntity.status(201)
-			.body(ticketRepository.findWithTaskId(ticketRequestDto.getTaskId()));
+			.body(taskRepository.findTaskById(ticketRequestDto.getTaskId()));
 	}
 
 	// 티켓 상세조회
@@ -83,7 +83,7 @@ public class TicketService {
 		task.deleteTicket(ticket);
 		//4. ticket Repo에서 ticket 삭제함
 		ticketRepository.delete(ticket);
-		return ResponseEntity.ok(ticketRepository.findWithTaskId(task.getTaskId()));
+		return ResponseEntity.ok(taskRepository.findTaskById(task.getTaskId()));
 	}
 
 	/* == 반복 로직 == */
