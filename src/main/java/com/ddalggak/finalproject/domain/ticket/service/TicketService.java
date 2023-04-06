@@ -2,6 +2,8 @@ package com.ddalggak.finalproject.domain.ticket.service;
 
 import static com.ddalggak.finalproject.global.error.ErrorCode.*;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +38,7 @@ public class TicketService {
 
 	// 티켓 등록
 	@Transactional
-	public ResponseEntity<?> createTicket(User user, TicketRequestDto ticketRequestDto) {
+	public ResponseEntity<List<TicketResponseDto>> createTicket(User user, TicketRequestDto ticketRequestDto) {
 		//1. 이메일 확인
 		validateUserByEmail(user.getEmail());
 		//2. task가 존재하는지 확인
@@ -46,7 +48,7 @@ public class TicketService {
 		//4. 티켓 저장
 		ticketRepository.save(ticket);
 		//5. return
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
+		return ResponseEntity.ok(ticketRepository.findByTaskId(task.getTaskId()));
 	}
 
 	// 티켓 상세조회
@@ -59,7 +61,8 @@ public class TicketService {
 
 	// 티켓 수정하기 todo 유효성검증
 	@Transactional
-	public ResponseEntity<?> updateTicket(Long ticketId, TicketRequestDto ticketRequestDto, User user) {
+	public ResponseEntity<List<TicketResponseDto>> updateTicket(Long ticketId, TicketRequestDto ticketRequestDto,
+		User user) {
 		Ticket ticket = validateTicket(ticketId);
 		Task task = ticket.getTask();
 		//같은 transaction 안에 있기에 DB에 새로 접근하는 것이 아니며, dirty checking에 의해 task는 dynamic update를 따르도록 한다.
@@ -67,12 +70,12 @@ public class TicketService {
 		ticket.update(ticketRequestDto);
 		task.addTicket(ticket);
 		ticketRepository.save(ticket);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
+		return ResponseEntity.ok(ticketRepository.findByTaskId(task.getTaskId()));
 	}
 
 	// 티켓 삭제하기
 	@Transactional
-	public ResponseEntity<?> deleteTicket(User user, Long ticketId) {
+	public ResponseEntity<List<TicketResponseDto>> deleteTicket(User user, Long ticketId) {
 		user = validateUserByEmail(user.getEmail()); // todo validate 로직 다시 짜기
 		// 1. 티켓 존재하는지 확인
 		Ticket ticket = validateTicket(ticketId);
@@ -82,7 +85,7 @@ public class TicketService {
 		task.deleteTicket(ticket);
 		//4. ticket Repo에서 ticket 삭제함
 		ticketRepository.delete(ticket);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
+		return ResponseEntity.ok(ticketRepository.findByTaskId(task.getTaskId()));
 	}
 
 	/* == 반복 로직 == */

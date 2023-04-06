@@ -1,5 +1,7 @@
 package com.ddalggak.finalproject.domain.ticket.controller;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -36,7 +38,7 @@ public class TicketController {
 	// 티켓 등록
 	@Operation(summary = "ticket 생성", description = "Ticket 등록 post 메서드 체크")
 	@PostMapping("/ticket")
-	public ResponseEntity<?> createTicket(
+	public ResponseEntity<List<TicketResponseDto>> createTicket(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody TicketRequestDto ticketRequestDto) {
 		return ticketService.createTicket(userDetails.getUser(), ticketRequestDto);
@@ -56,7 +58,7 @@ public class TicketController {
 	// 티켓 수정
 	@Operation(summary = "patch ticket", description = "Ticket 수정 patch 메서드 체크")
 	@PatchMapping("/ticket/{ticketId}")
-	public ResponseEntity<?> updateTicket(
+	public ResponseEntity<List<TicketResponseDto>> updateTicket(
 		@PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody TicketRequestDto ticketRequestDto) {
@@ -66,7 +68,7 @@ public class TicketController {
 	// 티켓 삭제
 	@Operation(summary = "delete ticket", description = "Ticket 삭제 delete 메서드 체크")
 	@DeleteMapping("/ticket/{ticketId}")
-	public ResponseEntity<?> deleteTicket(@PathVariable Long ticketId,
+	public ResponseEntity<List<TicketResponseDto>> deleteTicket(@PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return ticketService.deleteTicket(userDetails.getUser(), ticketId);
 	}
