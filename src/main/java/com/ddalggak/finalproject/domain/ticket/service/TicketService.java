@@ -83,7 +83,7 @@ public class TicketService {
 		task.deleteTicket(ticket);
 		//4. ticket Repo에서 ticket 삭제함
 		ticketRepository.delete(ticket);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
+		return ResponseEntity.ok(ticketRepository.findWithTaskId(task.getTaskId()));
 	}
 
 	/* == 반복 로직 == */
