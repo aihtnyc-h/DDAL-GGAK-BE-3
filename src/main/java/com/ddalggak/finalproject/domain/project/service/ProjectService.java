@@ -39,7 +39,7 @@ public class ProjectService {
 	private final S3Uploader s3Uploader;
 	private final UserRepository userRepository;
 
-	public ResponseEntity<ProjectBriefResponseDto> createProject(User user, MultipartFile image,
+	public ResponseEntity<?> createProject(User user, MultipartFile image,
 		ProjectRequestDto projectRequestDto) throws
 		IOException {
 		//1. user로 projectUserRequestDto 생성
@@ -59,7 +59,7 @@ public class ProjectService {
 		project.setProjectLeader(user.getEmail());
 		//5. projectRepository에 project 저장
 		projectRepository.save(project);
-		return ResponseEntity.ok(new ProjectBriefResponseDto(project));
+		return ResponseEntity.ok(projectRepository.findProjectAllByUserId(user.getUserId()));
 	}
 
 	@Transactional(readOnly = true)
@@ -104,23 +104,20 @@ public class ProjectService {
 	}
 
 	@Transactional
-	public ResponseEntity<SuccessResponseDto> updateProject(User user, Long projectId,
+	public ResponseEntity<ProjectBriefResponseDto> updateProject(User user, Long projectId,
 		MultipartFile image, ProjectRequestDto projectRequestDto) throws IOException {
 		Project project = validateProject(projectId);
 		if (!project.getProjectLeader().equals(user.getEmail())) {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
-		//todo logic : project에 있는 thumbnail과 이미지값 비교해서 같으면 업로드 안하고 다르면 업로드
-		// 아 근데 이거 파일 이름 같게 하고 다른 이미지 던지면 어쩔건데?
-		// String filename = URLDecoder.decode(project.getThumbnail().substring(47), StandardCharsets.UTF_8);
-		// if (filename.equals()) {
-		// 	imageUrl = s3Uploader.upload(image, "project");
-		// }
-		// 나중에 업데이트할때 S3 버킷에서 지우기
-		String imageUrl = s3Uploader.upload(image, "project");
+		String imageUrl = null;
+		if (!(image == null)) {
+			fileCheck(image);
+			imageUrl = s3Uploader.upload(image, "project");
+		}
 		projectRequestDto.setThumbnail(imageUrl);
 		projectRepository.update(projectId, projectRequestDto);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_SEND);
+		return ResponseEntity.ok(new ProjectBriefResponseDto(project));
 	}
 
 	public ResponseEntity<?> deleteProjectUser(User user, Long projectId, Long userId) {
