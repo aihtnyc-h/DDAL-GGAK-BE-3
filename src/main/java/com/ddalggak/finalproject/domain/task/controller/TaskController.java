@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
@@ -44,9 +45,9 @@ public class TaskController {
 	@JsonView(Views.Task.class)
 	public ResponseEntity<TaskResponseDto> viewTask(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@Valid @RequestBody TaskRequestDto taskRequestDto,
+		@RequestParam Long projectId,
 		@PathVariable Long taskId) {
-		return taskService.viewTask(userDetails.getUser(), taskRequestDto.getProjectId(), taskId);
+		return taskService.viewTask(userDetails.getUser(), taskId);
 	}
 
 	@Operation(summary = "Task 삭제", description = "api for delete one task")
