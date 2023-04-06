@@ -4,6 +4,10 @@ import static com.ddalggak.finalproject.domain.label.entity.QLabel.*;
 import static com.ddalggak.finalproject.domain.task.entity.QTask.*;
 import static com.ddalggak.finalproject.domain.ticket.entity.QTicket.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.ddalggak.finalproject.domain.task.dto.TaskBriefResponseDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskResponseDto;
 import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketMapper;
@@ -37,5 +41,19 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
 		}
 
 		return new TaskResponseDto(result);
+	}
+
+	@Override
+	public List<TaskBriefResponseDto> findTaskByProject(Long projectId) {
+		List<Task> result = queryFactory
+			.selectFrom(task)
+			.orderBy(task.createdAt.desc())
+			.where(task.project.projectId.eq(projectId))
+			.fetch();
+
+		return result
+			.stream()
+			.map(TaskBriefResponseDto::new)
+			.collect(Collectors.toList());
 	}
 }
