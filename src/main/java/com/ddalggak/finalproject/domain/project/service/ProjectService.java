@@ -38,9 +38,8 @@ public class ProjectService {
 	private final ProjectRepository projectRepository;
 	private final S3Uploader s3Uploader;
 	private final UserRepository userRepository;
-	private long fileSizeLimit = 10 * 1024 * 1024;
 
-	public ResponseEntity<SuccessResponseDto> createProject(User user, MultipartFile image,
+	public ResponseEntity<ProjectBriefResponseDto> createProject(User user, MultipartFile image,
 		ProjectRequestDto projectRequestDto) throws
 		IOException {
 		//1. user로 projectUserRequestDto 생성
@@ -60,7 +59,7 @@ public class ProjectService {
 		project.setProjectLeader(user.getEmail());
 		//5. projectRepository에 project 저장
 		projectRepository.save(project);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
+		return ResponseEntity.ok(new ProjectBriefResponseDto(project));
 	}
 
 	@Transactional(readOnly = true)
@@ -157,7 +156,7 @@ public class ProjectService {
 		}
 	}
 
-	private Project validateProject(Long id) {
+	private Project validateProject(Long id) { // todo 로직 만들어서 participant가 3명 이상이면 3명까지만 출력하도록 method 작성
 		return projectRepository.findById(id).orElseThrow(
 			() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND)
 		);

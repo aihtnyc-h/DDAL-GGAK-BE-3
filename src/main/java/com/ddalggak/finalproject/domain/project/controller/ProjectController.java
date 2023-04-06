@@ -46,7 +46,7 @@ public class ProjectController {
 		@Parameter(name = "projectRequestDto", description = "프로젝트 생성에 필요한 정보입니다.", required = true)
 	})
 	@PostMapping("/project")
-	public ResponseEntity<SuccessResponseDto> createProject(
+	public ResponseEntity<?> createProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestPart(value = "thumbnail", required = false) MultipartFile image,
 		@Valid @RequestPart(value = "data") ProjectRequestDto projectRequestDto) throws IOException {

@@ -49,10 +49,10 @@ public class TaskService {
 	}
 
 	@Transactional(readOnly = true) // project member면 누구나 task 조회 가능하다. task 멤버가 아닐지라도.
-	public ResponseEntity<TaskResponseDto> viewTask(User user, Long taskId) {
-		TaskResponseDto taskById = taskRepository.findTaskById(taskId);
-		Project project = validateProjectByTaskId(taskId);
+	public ResponseEntity<TaskResponseDto> viewTask(User user, Long projectId, Long taskId) {
+		Project project = validateProject(projectId);
 		validateExistMember(project, ProjectUser.create(project, user));
+		TaskResponseDto taskById = taskRepository.findTaskById(taskId);
 		return ResponseEntity.ok(taskById);
 	}
 
