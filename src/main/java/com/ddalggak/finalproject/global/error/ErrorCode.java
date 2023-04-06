@@ -39,11 +39,15 @@ public enum ErrorCode {
 	LABEL_NOT_FOUND(NOT_FOUND, "D-008", "The label could not be found"),
 	REVIEW_NOT_FOUND(NOT_FOUND, "D-009", "The review could not be found"),
 	REVIEW_COMMENT_NOT_FOUND(NOT_FOUND, "D-010", "The review comment could not be found"),
+	MESSAGE_NOT_READ(NOT_FOUND, "D-011", "The message read could not be found"),
+	CHATROOM_NOT_FOUND(NOT_FOUND, "D-012", "The chatroom not be found"),
 
 	/* 409 CONFLICT : Resource 의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
 	DUPLICATE_RESOURCE(CONFLICT, "E-001", "Data already exists."),
 	DUPLICATE_MEMBER(CONFLICT, "E-002", "Duplicate user exists."),
 	DUPLICATE_EMAIL(CONFLICT, "E-003", "Email address is already in use. Please try a different email address."),
+
+
 
 	/* 415 UNSUPPORTED_MEDIA_TYPE : 지원하지 않는 미디어 타입 */
 	TYPE_MISMATCH(UNSUPPORTED_MEDIA_TYPE, "F-001", "Unsupported media type."),
