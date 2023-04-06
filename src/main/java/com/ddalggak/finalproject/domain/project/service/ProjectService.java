@@ -39,7 +39,7 @@ public class ProjectService {
 	private final S3Uploader s3Uploader;
 	private final UserRepository userRepository;
 
-	public ResponseEntity<ProjectBriefResponseDto> createProject(User user, MultipartFile image,
+	public ResponseEntity<?> createProject(User user, MultipartFile image,
 		ProjectRequestDto projectRequestDto) throws
 		IOException {
 		//1. user로 projectUserRequestDto 생성
@@ -59,7 +59,7 @@ public class ProjectService {
 		project.setProjectLeader(user.getEmail());
 		//5. projectRepository에 project 저장
 		projectRepository.save(project);
-		return ResponseEntity.ok(new ProjectBriefResponseDto(project));
+		return ResponseEntity.ok(projectRepository.findProjectAllByUserId(user.getUserId()));
 	}
 
 	@Transactional(readOnly = true)
