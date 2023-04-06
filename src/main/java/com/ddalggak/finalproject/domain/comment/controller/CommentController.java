@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ddalggak.finalproject.domain.comment.dto.CommentRequestDto;
+import com.ddalggak.finalproject.domain.comment.dto.CommentResponseDto;
 import com.ddalggak.finalproject.domain.comment.service.CommentService;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
@@ -27,14 +28,16 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api")
 public class CommentController {
 	private final CommentService commentService;
+
 	// 댓글 등록
 	@Operation(summary = "ticket comment", description = "comment 등록 post 메서드 체크")
 	@PostMapping("/comment")
-	public ResponseEntity<SuccessResponseDto> createComment(
+	public ResponseEntity<CommentResponseDto> createComment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody CommentRequestDto commentRequestDto) {
 		return commentService.createComment(userDetails.getUser(), commentRequestDto);
 	}
+
 	// 댓글 수정
 	@Operation(summary = "patch ticket comment", description = "comment 수정 get 메서드 체크")
 	@PatchMapping("/comment/{commentId}")
@@ -44,6 +47,7 @@ public class CommentController {
 		@Valid @RequestBody CommentRequestDto commentRequestDto) {
 		return commentService.updateComment(userDetails.getUser(), commentId, commentRequestDto);
 	}
+
 	// 댓글 삭제
 	@Operation(summary = "delete ticket comment", description = "comment 삭제 delete 메서드 체크")
 	@DeleteMapping("/comment/{commentId}")

@@ -17,7 +17,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
+import lombok.Setter;
 
+@Setter
 public class TaskResponseDto {
 
 	@Schema(name = "task id", example = "1")
@@ -46,10 +48,12 @@ public class TaskResponseDto {
 
 	@Schema(name = "labels", example = "front-end", defaultValue = "null")
 	@JsonView(Views.Task.class)
+	@Setter
 	public List<LabelResponseDto> labels;
 
 	@Schema(name = "total tickets")
 	@JsonView(Views.Task.class)
+	@Setter
 	public Map<TicketStatus, List<TicketResponseDto>> tickets;
 
 	@Builder

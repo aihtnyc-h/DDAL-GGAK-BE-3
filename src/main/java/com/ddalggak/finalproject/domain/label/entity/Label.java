@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -37,7 +38,8 @@ public class Label extends BaseEntity {
 	private String labelTitle;
 	@Setter
 	private String labelLeader;
-	@ManyToOne
+
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "task_id")
 	private Task task;
 
@@ -69,12 +71,17 @@ public class Label extends BaseEntity {
 		task.addLabel(this);
 	}
 
-	private void addLabelUser(LabelUser labelUser) {
+	public void addLabelUser(LabelUser labelUser) {
 		labelUserList.add(labelUser);
 		labelUser.addLabel(this);
 	}
 
 	public void addTicket(Ticket ticket) {
 		tickets.add(ticket);
+	}
+
+	public boolean validateUserWithEmail(String email) {
+		return labelUserList.stream()
+			.anyMatch(labelUser -> labelUser.getUser().getEmail().equals(email));
 	}
 }
