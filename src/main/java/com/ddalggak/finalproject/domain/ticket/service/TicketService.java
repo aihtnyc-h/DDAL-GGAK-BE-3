@@ -46,7 +46,8 @@ public class TicketService {
 		//4. 티켓 저장
 		ticketRepository.save(ticket);
 		//5. return
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
+		return ResponseEntity.status(201)
+			.body(taskRepository.findTaskById(ticketRequestDto.getTaskId()));
 	}
 
 	// 티켓 상세조회
@@ -82,7 +83,7 @@ public class TicketService {
 		task.deleteTicket(ticket);
 		//4. ticket Repo에서 ticket 삭제함
 		ticketRepository.delete(ticket);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
+		return ResponseEntity.ok(taskRepository.findTaskById(task.getTaskId()));
 	}
 
 	/* == 반복 로직 == */
