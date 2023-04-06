@@ -1,12 +1,15 @@
 package com.ddalggak.finalproject.domain.label.dto;
 
 import com.ddalggak.finalproject.domain.label.entity.Label;
+import com.ddalggak.finalproject.global.view.Views;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 public class LabelResponseDto {
+	@JsonView(Views.Task.class)
 	private String labelTitle;
 
 	@Builder
@@ -19,4 +22,5 @@ public class LabelResponseDto {
 			.label(label)
 			.build();
 	}
+
 }

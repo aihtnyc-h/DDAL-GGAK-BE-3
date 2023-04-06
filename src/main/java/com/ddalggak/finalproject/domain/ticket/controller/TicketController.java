@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ddalggak.finalproject.domain.ticket.dto.TicketLabelRequestDto;
@@ -47,9 +48,9 @@ public class TicketController {
 	@JsonView(Views.Ticket.class)
 	public ResponseEntity<TicketResponseDto> getTicket(
 		@PathVariable Long ticketId,
-		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@Valid @RequestBody TicketRequestDto ticketRequestDto) {
-		return ticketService.getTicket(ticketId, userDetails.getUser(), ticketRequestDto);
+		@RequestParam Long taskId,
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		return ticketService.getTicket(ticketId, userDetails.getUser());
 	}
 
 	// 티켓 수정

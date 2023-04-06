@@ -1,5 +1,6 @@
 package com.ddalggak.finalproject.domain.task.repository;
 
+import static com.ddalggak.finalproject.domain.label.entity.QLabel.*;
 import static com.ddalggak.finalproject.domain.task.entity.QTask.*;
 import static com.ddalggak.finalproject.domain.ticket.entity.QTicket.*;
 
@@ -22,14 +23,19 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
 	@Override
 	public TaskResponseDto findTaskById(Long id) {
 
-		Task result = queryFactory.selectFrom(task)
+		Task result = queryFactory
+			.selectFrom(task)
+			.leftJoin(task.labelList, label)
 			.leftJoin(task.ticketList, ticket).fetchJoin()
 			.orderBy(ticket.createdAt.desc(), ticket.priority.desc())
 			.where(task.taskId.eq(id))
+			.distinct()
 			.fetchOne();
+
 		if (result == null) {
 			throw new CustomException(ErrorCode.TASK_NOT_FOUND);
 		}
+
 		return new TaskResponseDto(result);
 	}
 }

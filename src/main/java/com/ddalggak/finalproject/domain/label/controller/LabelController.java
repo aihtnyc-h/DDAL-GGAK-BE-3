@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ddalggak.finalproject.domain.label.dto.LabelRequestDto;
+import com.ddalggak.finalproject.domain.label.dto.LabelResponseDto;
 import com.ddalggak.finalproject.domain.label.service.LabelService;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
@@ -27,7 +28,7 @@ public class LabelController {
 
 	@Operation(summary = "Label 생성", description = "api for creating label")
 	@PostMapping("/label")
-	public ResponseEntity<SuccessResponseDto> createLabel(
+	public ResponseEntity<LabelResponseDto> createLabel(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody LabelRequestDto labelRequestDto) {
 		return labelService.createLabel(userDetails.getUser(), labelRequestDto);
@@ -37,8 +38,27 @@ public class LabelController {
 	@DeleteMapping("/label/{labelId}")
 	public ResponseEntity<SuccessResponseDto> deleteLabel(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestBody Long taskId,
+		@RequestBody LabelRequestDto labelRequestDto,
 		@PathVariable Long labelId) {
-		return labelService.deleteLabel(userDetails.getUser(), taskId, labelId);
+		return labelService.deleteLabel(userDetails.getUser(), labelRequestDto.taskId, labelId);
 	}
+
+	@Operation(summary = "Label 강제입성", description = "api for invite label")
+	@PostMapping("/label/{labelId}/invite")
+	public ResponseEntity<SuccessResponseDto> inviteLabel(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
+		@RequestBody LabelRequestDto labelRequestDto,
+		@PathVariable Long labelId) {
+		return labelService.inviteLabel(userDetails.getUser(), labelRequestDto, labelId);
+	}
+
+	@Operation(summary = "Label 리더 부여", description = "api for assign admin to label")
+	@PostMapping("/label/{labelId}/leader")
+	public ResponseEntity<SuccessResponseDto> assignLeader(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
+		@RequestBody LabelRequestDto labelRequestDto,
+		@PathVariable Long labelId) {
+		return labelService.assignLeader(userDetails.getUser(), labelRequestDto, labelId);
+	}
+
 }

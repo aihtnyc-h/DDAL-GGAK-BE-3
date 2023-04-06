@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ddalggak.finalproject.domain.comment.dto.CommentMapper;
 import com.ddalggak.finalproject.domain.comment.dto.CommentRequestDto;
+import com.ddalggak.finalproject.domain.comment.dto.CommentResponseDto;
 import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.comment.repository.CommentRepository;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
@@ -33,16 +34,15 @@ public class CommentService {
 	private final UserRepository userRepository;
 
 	// 댓글 작성
-	public ResponseEntity<SuccessResponseDto> createComment(User user,
+	public ResponseEntity<CommentResponseDto> createComment(User user,
 		CommentRequestDto commentRequestDto) {
-		System.out.println("---------commment = " + user.getEmail());
 		user = validateUserByEmail(user.getEmail());
 		Ticket ticket = TicketValidation(commentRequestDto.getTicketId());
 		// comment 작성
 		Comment comment = commentMapper.mapToEntity(user, ticket, commentRequestDto);
 		commentRepository.save(comment);
 		// 상태 반환
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
+		return ResponseEntity.ok(commentMapper.toDto(comment));
 	}
 
 	// 댓글 수정
