@@ -47,7 +47,7 @@ public class TaskController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestParam Long projectId,
 		@PathVariable Long taskId) {
-		return taskService.viewTask(userDetails.getUser(), taskId);
+		return taskService.viewTask(userDetails.getUser(), projectId, taskId);
 	}
 
 	@Operation(summary = "Task 삭제", description = "api for delete one task")
