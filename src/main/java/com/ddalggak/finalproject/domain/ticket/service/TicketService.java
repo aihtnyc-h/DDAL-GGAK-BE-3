@@ -46,7 +46,8 @@ public class TicketService {
 		//4. 티켓 저장
 		ticketRepository.save(ticket);
 		//5. return
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
+		return ResponseEntity.status(201)
+			.body(ticketRepository.findWithTaskId(ticketRequestDto.getTaskId()));
 	}
 
 	// 티켓 상세조회
