@@ -3,6 +3,9 @@ package com.ddalggak.finalproject.domain.ticket.repository;
 import static com.ddalggak.finalproject.domain.comment.entity.QComment.*;
 import static com.ddalggak.finalproject.domain.ticket.entity.QTicket.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.ddalggak.finalproject.domain.task.entity.QTask;
 import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketMapper;
@@ -43,6 +46,19 @@ public class TicketRepositoryCustomImpl implements TicketRepositoryCustom {
 			throw new CustomException(ErrorCode.TICKET_NOT_FOUND);
 		}
 		return ticketMapper.toDto(result);
+	}
+
+	@Override
+	public List<TicketResponseDto> findWithTaskId(Long taskId) {
+		return queryFactory
+			.selectFrom(ticket)
+			.join(ticket.task, QTask.task)
+			.where(QTask.task.taskId.eq(taskId))
+			.orderBy(ticket.createdAt.desc())
+			.fetch()
+			.stream()
+			.map(ticketMapper::toDto)
+			.collect(Collectors.toList());
 	}
 
 	private BooleanExpression isTicketPriorityChanged(TicketRequestDto ticketRequestDto) {
