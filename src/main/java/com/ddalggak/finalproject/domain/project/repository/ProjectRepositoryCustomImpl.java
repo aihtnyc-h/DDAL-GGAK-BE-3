@@ -6,6 +6,7 @@ import static com.ddalggak.finalproject.domain.task.entity.QTask.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
@@ -17,6 +18,7 @@ import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -81,5 +83,14 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 			.set(project.thumbnail, projectRequestDto.thumbnail)
 			.where(project.projectId.eq(projectId))
 			.execute();
+	}
+	@Override
+	public Optional<Project> findProjectByTaskId(Long taskId) {
+		Project result = queryFactory
+			.selectFrom(project)
+			.join(project.taskList, task)
+			.where(task.taskId.eq(taskId))
+			.fetchOne();
+		return Optional.ofNullable(result);
 	}
 }

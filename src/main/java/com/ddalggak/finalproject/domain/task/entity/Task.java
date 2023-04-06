@@ -45,10 +45,8 @@ public class Task extends BaseEntity {
 
 	private String taskTitle;
 
-	@Setter
 	private int totalPriority;
 
-	@Setter
 	private int totalDifficulty;
 
 	private LocalDate expiredAt;
@@ -61,6 +59,7 @@ public class Task extends BaseEntity {
 	private Project project;
 
 	@OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+	@BatchSize(size = 500)
 	private List<Label> labelList = new ArrayList<>();
 
 	@OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)

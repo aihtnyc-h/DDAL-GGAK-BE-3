@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ddalggak.finalproject.domain.comment.dto.CommentRequestDto;
+import com.ddalggak.finalproject.domain.comment.dto.CommentResponseDto;
 import com.ddalggak.finalproject.domain.comment.service.CommentService;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
@@ -30,7 +31,7 @@ public class CommentController {
 	// 댓글 등록
 	@Operation(summary = "ticket comment", description = "comment 등록 post 메서드 체크")
 	@PostMapping("/comment")
-	public ResponseEntity<SuccessResponseDto> createComment(
+	public ResponseEntity<CommentResponseDto> createComment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody CommentRequestDto commentRequestDto) {
 		return commentService.createComment(userDetails.getUser(), commentRequestDto);

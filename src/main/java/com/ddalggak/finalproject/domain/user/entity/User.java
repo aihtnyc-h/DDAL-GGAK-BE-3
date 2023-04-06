@@ -3,7 +3,6 @@ package com.ddalggak.finalproject.domain.user.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -16,7 +15,6 @@ import javax.persistence.OneToMany;
 import com.ddalggak.finalproject.domain.label.entity.LabelUser;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
-import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.user.role.UserRole;
 import com.ddalggak.finalproject.global.entity.BaseTimeEntity;
 
@@ -60,12 +58,32 @@ public class User extends BaseTimeEntity {
 	@OneToMany(mappedBy = "user")
 	List<LabelUser> labelUserList = new ArrayList<>();
 
-	public User(Long userId, String email, String nickname, String password, String profile, UserRole role) {
-		this.userId = userId;
-		this.email = email;
-		this.nickname = nickname;
-		this.password = password;
-		this.profile = profile;
-		this.role = role;
+	// public static void updateOAuth(ProviderType providerType, String profile) {
+	// 	builder()
+	// 		.providerType(providerType)
+	// 		.profile(profile)
+	// 		.build();
+	// }
+
+	public static void updateNickname(User user, String nickname) {
+		builder()
+			.email(user.getEmail())
+			.userId(user.getUserId())
+			.email(user.getEmail())
+			.password(user.getPassword())
+			.nickname(nickname)
+			.profile(user.getProfile())
+			.build();
+	}
+
+	public static void updateProfile(User user, String profile) {
+		builder()
+			.email(user.getEmail())
+			.userId(user.getUserId())
+			.email(user.getEmail())
+			.password(user.getPassword())
+			.nickname(user.getNickname())
+			.profile(profile)
+			.build();
 	}
 }

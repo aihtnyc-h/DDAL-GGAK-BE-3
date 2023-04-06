@@ -7,9 +7,5 @@ import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long>, TicketRepositoryCustom {
-	// Ticket findAllBytaskIdByticketId( Long taskId, Long ticketId);
 
-	// List<Ticket> findAllByTicketOrderByCratedAtDesc(Ticket ticket);
-
-	// List<Ticket> findAllByOrderByModifiedAtDesc();
 }

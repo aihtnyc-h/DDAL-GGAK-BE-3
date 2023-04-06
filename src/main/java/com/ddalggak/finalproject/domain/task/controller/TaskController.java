@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
@@ -17,7 +18,8 @@ import com.ddalggak.finalproject.domain.task.dto.TaskResponseDto;
 import com.ddalggak.finalproject.domain.task.service.TaskService;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
-
+import com.fasterxml.jackson.annotation.JsonView;
+import com.ddalggak.finalproject.global.view.Views;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -36,14 +38,14 @@ public class TaskController {
 		@Valid @RequestBody TaskRequestDto taskRequestDto) {
 		return taskService.createTask(userDetails.getUser(), taskRequestDto);
 	}
-
 	@Operation(summary = "Task 조회", description = "api for view one task")
 	@GetMapping("/task/{taskId}")
+	@JsonView(Views.Task.class)
 	public ResponseEntity<TaskResponseDto> viewTask(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@Valid @RequestBody TaskRequestDto taskRequestDto,
+		@RequestParam Long projectId,
 		@PathVariable Long taskId) {
-		return taskService.viewTask(userDetails.getUser(), taskRequestDto.getProjectId(), taskId);
+		return taskService.viewTask(userDetails.getUser(), taskId);
 	}
 
 	@Operation(summary = "Task 삭제", description = "api for delete one task")

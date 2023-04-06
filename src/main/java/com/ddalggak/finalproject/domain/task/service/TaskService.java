@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ddalggak.finalproject.domain.project.entity.Project;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.project.repository.ProjectRepository;
+import com.ddalggak.finalproject.domain.task.dto.TaskBriefResponseDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskResponseDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskUserRequestDto;
@@ -44,15 +45,20 @@ public class TaskService {
 		TaskUser taskUser = TaskUser.create(taskUserRequestDto);
 		Task task = Task.create(taskRequestDto, taskUser, project);
 		taskRepository.save(task);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
+		return ResponseEntity.ok(
+			taskRepository.findTaskByProject(project.getProjectId()));//todo globalResponse 만들 때 201 날리기
 	}
-
 	@Transactional(readOnly = true) // project member면 누구나 task 조회 가능하다. task 멤버가 아닐지라도.
-	public ResponseEntity<TaskResponseDto> viewTask(User user, Long projectId, Long taskId) {
-		Task task = validateTask(taskId);
-		Project project = validateProject(projectId);
+	public ResponseEntity<TaskResponseDto> viewTask(User user, Long taskId) {
+		TaskResponseDto taskById = taskRepository.findTaskById(taskId);
+		Project project = validateProjectByTaskId(taskId);
 		validateExistMember(project, ProjectUser.create(project, user));
-		return TaskResponseDto.toResponseEntity(task);
+		return ResponseEntity.ok(taskById);
+	}
+	private Project validateProjectByTaskId(Long taskId) {
+		return projectRepository.findProjectByTaskId(taskId).orElseThrow(
+			() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND)
+		);
 	}
 
 	@Transactional

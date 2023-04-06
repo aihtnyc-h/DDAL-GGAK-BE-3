@@ -3,6 +3,7 @@ package com.ddalggak.finalproject.domain.ticket.repository;
 import static com.ddalggak.finalproject.domain.comment.entity.QComment.*;
 import static com.ddalggak.finalproject.domain.ticket.entity.QTicket.*;
 
+import com.ddalggak.finalproject.domain.ticket.dto.TicketMapper;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketRequestDto;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class TicketRepositoryCustomImpl implements TicketRepositoryCustom {
 
 	private final JPAQueryFactory queryFactory;
+	private final TicketMapper ticketMapper;
 
 	@Override
 	public TicketResponseDto findWithOrderedComments(Long ticketId) {
@@ -29,27 +31,8 @@ public class TicketRepositoryCustomImpl implements TicketRepositoryCustom {
 		if (result == null) {
 			throw new CustomException(ErrorCode.TICKET_NOT_FOUND);
 		}
-		return new TicketResponseDto(result);
+		return ticketMapper.toDto(result);
 	}
-
-	//todo 2점에서 1점으로 바꿀때 task의 토탈 점수 어떻게 db에 인서트해야함?
-	// @Override //todo @DynamicUpdate 단점 조사해서 비교하고 update문 수정
-	// public void update(Long ticketId, TicketRequestDto ticketRequestDto) {
-	// 	queryFactory
-	// 		.update(task)
-	// 		.set(task.totalDifficulty, )
-	//
-	// 		queryFactory
-	// 			.update(ticket)
-	// 			.set(ticket.ticketTitle, ticketRequestDto.getTicketTitle())
-	// 			.set(ticket.ticketDescription, ticketRequestDto.getTicketDescription())
-	// 			.set(ticket.priority, ticketRequestDto.getPriority())
-	// 			.set(ticket.difficulty, ticketRequestDto.getDifficulty())
-	// 			.set(ticket.expiredAt, ticketRequestDto.getTicketExpiredAt())
-	// 			.where(ticket.ticketId.eq(ticketId))
-	// 			.execute();
-	//
-	// }
 
 	private BooleanExpression isTicketPriorityChanged(TicketRequestDto ticketRequestDto) {
 		return ticket.priority.eq(ticketRequestDto.getPriority());

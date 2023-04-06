@@ -4,5 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.ddalggak.finalproject.domain.task.entity.Task;
 
-public interface TaskRepository extends JpaRepository<Task, Long> {
+public interface TaskRepository extends JpaRepository<Task, Long>, TaskRepositoryCustom {
+	// Object findTaskByProject(Long projectId);
 }

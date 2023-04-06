@@ -29,7 +29,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
@@ -115,7 +114,7 @@ public class Ticket extends BaseEntity {
 		this.label = label;
 	}
 
-	private void addTask(Task task) {
+	public void addTask(Task task) {
 		this.task = task;
 		task.addTicket(this);
 	}
