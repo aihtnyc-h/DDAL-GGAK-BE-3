@@ -45,7 +45,7 @@ public class TaskService {
 		Task task = Task.create(taskRequestDto, taskUser, project);
 		taskRepository.save(task);
 		return ResponseEntity.ok(
-			taskRepository.findTaskByProject(project.getProjectId()));//todo globalResponse 만들 때 201 날리기
+			"ok");//todo globalResponse 만들 때 201 날리기
 	}
 
 	@Transactional(readOnly = true) // project member면 누구나 task 조회 가능하다. task 멤버가 아닐지라도.

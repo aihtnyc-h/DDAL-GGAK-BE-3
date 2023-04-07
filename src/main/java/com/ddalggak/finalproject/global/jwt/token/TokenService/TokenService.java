@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
