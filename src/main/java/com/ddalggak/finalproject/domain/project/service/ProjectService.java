@@ -1,5 +1,7 @@
 package com.ddalggak.finalproject.domain.project.service;
 
+import static com.ddalggak.finalproject.global.dto.SuccessCode.*;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +24,7 @@ import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
+import com.ddalggak.finalproject.global.dto.GlobalResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.infra.aws.S3Uploader;
@@ -57,7 +60,9 @@ public class ProjectService {
 		project.setProjectLeader(user.getEmail());
 		//5. projectRepository에 project 저장
 		projectRepository.save(project);
-		return ResponseEntity.ok(projectRepository.findProjectAllByUserId(user.getUserId()));
+		//6. projectResponseDto로 반환
+		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(user.getUserId());
+		return GlobalResponseDto.of(CREATED_SUCCESSFULLY, result, null);
 	}
 
 	@Transactional(readOnly = true)
@@ -115,6 +120,7 @@ public class ProjectService {
 		}
 		projectRequestDto.setThumbnail(imageUrl);
 		projectRepository.update(projectId, projectRequestDto);
+		new ProjectBriefResponseDto(project);
 		return ResponseEntity.ok(new ProjectBriefResponseDto(project));
 	}
 
