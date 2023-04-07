@@ -39,6 +39,10 @@ public class TaskResponseDto {
 	@JsonView(Views.Task.class)
 	public String taskLeader;
 
+	@Schema(name = "when does this project created at", example = "2023-03-22")
+	@JsonView(Views.Task.class)
+	public LocalDate createdAt;
+
 	@Schema(name = "when does this project expired at", example = "2023-03-22")
 	@JsonView(Views.Task.class)
 	public LocalDate expiredAt;
@@ -71,6 +75,7 @@ public class TaskResponseDto {
 		id = task.getTaskId();
 		taskTitle = task.getTaskTitle();
 		taskLeader = task.getTaskLeader();
+		createdAt = LocalDate.from(task.getCreatedAt());
 		expiredAt = task.getExpiredAt();
 		totalDifficulty = task.getTicketList().stream().mapToInt(Ticket::getDifficulty).sum();
 		totalPriority = task.getTicketList().stream().mapToInt(Ticket::getPriority).sum();
