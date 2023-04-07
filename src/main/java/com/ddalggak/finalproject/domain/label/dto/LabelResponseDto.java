@@ -9,11 +9,16 @@ import lombok.Getter;
 
 @Getter
 public class LabelResponseDto {
+
+	@JsonView(Views.Task.class)
+	private Long labelId;
+
 	@JsonView(Views.Task.class)
 	private String labelTitle;
 
 	@Builder
 	public LabelResponseDto(Label label) {
+		labelId = label.getLabelId();
 		labelTitle = label.getLabelTitle();
 	}
 

@@ -1,6 +1,7 @@
 package com.ddalggak.finalproject.domain.user.service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletResponse;
@@ -16,6 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
 import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
+import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
+import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
@@ -136,5 +139,13 @@ public class UserService {
 		return ResponseEntity
 			.status(HttpStatus.OK)
 			.body(userPage);
+	}
+
+	public ResponseEntity<?> getMyTickets(Long userId, TicketSearchCondition condition) {
+		User user = userRepository.findById(userId).orElseThrow(
+			() -> new UserException(ErrorCode.MEMBER_NOT_FOUND)
+		);
+		List<DateTicket> completedTicketCountByDate = userRepository.getCompletedTicketCountByDate(condition, userId);
+		return ResponseEntity.ok(completedTicketCountByDate);
 	}
 }

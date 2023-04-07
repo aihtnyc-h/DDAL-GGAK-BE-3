@@ -1,22 +1,28 @@
 package com.ddalggak.finalproject.domain.label.service;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ddalggak.finalproject.domain.label.dto.LabelRequestDto;
-import com.ddalggak.finalproject.domain.label.dto.LabelResponseDto;
 import com.ddalggak.finalproject.domain.label.dto.LabelUserRequestDto;
 import com.ddalggak.finalproject.domain.label.entity.Label;
 import com.ddalggak.finalproject.domain.label.entity.LabelUser;
 import com.ddalggak.finalproject.domain.label.repository.LabelRepository;
+import com.ddalggak.finalproject.domain.project.entity.Project;
+import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
 import com.ddalggak.finalproject.domain.task.repository.TaskRepository;
+import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
+import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
+import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
+import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
-import com.ddalggak.finalproject.global.dto.SuccessCode;
-import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 
@@ -33,8 +39,12 @@ public class LabelService {
 
 	private final UserRepository userRepository;
 
+	private final TicketRepository ticketRepository;
+
+	//라벨 생성
 	@Transactional
-	public ResponseEntity<LabelResponseDto> createLabel(User user, LabelRequestDto labelRequestDto) {
+	public ResponseEntity<?> createLabel(User user, LabelRequestDto labelRequestDto) {
+		// 유효성 검증
 		Task task = validateTask(labelRequestDto.getTaskId());
 		validateExistMember(task, TaskUser.create(task, user));
 		if (!(task.getTaskLeader().equals(user.getEmail()) || task.getLabelLeadersList().contains(user.getEmail()))) {
@@ -44,15 +54,20 @@ public class LabelService {
 			if (label.getLabelTitle().equals(labelRequestDto.getLabelTitle()))
 				throw new CustomException(ErrorCode.DUPLICATE_RESOURCE);
 		}
+		// label create 작업
 		LabelUserRequestDto labelUserRequestDto = LabelUserRequestDto.create(user);
 		LabelUser labelUser = LabelUser.create(labelUserRequestDto);
 		Label label = Label.create(labelRequestDto, labelUser, task);
+		// label 저장
 		labelRepository.save(label);
-		return ResponseEntity.ok(LabelResponseDto.of(label));
+		// return label list
+		return ResponseEntity.ok(labelRepository.findByTaskId(task.getTaskId()));
 	}
 
+	//라벨 삭제
 	@Transactional
-	public ResponseEntity<SuccessResponseDto> deleteLabel(User user, Long taskId, Long labelId) {
+	public ResponseEntity<?> deleteLabel(User user, Long taskId, Long labelId) {
+		// 유효성 검증
 		Task task = validateTask(taskId);
 		Label label = validateLabel(labelId);
 		if (!(task.getTaskLeader().equals(user.getEmail()) || label.getLabelLeader().equals(user.getEmail()))) {
@@ -60,11 +75,13 @@ public class LabelService {
 		} else {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
-		return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
+
+		// return label list
+		return ResponseEntity.ok(labelRepository.findByTaskId(task.getTaskId()));
 	}
 
-	@Transactional
-	public ResponseEntity<SuccessResponseDto> inviteLabel(User user, LabelRequestDto labelRequestDto, Long labelId) {
+	@Transactional // todo 검증필요
+	public ResponseEntity<?> inviteLabel(User user, LabelRequestDto labelRequestDto, Long labelId) {
 		Task task = validateTask(labelRequestDto.getTaskId());
 		Label label = validateLabel(labelId);
 		// 1. user의 유효성 검증 -> task, label, project Leader가 아닐 경우 403 FORBIDDEN
@@ -80,11 +97,14 @@ public class LabelService {
 		LabelUserRequestDto labelUserRequestDto = LabelUserRequestDto.create(inviteUser);
 		LabelUser labelUser = LabelUser.create(labelUserRequestDto);
 		label.addLabelUser(labelUser);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.JOINED_SUCCESSFULLY);
+		//4. 라벨의 유저 업데이트
+		List<UserResponseDto> userList = userRepository.getUserFromLabel(labelId);
+		return ResponseEntity.ok(userList);
 	}
 
+	// label leader 위임
 	@Transactional
-	public ResponseEntity<SuccessResponseDto> assignLeader(User user, LabelRequestDto labelRequestDto, Long labelId) {
+	public ResponseEntity<?> assignLeader(User user, LabelRequestDto labelRequestDto, Long labelId) {
 		// task 검증
 		Task task = validateTask(labelRequestDto.getTaskId());
 		// label 검증
@@ -97,7 +117,18 @@ public class LabelService {
 		} else {
 			throw new CustomException(ErrorCode.EMPTY_CLIENT);
 		}
-		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
+		List<UserResponseDto> userList = userRepository.getUserFromLabel(labelId);
+		return ResponseEntity.ok(userList);
+	}
+
+	@Transactional(readOnly = true)
+	public ResponseEntity<?> getTicketListByLabel(User user, Long labelId) {
+		Label label = validateLabel(labelId);
+		//project 내에 존재하는 유저들은 label별 티켓 확인 가능
+		Project project = label.getTask().getProject();
+		valideExistMember(project, ProjectUser.create(project, user));
+		Map<TicketStatus, List<TicketResponseDto>> tickets = ticketRepository.findWithLabelId(labelId);
+		return ResponseEntity.ok(tickets);
 	}
 
 	private Task validateTask(Long id) { //todo AOP 적용
@@ -120,6 +151,12 @@ public class LabelService {
 
 	private void validateExistMember(Task task, TaskUser taskUser) {
 		if (!task.getTaskUserList().contains(taskUser)) {
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
+		}
+	}
+
+	private void valideExistMember(Project project, ProjectUser projectUser) {
+		if (!project.getProjectUserList().contains(projectUser)) {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 	}

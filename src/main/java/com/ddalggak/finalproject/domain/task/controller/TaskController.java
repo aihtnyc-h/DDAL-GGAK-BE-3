@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskResponseDto;
 import com.ddalggak.finalproject.domain.task.service.TaskService;
-import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 import com.ddalggak.finalproject.global.view.Views;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -52,7 +51,7 @@ public class TaskController {
 
 	@Operation(summary = "Task 삭제", description = "api for delete one task")
 	@DeleteMapping("/task/{taskId}")
-	public ResponseEntity<SuccessResponseDto> deleteTask(
+	public ResponseEntity<?> deleteTask(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@PathVariable Long taskId) {
 		return taskService.deleteTask(user.getUser(), taskId);
@@ -60,7 +59,7 @@ public class TaskController {
 
 	@Operation(summary = "Task 리더 부여", description = "api for assign admin to task")
 	@PostMapping("/task/{taskId}/admin")
-	public ResponseEntity<SuccessResponseDto> assignLeader(
+	public ResponseEntity<?> assignLeader(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@PathVariable Long taskId,
 		@Valid @RequestBody TaskRequestDto taskRequestDto) {
@@ -69,7 +68,7 @@ public class TaskController {
 
 	@Operation(summary = "Task 초대", description = "api for invite user to task")
 	@PostMapping("/task/{taskId}/invite")
-	public ResponseEntity<SuccessResponseDto> inviteTask(
+	public ResponseEntity<?> inviteTask(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@Valid @RequestBody TaskRequestDto taskRequestDto,
 		@PathVariable Long taskId) {
