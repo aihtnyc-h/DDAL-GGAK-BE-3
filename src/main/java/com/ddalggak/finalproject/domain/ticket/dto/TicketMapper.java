@@ -1,5 +1,7 @@
 package com.ddalggak.finalproject.domain.ticket.dto;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -25,4 +27,5 @@ public interface TicketMapper {
 	})
 	TicketResponseDto toDto(Ticket ticket);
 
+	List<TicketResponseDto> toDtoList(List<Ticket> tickets);
 }
