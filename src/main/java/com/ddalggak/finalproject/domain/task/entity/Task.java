@@ -55,10 +55,11 @@ public class Task extends BaseEntity {
 	private String taskLeader;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "project_id")
+	@JoinColumn(name = "projectId")
 	private Project project;
 
 	@OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+	@BatchSize(size = 500)
 	private List<Label> labelList = new ArrayList<>();
 
 	@OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)

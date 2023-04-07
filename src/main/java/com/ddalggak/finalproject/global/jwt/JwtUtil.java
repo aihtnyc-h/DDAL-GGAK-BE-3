@@ -48,9 +48,11 @@ public class JwtUtil {
 	public static final String REFRESH_TOKEN_HEADER = "RefreshToken";
 	public static final String AUTHORIZATION_KEY = "auth";
 	private static final String BEARER_PREFIX = "Bearer ";
-	private static final long ACCESS_TOKEN_TIME = 60 * 60 * 24 * 1000L;
-	private static final long REFRESH_TOKEN_TIME = 60 * 60 * 24 * 30 * 1000L;
 
+	@Value("${app.auth.accessTokenTime}")
+	private Long accessTokenTime;
+	@Value("${app.auth.refreshTokenTime}")
+	private Long refreshTokenTime;
 	@Value("${jwt.secret.key}")
 	private String secretKey;
 	private Key key;
@@ -101,7 +103,7 @@ public class JwtUtil {
 			Jwts.builder()
 				.setSubject(email)
 				.claim(AUTHORIZATION_KEY, role)
-				.setExpiration(new Date(date.getTime() + ACCESS_TOKEN_TIME))
+				.setExpiration(new Date(date.getTime() + accessTokenTime))
 				.setIssuedAt(date)
 				.signWith(key, signatureAlgorithm)
 				.compact();
@@ -130,7 +132,7 @@ public class JwtUtil {
 		return Jwts.builder()
 			.setSubject(email)
 			.claim(AUTHORIZATION_KEY, role)
-			.setExpiration(new Date(date.getTime() + ACCESS_TOKEN_TIME))
+			.setExpiration(new Date(date.getTime() + accessTokenTime))
 			.setIssuedAt(date)
 			.signWith(key, signatureAlgorithm)
 			.compact();
@@ -143,7 +145,7 @@ public class JwtUtil {
 			Jwts.builder()
 				.setSubject(email)
 				.claim(AUTHORIZATION_KEY, role)
-				.setExpiration(new Date(date.getTime() + REFRESH_TOKEN_TIME))
+				.setExpiration(new Date(date.getTime() + refreshTokenTime))
 				.setIssuedAt(date)
 				.signWith(key, signatureAlgorithm)
 				.compact();
@@ -172,7 +174,7 @@ public class JwtUtil {
 		return Jwts.builder()
 			.setSubject(email)
 			.claim(AUTHORIZATION_KEY, role)
-			.setExpiration(new Date(date.getTime() + REFRESH_TOKEN_TIME))
+			.setExpiration(new Date(date.getTime() + refreshTokenTime))
 			.setIssuedAt(date)
 			.signWith(key, signatureAlgorithm)
 			.compact();
@@ -195,14 +197,10 @@ public class JwtUtil {
 			return true;
 		} catch (SecurityException | MalformedJwtException e) {
 			log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
-		} catch (ExpiredJwtException e) {
-			log.info("Expired JWT token, 만료된 JWT token 입니다.");
 		} catch (UnsupportedJwtException e) {
 			log.info("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
 		} catch (IllegalArgumentException e) {
 			log.info("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
-		} catch (Exception e) {
-			log.info("Invalid token, 유효하지 않은 토큰입니다.");
 		}
 		return false;
 	}
@@ -220,8 +218,6 @@ public class JwtUtil {
 			}
 		} catch (SecurityException | MalformedJwtException e) {
 			log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
-		} catch (ExpiredJwtException e) {
-			log.info("Expired JWT token, 만료된 JWT token 입니다.");
 		} catch (UnsupportedJwtException e) {
 			log.info("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
 		} catch (IllegalArgumentException e) {
@@ -243,7 +239,7 @@ public class JwtUtil {
 			Jwts.builder()
 				.setSubject(email)
 				.claim(AUTHORIZATION_KEY, role)
-				.setExpiration(new Date(date.getTime() + ACCESS_TOKEN_TIME))
+				.setExpiration(new Date(date.getTime() + accessTokenTime))
 				.setIssuedAt(date)
 				.signWith(key, signatureAlgorithm)
 				.compact();
@@ -259,9 +255,22 @@ public class JwtUtil {
 		return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
 	}
 
-	public Date getTokenExpiration(String token) {
-		Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
-		return claims.getExpiration();
+	public boolean isExpired(String token) {
+		try {
+			Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody().getExpiration().before(new Date());
+		} catch (ExpiredJwtException e) {
+			log.info("Expired JWT token, 만료된 JWT token 입니다.");
+			return true;
+		}
+		return false;
 	}
+
+	// public void setErrorResponse(HttpServletResponse response) throws IOException {
+	// 	response.setStatus(999);
+	// 	response.setContentType("application/json; charset=UTF-8");
+	//
+	// 	JwtExceptionResponse jwtExceptionResponse = new JwtExceptionResponse(ErrorCode.INVALID_AUTH_TOKEN);
+	// 	response.getWriter().write(jwtExceptionResponse.convertToJson());
+	// }
 
 }

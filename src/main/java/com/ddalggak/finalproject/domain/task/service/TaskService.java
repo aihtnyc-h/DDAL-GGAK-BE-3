@@ -44,7 +44,8 @@ public class TaskService {
 		TaskUser taskUser = TaskUser.create(taskUserRequestDto);
 		Task task = Task.create(taskRequestDto, taskUser, project);
 		taskRepository.save(task);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
+		return ResponseEntity.ok(
+			"ok");//todo globalResponse 만들 때 201 날리기
 	}
 
 	@Transactional(readOnly = true) // project member면 누구나 task 조회 가능하다. task 멤버가 아닐지라도.
@@ -127,6 +128,12 @@ public class TaskService {
 
 	private Project validateProject(Long id) {
 		return projectRepository.findById(id).orElseThrow(
+			() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND)
+		);
+	}
+
+	private Project validateProjectByTaskId(Long taskId) {
+		return projectRepository.findProjectByTaskId(taskId).orElseThrow(
 			() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND)
 		);
 	}

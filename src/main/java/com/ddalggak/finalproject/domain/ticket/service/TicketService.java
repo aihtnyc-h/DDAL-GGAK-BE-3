@@ -46,15 +46,15 @@ public class TicketService {
 		//4. 티켓 저장
 		ticketRepository.save(ticket);
 		//5. return
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
+		return ResponseEntity.status(201)
+			.body(taskRepository.findTaskById(ticketRequestDto.getTaskId()));
 	}
 
 	// 티켓 상세조회
 	@Transactional(readOnly = true)
-	public ResponseEntity<TicketResponseDto> getTicket(Long ticketId, User user, TicketRequestDto ticketRequestDto) {
-		validateTask(ticketRequestDto.getTaskId());
-		//프로젝트에 있는 유저인지 확인 todo 프로젝트에 있는 유저인지 확인하면서 DB에 최소한으로 들를 수 있는 방법이 없을까?
+	public ResponseEntity<TicketResponseDto> getTicket(Long ticketId, User user) {
 		TicketResponseDto ticket = ticketRepository.findWithOrderedComments(ticketId);
+		// validateTask(ticket.get);
 		return ResponseEntity.ok(ticket);
 	}
 
@@ -72,7 +72,7 @@ public class TicketService {
 	}
 
 	// 티켓 삭제하기
-	@Transactional //todo 삭제된 티켓에 대해서 task의 db일관성문제가 터진다.
+	@Transactional
 	public ResponseEntity<?> deleteTicket(User user, Long ticketId) {
 		user = validateUserByEmail(user.getEmail()); // todo validate 로직 다시 짜기
 		// 1. 티켓 존재하는지 확인
@@ -83,7 +83,7 @@ public class TicketService {
 		task.deleteTicket(ticket);
 		//4. ticket Repo에서 ticket 삭제함
 		ticketRepository.delete(ticket);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
+		return ResponseEntity.ok(taskRepository.findTaskById(task.getTaskId()));
 	}
 
 	/* == 반복 로직 == */

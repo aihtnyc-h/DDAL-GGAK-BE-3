@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
 import com.ddalggak.finalproject.domain.project.service.ProjectService;
-import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,7 +45,7 @@ public class ProjectController {
 		@Parameter(name = "projectRequestDto", description = "프로젝트 생성에 필요한 정보입니다.", required = true)
 	})
 	@PostMapping("/project")
-	public ResponseEntity<SuccessResponseDto> createProject(
+	public ResponseEntity<?> createProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestPart(value = "thumbnail", required = false) MultipartFile image,
 		@Valid @RequestPart(value = "data") ProjectRequestDto projectRequestDto) throws IOException {
@@ -88,7 +87,7 @@ public class ProjectController {
 
 	@Operation(summary = "프로젝트 수정", description = "api for update project")
 	@PostMapping("/project/{projectId}/settings")
-	public ResponseEntity<SuccessResponseDto> updateProject(
+	public ResponseEntity<ProjectBriefResponseDto> updateProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId,
 		@RequestPart(value = "thumbnail", required = false) MultipartFile image,
