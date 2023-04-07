@@ -22,7 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.user.dto.EmailRequestDto;
-import com.ddalggak.finalproject.domain.user.dto.NicknameRequestDto;
+import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
+import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
@@ -103,24 +104,22 @@ public class UserController {
 	}
 
 	@PutMapping("/user/nickname")
-	public ResponseEntity<?> updateNickname(@Valid @RequestBody NicknameRequestDto nicknameRequestDto,
+	public NicknameDto updateNickname(@Valid @RequestBody NicknameDto nicknameDto,
 		@AuthenticationPrincipal UserDetailsImpl userDetails, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			List<ObjectError> list = bindingResult.getAllErrors();
 			for (ObjectError e : list) {
 				System.out.println(e.getDefaultMessage());
 			}
-			return ErrorResponse.from(ErrorCode.INVALID_REQUEST);
+			throw new UserException(ErrorCode.INVALID_REQUEST);
 		}
-		userService.updateNickname(nicknameRequestDto.getNickname(), userDetails.getEmail());
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_UPLOAD);
+		return userService.updateNickname(nicknameDto.getNickname(), userDetails.getEmail());
 	}
 
 	@PutMapping("/user/profile")
-	public ResponseEntity<?> updateProfile(@RequestPart(value = "image") MultipartFile image,
+	public ProfileDto updateProfile(@RequestPart(value = "image") MultipartFile image,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-		userService.updateProfile(image, userDetails.getEmail());
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_UPLOAD);
+		return userService.updateProfile(image, userDetails.getEmail());
 	}
 
 	@GetMapping("/user")

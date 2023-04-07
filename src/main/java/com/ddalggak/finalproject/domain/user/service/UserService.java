@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
+import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
@@ -33,7 +36,8 @@ public class UserService {
 	private final JwtUtil jwtUtil;
 	private final S3Uploader s3Uploader;
 
-	private long fileSizeLimit = 10 * 1024 * 1024;//10메가바이트/킬로바이트/바이트
+	@Value("${file.size.limit}")
+	private Long fileSizeLimit;//10메가바이트/킬로바이트/바이트
 
 	@Transactional
 	public void signup(UserRequestDto userRequestDto) {
@@ -82,14 +86,15 @@ public class UserService {
 	}
 
 	@Transactional
-	public void updateNickname(String nickname, String email) {
+	public NicknameDto updateNickname(String nickname, String email) {
 		User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
 
 		User.updateNickname(user, nickname);
+		return new NicknameDto(user.getNickname());
 	}
 
 	@Transactional
-	public void updateProfile(MultipartFile image, String email) throws IOException {
+	public ProfileDto updateProfile(MultipartFile image, String email) throws IOException {
 		fileSizeCheck(image);
 		fileCheck(image);
 
@@ -99,6 +104,7 @@ public class UserService {
 
 		User.updateProfile(user, storedFileName);
 
+		return new ProfileDto(storedFileName);
 	}
 
 	private boolean fileCheck(MultipartFile file) {
