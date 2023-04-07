@@ -67,13 +67,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ErrorResponse.from(ErrorCode.INVALID_REQUEST, e.getMessage());
 	}
 
-	protected ErrorResponse makeErrorResponse(ErrorCode errorCode) {
-		return ErrorResponse.builder()
-			.status(errorCode.getHttpStatus().value())
-			.message(errorCode.getMessage())
-			.build();
-	}
-
 	/*
 	 * BindingResult로 에러 나왔을 때 처리
 	 */
