@@ -7,7 +7,6 @@ import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 public interface TicketRepositoryCustom {
 	TicketResponseDto findWithOrderedComments(Long ticketId);
 
-	List<TicketResponseDto> findByTaskId(Long taskId);
-
+	List<TicketResponseDto> findWithTaskId(Long taskId);
 	// void update(Long ticketId, TicketRequestDto ticketRequestDto);
 }
