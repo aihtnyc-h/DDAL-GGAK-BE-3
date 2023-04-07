@@ -51,4 +51,7 @@ public class ChatRoom {
 			userList.add(user);
 		}
 	}
+	public void removeUser(User user) {
+		userList.remove(user);
+	}
 }

@@ -42,20 +42,20 @@ public class ChatController {
 	/**
 	 * 채팅방 퇴장
 	 */
-	// @PostMapping("/rooms/{roomId}/leave")
-	// public ResponseEntity<Void> leaveChatRoom(@PathVariable Long roomId, @RequestBody String email) {
-	// 	chatService.leaveChatRoom(roomId, email);
-	// 	return ResponseEntity.ok().build();
-	// }
+	@PostMapping("/rooms/{roomId}/leave")
+	public ResponseEntity<Void> leaveChatRoom(@PathVariable Long roomId, @RequestBody String email) {
+		chatService.leaveChatRoom(roomId, email);
+		return ResponseEntity.ok().build();
+	}
 
 	/**
 	 * 메시지 전송
 	 */
-	// @PostMapping("/messages")
-	// public ResponseEntity<ChatMessageDto> sendMessage(@RequestBody ChatMessageDto chatMessageDto) {
-	// 	chatService.sendMessage(chatMessageDto);
-	// 	return ResponseEntity.ok().body(chatMessageDto);
-	// }
+	@PostMapping("/messages")
+	public ResponseEntity<ChatMessageDto> sendMessage(@RequestBody ChatMessageDto chatMessageDto) {
+		chatService.sendMessage(chatMessageDto);
+		return ResponseEntity.ok().body(chatMessageDto);
+	}
 
 	/**
 	 * 채팅방의 모든 메시지 조회

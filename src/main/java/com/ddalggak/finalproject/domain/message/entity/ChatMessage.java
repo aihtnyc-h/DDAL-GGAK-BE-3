@@ -35,12 +35,18 @@ public class ChatMessage {
 	@Column(nullable = false)
 	private LocalDateTime createdAt;
 
-	public ChatMessage(Long chatMessageId, String content, Long roomId, User user, LocalDateTime createdAt) {
+	public ChatMessage() {
 		this.chatMessageId = chatMessageId;
 		this.content = content;
 		this.roomId = roomId;
 		this.user = user;
 		this.createdAt = createdAt;
 	}
+	public Long getChatMessageId() {
+		return chatMessageId;
+	}
 
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
 }

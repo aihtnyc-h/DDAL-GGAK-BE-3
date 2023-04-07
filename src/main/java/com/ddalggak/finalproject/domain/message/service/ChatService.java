@@ -2,6 +2,7 @@ package com.ddalggak.finalproject.domain.message.service;
 
 import static com.ddalggak.finalproject.global.error.ErrorCode.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,34 +70,40 @@ public class ChatService extends ChatServiceImpl {
 	// 	room.getUserList().remove(email);
 	// 	chatRoomRepository.save(room);
 	// }
-	// public void leaveChatRoom(Long roomId, String email) {
-	// 	ChatRoom room = (ChatRoom)chatRoomRepository.findById(roomId).orElse(new ChatRoom());
-	// 	if (!room.getUserList().contains(email)) {
-	// 		// 사용자가 채팅방에 없는 경우
-	// 		return;
-	// 	}
-	// 	room.getUserList().remove(email);
-	// 	chatRoomRepository.save(room);
-	// }
+	public void leaveChatRoom(Long roomId, String email) {
+		User user = validateUserByEmail(email);
+		ChatRoom room = getChatRoomOrThrow(roomId);
+		if (!room.getUserList().contains(user)) {
+			// User is not in the chat room
+			return;
+		}
+		room.removeUser(user);
+		chatRoomRepository.save(room);
+	}
 
 	/**
 	 * 메시지 전송
 	 */
-	// public void sendMessage(ChatMessageDto messageDto) {
-	// 	ChatRoom room = chatRoomRepository.findById(messageDto.getRoomId())
-	// 		.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 방입니다."));
-	//
-	// 	User sender = userRepository.findById(messageDto.getUser().getUserId())
-	// 		.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-	//
-	// 	ChatMessage message = new ChatMessage(messageDto.getContent(), room, sender);
-	// 	ChatMessage savedMessage = chatMessageRepository.save(message);
-	//
-	// 	messageDto.setChatMessageId(savedMessage.getId());
-	// 	messageDto.setCreatedAt(savedMessage.getCreatedAt());
-	//
-	// 	messagingTemplate.convertAndSend("/topic/chat/" + messageDto.getRoomId(), messageDto);
-	// }
+	public void sendMessage(ChatMessageDto messageDto) {
+		ChatRoom room = chatRoomRepository.findById(messageDto.getRoomId())
+			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 방입니다.")); // 오류코드 만들어야한다네 언제할것인가?
+
+		User sender = userRepository.findById(messageDto.getUser().getUserId())
+			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+		ChatMessage message = new ChatMessage();
+		messageDto.setContent(messageDto.getContent());
+		messageDto.setRoomId(room.getChatRoomId());
+		messageDto.setUser(sender);
+		messageDto.setCreatedAt(LocalDateTime.now());
+			// room.getChatRoomId(), sender, LocalDateTime.now());
+		ChatMessage savedMessage = chatMessageRepository.save(message);
+		// messageDto.setChatMessageId(savedMessag);
+		messageDto.setChatMessageId(savedMessage.getChatMessageId());
+		messageDto.setCreatedAt(savedMessage.getCreatedAt());
+
+		messagingTemplate.convertAndSend("/topic/chat/" + messageDto.getRoomId(), messageDto);
+	}
 
 	/**
 	 * 채팅방의 모든 메시지 조회
