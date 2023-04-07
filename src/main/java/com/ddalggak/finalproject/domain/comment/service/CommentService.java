@@ -2,6 +2,9 @@ package com.ddalggak.finalproject.domain.comment.service;
 
 import static com.ddalggak.finalproject.global.error.ErrorCode.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,8 +18,6 @@ import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
-import com.ddalggak.finalproject.global.dto.SuccessCode;
-import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
@@ -34,36 +35,44 @@ public class CommentService {
 	private final UserRepository userRepository;
 
 	// 댓글 작성
-	public ResponseEntity<CommentResponseDto> createComment(User user,
-		CommentRequestDto commentRequestDto) {
+	@Transactional
+	public ResponseEntity<?> createComment(User user, CommentRequestDto commentRequestDto) {
+		// 유효성 검증
 		user = validateUserByEmail(user.getEmail());
 		Ticket ticket = TicketValidation(commentRequestDto.getTicketId());
 		// comment 작성
 		Comment comment = commentMapper.mapToEntity(user, ticket, commentRequestDto);
 		commentRepository.save(comment);
 		// 상태 반환
-		return ResponseEntity.ok(commentMapper.toDto(comment));
+		List<CommentResponseDto> result = commentRepository.findAllByTicketOrderByCreatedAtDesc(ticket)
+			.stream()
+			.map(commentMapper::toDto)
+			.collect(Collectors.toList());
+		return ResponseEntity.ok(result);
 	}
 
 	// 댓글 수정
+	@Transactional
 	public ResponseEntity<?> updateComment(User user, Long commentId, CommentRequestDto commentRequestDto) {
+		// 유효성 검증
 		validateUserByEmail(user.getEmail());
-		TicketValidation(commentRequestDto.getTicketId());
+		Ticket ticket = TicketValidation(commentRequestDto.getTicketId());
+		// comment 수정 메서드
 		Comment comment = CommnetValidation(commentId);
 		comment.update(commentRequestDto);
 		// 상태 반환
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
-	}
-
-	private User validateUserByEmail(String email) {
-		return userRepository.findByEmail(email).orElseThrow(
-			() -> new CustomException(MEMBER_NOT_FOUND)
-		);
+		List<CommentResponseDto> result = commentRepository.findAllByTicketOrderByCreatedAtDesc(ticket)
+			.stream()
+			.map(commentMapper::toDto)
+			.collect(Collectors.toList());
+		return ResponseEntity.ok(result);
 	}
 
 	// 댓글 삭제
-	public ResponseEntity<SuccessResponseDto> deleteComment(UserDetailsImpl userDetails, Long commentId) {
+	@Transactional
+	public ResponseEntity<?> deleteComment(UserDetailsImpl userDetails, Long commentId) {
 		Comment comment = CommnetValidation(commentId);
+		Ticket ticket = TicketValidation(comment.getTicket().getTicketId());
 		// checkValidation(ticket, comment, userDetails);
 		if (!comment.getUser().getUserId().equals(userDetails.getUser().getUserId())) {
 			throw new CustomException(UNAUTHENTICATED_USER);
@@ -71,7 +80,11 @@ public class CommentService {
 		// 삭제
 		commentRepository.delete(comment);
 		// 상태 반환
-		return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
+		List<CommentResponseDto> result = commentRepository.findAllByTicketOrderByCreatedAtDesc(ticket)
+			.stream()
+			.map(commentMapper::toDto)
+			.collect(Collectors.toList());
+		return ResponseEntity.ok(result);
 	}
 
 	/* == 반복 로직 == */
@@ -85,6 +98,12 @@ public class CommentService {
 	private Comment CommnetValidation(Long commentId) {
 		return commentRepository.findById(commentId)
 			.orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+	}
+
+	private User validateUserByEmail(String email) {
+		return userRepository.findByEmail(email).orElseThrow(
+			() -> new CustomException(MEMBER_NOT_FOUND)
+		);
 	}
 
 	// comment 유효성 검사

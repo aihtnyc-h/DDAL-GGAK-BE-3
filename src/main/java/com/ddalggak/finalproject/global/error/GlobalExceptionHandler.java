@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.ddalggak.finalproject.domain.oauth.exception.OAuthException;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ErrorResponse.from(e.getErrorCode());
 	}
 
+	@ExceptionHandler(value = {OAuthException.class})
+	protected ResponseEntity<ErrorResponse> handleOAuthException(OAuthException e) {
+		log.error("handleOAuthException throw OAuthException : {}", e.getErrorCode());
+		return ErrorResponse.from(e.getErrorCode(), e.getMessage());
+	}
+
 	@ExceptionHandler(value = {IOException.class})
 	protected ResponseEntity<?> handleIOException(IOException e) {
 		log.error("handleIOException throws IOException : {}", e.getMessage());
@@ -58,13 +65,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
 		log.error("handleIAException throws IllegalArgumentException : {}", e.getMessage());
 		return ErrorResponse.from(ErrorCode.INVALID_REQUEST, e.getMessage());
-	}
-
-	protected ErrorResponse makeErrorResponse(ErrorCode errorCode) {
-		return ErrorResponse.builder()
-			.status(errorCode.getHttpStatus().value())
-			.message(errorCode.getMessage())
-			.build();
 	}
 
 	/*

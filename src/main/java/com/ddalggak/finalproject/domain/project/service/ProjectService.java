@@ -1,5 +1,7 @@
 package com.ddalggak.finalproject.domain.project.service;
 
+import static com.ddalggak.finalproject.global.dto.SuccessCode.*;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,8 +24,7 @@ import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
-import com.ddalggak.finalproject.global.dto.SuccessCode;
-import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
+import com.ddalggak.finalproject.global.dto.GlobalResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.infra.aws.S3Uploader;
@@ -59,7 +60,9 @@ public class ProjectService {
 		project.setProjectLeader(user.getEmail());
 		//5. projectRepository에 project 저장
 		projectRepository.save(project);
-		return ResponseEntity.ok(projectRepository.findProjectAllByUserId(user.getUserId()));
+		//6. projectResponseDto로 반환
+		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(user.getUserId());
+		return GlobalResponseDto.of(CREATED_SUCCESSFULLY, result, null);
 	}
 
 	@Transactional(readOnly = true)
@@ -81,14 +84,14 @@ public class ProjectService {
 	}
 
 	@Transactional
-	public ResponseEntity<SuccessResponseDto> deleteProject(User user, Long projectId) {
+	public ResponseEntity<?> deleteProject(User user, Long projectId) {
 		Project project = validateProject(projectId);
 		if (project.getProjectLeader().equals(user.getEmail())) {
 			if (project.getThumbnail() != null) {
 				s3Uploader.delete(project.getThumbnail());
 			}
 			projectRepository.delete(project);
-			return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
+			return ResponseEntity.ok(projectRepository.findProjectAllByUserId(user.getUserId()));
 		} else {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
@@ -100,7 +103,7 @@ public class ProjectService {
 		ProjectUser projectUser = ProjectUser.create(project, user);
 		validateDuplicateMember(project, projectUser);
 		project.addProjectUser(projectUser);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.JOINED_SUCCESSFULLY);
+		return ResponseEntity.ok(projectRepository.findProjectAllByUserId(user.getUserId()));
 	}
 
 	@Transactional
@@ -117,6 +120,7 @@ public class ProjectService {
 		}
 		projectRequestDto.setThumbnail(imageUrl);
 		projectRepository.update(projectId, projectRequestDto);
+		new ProjectBriefResponseDto(project);
 		return ResponseEntity.ok(new ProjectBriefResponseDto(project));
 	}
 
@@ -129,7 +133,9 @@ public class ProjectService {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		project.getProjectUserList().remove(ProjectUser.create(project, projectUser));
-		return SuccessResponseDto.toResponseEntity(SuccessCode.DELETED_SUCCESSFULLY);
+		//참여중인 유저 목록 리턴
+		return ResponseEntity.ok(
+			project.getProjectUserList().stream().map(UserResponseDto::of).collect(Collectors.toList()));
 	}
 
 	@Transactional(readOnly = true)

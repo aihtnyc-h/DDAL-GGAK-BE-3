@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,8 +22,10 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
 import com.ddalggak.finalproject.domain.user.dto.EmailRequestDto;
-import com.ddalggak.finalproject.domain.user.dto.NicknameRequestDto;
+import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
+import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
@@ -103,24 +106,22 @@ public class UserController {
 	}
 
 	@PutMapping("/user/nickname")
-	public ResponseEntity<?> updateNickname(@Valid @RequestBody NicknameRequestDto nicknameRequestDto,
+	public NicknameDto updateNickname(@Valid @RequestBody NicknameDto nicknameDto,
 		@AuthenticationPrincipal UserDetailsImpl userDetails, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			List<ObjectError> list = bindingResult.getAllErrors();
 			for (ObjectError e : list) {
 				System.out.println(e.getDefaultMessage());
 			}
-			return ErrorResponse.from(ErrorCode.INVALID_REQUEST);
+			throw new UserException(ErrorCode.INVALID_REQUEST);
 		}
-		userService.updateNickname(nicknameRequestDto.getNickname(), userDetails.getEmail());
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_UPLOAD);
+		return userService.updateNickname(nicknameDto.getNickname(), userDetails.getEmail());
 	}
 
 	@PutMapping("/user/profile")
-	public ResponseEntity<?> updateProfile(@RequestPart(value = "image") MultipartFile image,
+	public ProfileDto updateProfile(@RequestPart(value = "image") MultipartFile image,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-		userService.updateProfile(image, userDetails.getEmail());
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_UPLOAD);
+		return userService.updateProfile(image, userDetails.getEmail());
 	}
 
 	@GetMapping("/user")
@@ -142,6 +143,12 @@ public class UserController {
 				.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 		} else
 			throw new UserException(ErrorCode.INVALID_AUTH_TOKEN);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_LOGIN);
+		return SuccessResponseDto.of(SuccessCode.SUCCESS_LOGIN);
+	}
+
+	@GetMapping("/user/{userId}/Tickets")
+	public ResponseEntity<?> getMyTickets(@PathVariable Long userId,
+		TicketSearchCondition condition) {
+		return userService.getMyTickets(userId, condition);
 	}
 }

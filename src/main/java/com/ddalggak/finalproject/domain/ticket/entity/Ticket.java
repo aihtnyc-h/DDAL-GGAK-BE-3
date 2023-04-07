@@ -118,5 +118,4 @@ public class Ticket extends BaseEntity {
 		this.task = task;
 		task.addTicket(this);
 	}
-
 }

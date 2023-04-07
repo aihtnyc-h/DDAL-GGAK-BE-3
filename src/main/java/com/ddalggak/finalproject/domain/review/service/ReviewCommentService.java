@@ -36,19 +36,22 @@ public class ReviewCommentService {
 		ReviewComment reviewComment = new ReviewComment(user, review, reviewCommentRequestDto);
 		// ReviewComment.create(reviewCommentRequestDto, review);
 		reviewCommentRepository.save(reviewComment);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
+		return SuccessResponseDto.of(SuccessCode.CREATED_SUCCESSFULLY);
 	}
+
 	// 리뷰 댓글 수정
 	@Transactional
 
-	public ResponseEntity<?> updateReviewComment(Long review_commentId, User user, ReviewCommentRequestDto reviewCommentRequestDto) {
+	public ResponseEntity<?> updateReviewComment(Long review_commentId, User user,
+		ReviewCommentRequestDto reviewCommentRequestDto) {
 		validateUserByEmail(user.getEmail());
 		validateReview(reviewCommentRequestDto.getReviewId());
 		ReviewComment reviewComment = validateReviewComment(review_commentId);
 		reviewComment.update(reviewCommentRequestDto);
 		reviewCommentRepository.save(reviewComment);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
+		return SuccessResponseDto.of(SuccessCode.UPDATED_SUCCESSFULLY);
 	}
+
 	// 리뷰 댓글 삭제
 	@Transactional
 
@@ -56,7 +59,7 @@ public class ReviewCommentService {
 		validateUserByEmail(user.getEmail());
 		ReviewComment reviewComment = validateReviewComment(review_commentId);
 		reviewCommentRepository.delete(reviewComment);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
+		return SuccessResponseDto.of(SuccessCode.UPDATED_SUCCESSFULLY);
 	}
 
 	// 반복 로직
