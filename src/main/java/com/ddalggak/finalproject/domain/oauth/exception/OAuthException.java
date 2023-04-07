@@ -2,6 +2,9 @@ package com.ddalggak.finalproject.domain.oauth.exception;
 
 import com.ddalggak.finalproject.global.error.ErrorCode;
 
+import lombok.Getter;
+
+@Getter
 public class OAuthException extends RuntimeException {
 
 	private final ErrorCode errorCode;

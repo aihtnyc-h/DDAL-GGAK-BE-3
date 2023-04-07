@@ -22,10 +22,8 @@ import com.ddalggak.finalproject.domain.oauth.handler.OAuth2AuthenticationSucces
 import com.ddalggak.finalproject.domain.oauth.repository.CookieAuthorizationRequestRepository;
 import com.ddalggak.finalproject.domain.oauth.service.CustomOAuth2UserService;
 import com.ddalggak.finalproject.global.jwt.JwtAuthFilter;
-import com.ddalggak.finalproject.global.jwt.JwtExceptionFilter;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
 import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
-import com.ddalggak.finalproject.global.security.UserDetailsServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,8 +34,6 @@ import lombok.RequiredArgsConstructor;
 public class WebSecurityConfig {
 	private final JwtUtil jwtUtil;
 	private final CustomOAuth2UserService customOAuth2UserService;
-	private final UserDetailsServiceImpl userDetailsService;
-	private final JwtExceptionFilter jwtExceptionFilter;
 	private final TokenRepository tokenRepository;
 
 	//
@@ -62,10 +58,12 @@ public class WebSecurityConfig {
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		//http.authorizeRequests().anyRequest().authenticated();
 		http.authorizeRequests()
+			.antMatchers("/api/auth/email", "/api/auth/signup", "/api/auth/login")
+			.permitAll()
 			.antMatchers("/api/auth/**")
-			.permitAll()
-			.antMatchers(HttpMethod.GET, "/api/user/**")
-			.permitAll()
+			.fullyAuthenticated()
+			.antMatchers("/api/user/**")
+			.fullyAuthenticated()
 			.antMatchers(HttpMethod.GET, "/api/project/**")
 			.permitAll()
 			.antMatchers(HttpMethod.GET, "/api/task/**")
@@ -99,8 +97,7 @@ public class WebSecurityConfig {
 			// JWT 인증/인가를 사용하기 위한 설정
 			.and()
 			.addFilterBefore(new JwtAuthFilter(jwtUtil),
-				UsernamePasswordAuthenticationFilter.class) //    private final JwtUtil jwtUtil; 추가하기!
-			.addFilterBefore(jwtExceptionFilter, JwtAuthFilter.class);
+				UsernamePasswordAuthenticationFilter.class); //    private final JwtUtil jwtUtil; 추가하기!
 		http.cors();
 		// 로그인 사용
 		http.formLogin().permitAll();// 로그인 페이지가 있을 경우 넣기!.loginPage(".api/user/login-page").permitAll();
