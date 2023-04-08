@@ -20,8 +20,10 @@ import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.domain.user.role.UserRole;
 import com.ddalggak.finalproject.global.error.ErrorCode;
-import com.ddalggak.finalproject.global.jwt.token.entity.Token;
-import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
+import com.ddalggak.finalproject.global.jwt.token.entity.AccessToken;
+import com.ddalggak.finalproject.global.jwt.token.entity.RefreshToken;
+import com.ddalggak.finalproject.global.jwt.token.repository.AccessTokenRepository;
+import com.ddalggak.finalproject.global.jwt.token.repository.RefreshTokenRepository;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 import com.ddalggak.finalproject.global.security.UserDetailsServiceImpl;
 
@@ -41,8 +43,9 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
+	private final AccessTokenRepository accessTokenRepository;
 	private final UserRepository userRepository;
-	private final TokenRepository tokenRepository;
+	private final RefreshTokenRepository refreshTokenRepository;
 	private final UserDetailsServiceImpl userDetailsService;
 	public static final String AUTHORIZATION_HEADER = "Authorization";
 	public static final String REFRESH_TOKEN_HEADER = "RefreshToken";
@@ -65,19 +68,29 @@ public class JwtUtil {
 	}
 
 	public String login(String email, UserRole role) {
-		if (tokenRepository.existsById(email)) {
-			log.info("기존의 존재하는 모든 토큰 삭제");
-			tokenRepository.deleteById(email);
+		if (accessTokenRepository.existsById(email)) {
+			log.info("기존의 존재하는 액세스 토큰 삭제");
+			accessTokenRepository.deleteById(email);
+		}
+		if (refreshTokenRepository.existsById(email)) {
+			log.info("기존의 존재하는 리프레시 토큰 삭제");
+			refreshTokenRepository.deleteById(email);
 		}
 
 		String accessToken = createAccessToken(email, role);
 		String refreshToken = createRefreshToken(email, role).getRefreshToken();
 
-		Token token = Token.builder()
+		AccessToken newAccessToken = AccessToken.builder()
+			.email(email)
+			.accessToken(accessToken)
+			.build();
+		accessTokenRepository.save(newAccessToken);
+
+		RefreshToken newRefreshToken = RefreshToken.builder()
 			.email(email)
 			.refreshToken(refreshToken)
 			.build();
-		tokenRepository.save(token);
+		refreshTokenRepository.save(newRefreshToken);
 
 		return accessToken;
 	}
@@ -121,7 +134,7 @@ public class JwtUtil {
 			.map(GrantedAuthority::getAuthority)
 			.collect(Collectors.joining(","));
 
-		return BEARER_PREFIX +
+		String accessToken = BEARER_PREFIX +
 			Jwts.builder()
 				.setSubject(email)
 				.claim(AUTHORIZATION_KEY, role)
@@ -129,9 +142,17 @@ public class JwtUtil {
 				.setIssuedAt(date)
 				.signWith(key, signatureAlgorithm)
 				.compact();
+
+		AccessToken toSaveAccessToken = AccessToken.builder()
+			.email(email)
+			.accessToken(accessToken)
+			.expirationTime(new Date(date.getTime() + accessTokenTime))
+			.build();
+
+		return toSaveAccessToken.getAccessToken();
 	}
 
-	public Token createRefreshToken(String email, UserRole role) {
+	public RefreshToken createRefreshToken(String email, UserRole role) {
 		Date date = new Date();
 
 		String refreshToken = BEARER_PREFIX +
@@ -143,12 +164,12 @@ public class JwtUtil {
 				.signWith(key, signatureAlgorithm)
 				.compact();
 
-		Token toSaveRefreshToken = Token.builder()
+		RefreshToken toSaveRefreshToken = RefreshToken.builder()
 			.email(email)
 			.refreshToken(refreshToken)
 			.build();
 
-		tokenRepository.save(toSaveRefreshToken);
+		refreshTokenRepository.save(toSaveRefreshToken);
 
 		return toSaveRefreshToken;
 
@@ -175,12 +196,13 @@ public class JwtUtil {
 	}
 
 	public void logout(String email) {
-		Token token = tokenRepository.findById(email).orElseThrow(() -> new UserException(ErrorCode.INVALID_REQUEST));
+		RefreshToken token = refreshTokenRepository.findById(email)
+			.orElseThrow(() -> new UserException(ErrorCode.INVALID_REQUEST));
 		String refreshToken = token.getRefreshToken();
 
 		if (refreshToken != null) {
 			log.info("기존의 존재하는 토큰 모두 삭제");
-			tokenRepository.deleteById(email);
+			refreshTokenRepository.deleteById(email);
 		}
 	}
 
@@ -258,6 +280,18 @@ public class JwtUtil {
 			return true;
 		}
 		return false;
+	}
+
+	public boolean isAccessTokenAboutToExpire(String accessToken) {
+		Long now = new Date().getTime();
+		if (now - getExpirationTime(accessToken).getTime() <= 120000) {
+			return true;
+		}
+		return false;
+	}
+
+	public Date getExpirationTime(String token) {
+		return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody().getExpiration();
 	}
 
 }
