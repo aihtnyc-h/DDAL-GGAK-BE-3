@@ -58,7 +58,7 @@ public class CommentService {
 		validateUserByEmail(user.getEmail());
 		Ticket ticket = TicketValidation(commentRequestDto.getTicketId());
 		// comment 수정 메서드
-		Comment comment = CommnetValidation(commentId);
+		Comment comment = CommentValidation(commentId);
 		comment.update(commentRequestDto);
 		// 상태 반환
 		List<CommentResponseDto> result = commentRepository.findAllByTicketOrderByCreatedAtDesc(ticket)
@@ -71,7 +71,7 @@ public class CommentService {
 	// 댓글 삭제
 	@Transactional
 	public ResponseEntity<?> deleteComment(UserDetailsImpl userDetails, Long commentId) {
-		Comment comment = CommnetValidation(commentId);
+		Comment comment = CommentValidation(commentId);
 		Ticket ticket = TicketValidation(comment.getTicket().getTicketId());
 		// checkValidation(ticket, comment, userDetails);
 		if (!comment.getUser().getUserId().equals(userDetails.getUser().getUserId())) {
@@ -95,7 +95,7 @@ public class CommentService {
 	}
 
 	// comment 유무 확인
-	private Comment CommnetValidation(Long commentId) {
+	private Comment CommentValidation(Long commentId) {
 		return commentRepository.findById(commentId)
 			.orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
 	}
