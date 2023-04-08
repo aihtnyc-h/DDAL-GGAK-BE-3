@@ -2,12 +2,15 @@ package com.ddalggak.finalproject.domain.label.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ddalggak.finalproject.domain.label.dto.LabelMapper;
 import com.ddalggak.finalproject.domain.label.dto.LabelRequestDto;
+import com.ddalggak.finalproject.domain.label.dto.LabelResponseDto;
 import com.ddalggak.finalproject.domain.label.dto.LabelUserRequestDto;
 import com.ddalggak.finalproject.domain.label.entity.Label;
 import com.ddalggak.finalproject.domain.label.entity.LabelUser;
@@ -17,9 +20,12 @@ import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
 import com.ddalggak.finalproject.domain.task.repository.TaskRepository;
+import com.ddalggak.finalproject.domain.ticket.dto.TicketMapper;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
+import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
 import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
+import com.ddalggak.finalproject.domain.user.dto.UserMapper;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
@@ -33,12 +39,13 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class LabelService {
+
+	private final LabelMapper labelMapper;
+	private final UserMapper userMapper;
+	private final TicketMapper ticketMapper;
 	private final TaskRepository taskRepository;
-
 	private final LabelRepository labelRepository;
-
 	private final UserRepository userRepository;
-
 	private final TicketRepository ticketRepository;
 
 	//라벨 생성
@@ -61,7 +68,12 @@ public class LabelService {
 		// label 저장
 		labelRepository.save(label);
 		// return label list
-		return ResponseEntity.ok(labelRepository.findByTaskId(task.getTaskId()));
+		List<LabelResponseDto> labelList = labelRepository
+			.findByTaskId(task.getTaskId())
+			.stream()
+			.map(labelMapper::toDto)
+			.collect(Collectors.toList());
+		return ResponseEntity.ok(labelList);
 	}
 
 	//라벨 삭제
@@ -70,17 +82,23 @@ public class LabelService {
 		// 유효성 검증
 		Task task = validateTask(taskId);
 		Label label = validateLabel(labelId);
+		// 서비스 로직
 		if (!(task.getTaskLeader().equals(user.getEmail()) || label.getLabelLeader().equals(user.getEmail()))) {
 			labelRepository.delete(label);
 		} else {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
-
 		// return label list
-		return ResponseEntity.ok(labelRepository.findByTaskId(task.getTaskId()));
+		List<LabelResponseDto> labelList = labelRepository
+			.findByTaskId(task.getTaskId())
+			.stream()
+			.map(labelMapper::toDto)
+			.collect(Collectors.toList());
+		return ResponseEntity.ok(labelList);
 	}
 
-	@Transactional // todo 검증필요
+	//라벨 초대
+	@Transactional
 	public ResponseEntity<?> inviteLabel(User user, LabelRequestDto labelRequestDto, Long labelId) {
 		Task task = validateTask(labelRequestDto.getTaskId());
 		Label label = validateLabel(labelId);
@@ -98,7 +116,11 @@ public class LabelService {
 		LabelUser labelUser = LabelUser.create(labelUserRequestDto);
 		label.addLabelUser(labelUser);
 		//4. 라벨의 유저 업데이트
-		List<UserResponseDto> userList = userRepository.getUserFromLabel(labelId);
+		List<UserResponseDto> userList = userRepository
+			.getUserFromLabelId(labelId)
+			.stream()
+			.map(userMapper::toUserResponseDtoWithLabel)
+			.collect(Collectors.toList());
 		return ResponseEntity.ok(userList);
 	}
 
@@ -117,17 +139,26 @@ public class LabelService {
 		} else {
 			throw new CustomException(ErrorCode.EMPTY_CLIENT);
 		}
-		List<UserResponseDto> userList = userRepository.getUserFromLabel(labelId);
+		// label에 있는 user 검증
+		List<UserResponseDto> userList = userRepository
+			.getUserFromLabelId(labelId)
+			.stream()
+			.map(userMapper::toUserResponseDtoWithLabel)
+			.collect(Collectors.toList());
 		return ResponseEntity.ok(userList);
 	}
 
+	// 라벨당 존재하는 티켓 리스트 조회
 	@Transactional(readOnly = true)
 	public ResponseEntity<?> getTicketListByLabel(User user, Long labelId) {
+		// label 검증
 		Label label = validateLabel(labelId);
 		//project 내에 존재하는 유저들은 label별 티켓 확인 가능
 		Project project = label.getTask().getProject();
-		valideExistMember(project, ProjectUser.create(project, user));
-		Map<TicketStatus, List<TicketResponseDto>> tickets = ticketRepository.findWithLabelId(labelId);
+		validateExistMember(project, ProjectUser.create(project, user));
+		// label에 속한 티켓들을 가져옴
+		List<Ticket> ticketList = ticketRepository.findWithLabelId(labelId);
+		Map<TicketStatus, List<TicketResponseDto>> tickets = ticketMapper.toDtoMapWithStatus(ticketList);
 		return ResponseEntity.ok(tickets);
 	}
 
@@ -155,7 +186,7 @@ public class LabelService {
 		}
 	}
 
-	private void valideExistMember(Project project, ProjectUser projectUser) {
+	private void validateExistMember(Project project, ProjectUser projectUser) {
 		if (!project.getProjectUserList().contains(projectUser)) {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
