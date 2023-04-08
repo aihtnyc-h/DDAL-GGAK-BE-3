@@ -285,7 +285,7 @@ public class JwtUtil {
 
 	public boolean isAccessTokenAboutToExpire(String accessToken) {
 		Long now = new Date().getTime();
-		if (now - getExpirationTime(accessToken).getTime() <= 120000) {
+		if (getExpirationTime(accessToken).getTime() - now <= 120000) {
 			return true;
 		}
 		return false;
