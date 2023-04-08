@@ -146,7 +146,6 @@ public class JwtUtil {
 		AccessToken toSaveAccessToken = AccessToken.builder()
 			.email(email)
 			.accessToken(accessToken)
-			.expirationTime(new Date(date.getTime() + accessTokenTime))
 			.build();
 
 		return toSaveAccessToken.getAccessToken();

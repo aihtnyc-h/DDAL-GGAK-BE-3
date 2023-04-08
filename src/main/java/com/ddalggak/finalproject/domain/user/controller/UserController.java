@@ -3,6 +3,7 @@ package com.ddalggak.finalproject.domain.user.controller;
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -28,6 +29,7 @@ import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
+import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.domain.user.service.UserService;
 import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
@@ -39,6 +41,7 @@ import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeDto;
 import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeService;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -49,6 +52,7 @@ public class UserController {
 	private final JwtUtil jwtUtil;
 	private final MailService mailService;
 	private final RandomCodeService randomCodeService;
+	private final UserRepository userRepository;
 
 	@PostMapping("/auth/email")
 	public ResponseEntity<?> emailAuthentication(@Valid @RequestBody EmailRequestDto emailRequestDto,
@@ -129,5 +133,22 @@ public class UserController {
 	public ResponseEntity<?> getMyTickets(@PathVariable Long userId,
 		TicketSearchCondition condition) {
 		return userService.getMyTickets(userId, condition);
+	}
+
+	@GetMapping("/auth/validToken")
+	public ResponseEntity<?> validateToken(HttpServletRequest request, HttpServletResponse response) {
+		String token = jwtUtil.resolveToken(request);
+		Claims claims;
+		if (token != null) {
+			if (jwtUtil.validateToken(token)) {
+				claims = jwtUtil.getUserInfo(token);
+			} else {
+				return ErrorResponse.from(ErrorCode.INVALID_AUTH_TOKEN);
+			}
+			userRepository.findByEmail(claims.getSubject())
+				.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+		} else
+			throw new UserException(ErrorCode.INVALID_AUTH_TOKEN);
+		return SuccessResponseDto.of(SuccessCode.SUCCESS_LOGIN);
 	}
 }
