@@ -68,12 +68,12 @@ public class UserService {
 	public ResponseEntity<UserPageDto> login(UserRequestDto userRequestDto, HttpServletResponse response) {
 		String email = userRequestDto.getEmail();
 		User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new RuntimeException("Invalid email or password"));
+			.orElseThrow(() -> new UserException(ErrorCode.INVALID_EMAIL_PASSWORD));
 		String password = userRequestDto.getPassword();
 		String dbPassword = user.getPassword();
 
 		if (!passwordEncoder.matches(password, dbPassword)) {
-			throw new RuntimeException("Invalid email or password");
+			throw new UserException(ErrorCode.INVALID_EMAIL_PASSWORD);
 		}
 
 		String accessToken = jwtUtil.login(email, user.getRole());
