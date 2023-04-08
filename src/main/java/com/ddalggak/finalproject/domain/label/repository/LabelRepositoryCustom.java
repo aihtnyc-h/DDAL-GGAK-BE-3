@@ -2,9 +2,9 @@ package com.ddalggak.finalproject.domain.label.repository;
 
 import java.util.List;
 
-import com.ddalggak.finalproject.domain.label.dto.LabelResponseDto;
+import com.ddalggak.finalproject.domain.label.entity.Label;
 
 public interface LabelRepositoryCustom {
 
-	List<LabelResponseDto> findByTaskId(Long taskId);
+	List<Label> findByTaskId(Long taskId);
 }
