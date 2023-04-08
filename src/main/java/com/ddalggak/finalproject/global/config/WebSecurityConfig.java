@@ -24,6 +24,8 @@ import com.ddalggak.finalproject.domain.oauth.service.CustomOAuth2UserService;
 import com.ddalggak.finalproject.global.jwt.JwtAuthFilter;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
 import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
+import com.ddalggak.finalproject.global.security.CustomAccessDeniedHandler;
+import com.ddalggak.finalproject.global.security.CustomAuthenticationEntryPoint;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,7 +37,8 @@ public class WebSecurityConfig {
 	private final JwtUtil jwtUtil;
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final TokenRepository tokenRepository;
-
+	private final CustomAccessDeniedHandler customAccessDeniedHandler;
+	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 	//
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -92,6 +95,10 @@ public class WebSecurityConfig {
 			.and()
 			.successHandler(oAuth2AuthenticationSuccessHandler())
 			.failureHandler(oAuth2AuthenticationFailureHandler())
+			.and()
+			.exceptionHandling()
+			.accessDeniedHandler(customAccessDeniedHandler)
+			.authenticationEntryPoint(customAuthenticationEntryPoint)
 
 			//                .antMatchers(HttpMethod.POST, "/api/logout").permitAll()
 			// JWT 인증/인가를 사용하기 위한 설정
