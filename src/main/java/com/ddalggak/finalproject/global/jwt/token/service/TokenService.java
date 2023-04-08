@@ -37,6 +37,7 @@ public class TokenService {
 			throw new CustomException(ErrorCode.INVALID_REQUEST);
 		}
 
+		accessTokenRepository.deleteById(email);
 		String recreateAccessToken = jwtUtil.recreateAccessToken(accessToken);
 		AccessToken newAccessToken = new AccessToken();
 		accessTokenRepository.save(newAccessToken);
