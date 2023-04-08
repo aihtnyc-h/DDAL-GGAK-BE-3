@@ -25,12 +25,13 @@ public class TokenService {
 	private final JwtUtil jwtUtil;
 
 	public ResponseEntity<SuccessResponseDto> getAccessToken(HttpServletRequest request, HttpServletResponse response) {
-		String accessToken = request.getHeader("Authorization");
-		Claims info = jwtUtil.getUserInfo(accessToken);
-		String email = info.getSubject();
+		String accessToken = jwtUtil.resolveToken(request);
+		Claims userInfo = jwtUtil.getUserInfo(accessToken);
+		String email = userInfo.getSubject();
 
-		Token token = tokenRepository.findById(email).orElseThrow(()-> new UserException(ErrorCode.INVALID_REQUEST));
-		String refreshToken = token.getRefreshToken();
+		Token token = tokenRepository.findById(email)
+			.orElseThrow(() -> new UserException(ErrorCode.INVALID_REFRESH_TOKEN));
+		String refreshToken = jwtUtil.resolveRefreshToken(token.getRefreshToken());
 
 		if (!jwtUtil.validateRefreshToken(refreshToken)) {
 			throw new CustomException(ErrorCode.INVALID_REQUEST);

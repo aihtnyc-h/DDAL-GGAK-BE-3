@@ -29,19 +29,18 @@ import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
-import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.domain.user.service.UserService;
 import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.error.ErrorResponse;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
+import com.ddalggak.finalproject.global.jwt.token.TokenService.TokenService;
 import com.ddalggak.finalproject.global.mail.MailService;
 import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeDto;
 import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeService;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -50,7 +49,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 	private final UserService userService;
 	private final JwtUtil jwtUtil;
-	private final UserRepository userRepository;
+	private final TokenService tokenService;
 	private final MailService mailService;
 	private final RandomCodeService randomCodeService;
 
@@ -129,21 +128,9 @@ public class UserController {
 		return userService.getMyPage(userDetails.getEmail());
 	}
 
-	@GetMapping("/auth/validToken")
-	public ResponseEntity<?> validToken(HttpServletRequest request) {
-		String token = jwtUtil.resolveToken(request);
-		Claims claims;
-		if (token != null) {
-			if (jwtUtil.validateToken(token)) {
-				claims = jwtUtil.getUserInfo(token);
-			} else {
-				return ErrorResponse.from(ErrorCode.INVALID_AUTH_TOKEN);
-			}
-			userRepository.findByEmail(claims.getSubject())
-				.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-		} else
-			throw new UserException(ErrorCode.INVALID_AUTH_TOKEN);
-		return SuccessResponseDto.of(SuccessCode.SUCCESS_LOGIN);
+	@GetMapping("/auth/reissue")
+	public ResponseEntity<?> validateToken(HttpServletRequest request, HttpServletResponse response) {
+		return tokenService.getAccessToken(request, response);
 	}
 
 	@GetMapping("/user/{userId}/Tickets")

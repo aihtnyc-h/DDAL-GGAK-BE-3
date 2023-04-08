@@ -15,10 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
-import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
+import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
+import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
@@ -26,7 +26,6 @@ import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
-import com.ddalggak.finalproject.global.jwt.token.entity.Token;
 import com.ddalggak.finalproject.infra.aws.S3Uploader;
 
 import lombok.RequiredArgsConstructor;
@@ -77,9 +76,8 @@ public class UserService {
 			throw new RuntimeException("Invalid email or password");
 		}
 
-		Token token = jwtUtil.login(email, user.getRole());
-		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token.getAccessToken());
-		response.addHeader(JwtUtil.REFRESH_TOKEN_HEADER, token.getRefreshToken());
+		String accessToken = jwtUtil.login(email, user.getRole());
+		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, accessToken);
 
 		UserPageDto userPage = new UserPageDto(user);
 
