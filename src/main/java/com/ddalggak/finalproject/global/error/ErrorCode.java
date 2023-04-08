@@ -20,6 +20,7 @@ public enum ErrorCode {
 	INVALID_EMAIL(BAD_REQUEST, "A-006", "Please enter valid email."),
 	INVALID_REDIRECT_URI(BAD_REQUEST, "A-007", "redirect URIs are not matched"),
 	INVALID_PROVIDER_TYPE(BAD_REQUEST, "A-008", "Invalid Provider Type."),
+	INVALID_EMAIL_PASSWORD(BAD_REQUEST, "A-009", "Invalid email or password"),
 
 	/* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
 	INVALID_AUTH_TOKEN(UNAUTHORIZED, "B-001", "Please enter an authorized token. "),
