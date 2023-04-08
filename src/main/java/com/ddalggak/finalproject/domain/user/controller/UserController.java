@@ -3,7 +3,6 @@ package com.ddalggak.finalproject.domain.user.controller;
 import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -35,7 +34,6 @@ import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.error.ErrorResponse;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
-import com.ddalggak.finalproject.global.jwt.token.TokenService.TokenService;
 import com.ddalggak.finalproject.global.mail.MailService;
 import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeDto;
 import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeService;
@@ -49,7 +47,6 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 	private final UserService userService;
 	private final JwtUtil jwtUtil;
-	private final TokenService tokenService;
 	private final MailService mailService;
 	private final RandomCodeService randomCodeService;
 
@@ -97,7 +94,7 @@ public class UserController {
 	}
 
 	@PostMapping("/auth/logout")
-	public ResponseEntity<?> logout(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+	public ResponseEntity<SuccessResponseDto> logout(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		String email = userDetails.getEmail();
 		SecurityContextHolder.clearContext();
 		jwtUtil.logout(email);
@@ -124,13 +121,8 @@ public class UserController {
 	}
 
 	@GetMapping("/user")
-	public ResponseEntity<?> getMyPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+	public ResponseEntity<UserPageDto> getMyPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return userService.getMyPage(userDetails.getEmail());
-	}
-
-	@GetMapping("/auth/reissue")
-	public ResponseEntity<?> validateToken(HttpServletRequest request, HttpServletResponse response) {
-		return tokenService.getAccessToken(request, response);
 	}
 
 	@GetMapping("/user/{userId}/Tickets")
