@@ -23,8 +23,10 @@ import com.ddalggak.finalproject.domain.oauth.entity.ProviderType;
 import com.ddalggak.finalproject.domain.oauth.repository.CookieAuthorizationRequestRepository;
 import com.ddalggak.finalproject.global.cookie.CookieUtil;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
-import com.ddalggak.finalproject.global.jwt.token.entity.Token;
-import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
+import com.ddalggak.finalproject.global.jwt.token.entity.AccessToken;
+import com.ddalggak.finalproject.global.jwt.token.entity.RefreshToken;
+import com.ddalggak.finalproject.global.jwt.token.repository.AccessTokenRepository;
+import com.ddalggak.finalproject.global.jwt.token.repository.RefreshTokenRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +39,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 	@Value("${app.oauth2.authorizedRedirectUri}")
 	private String redirectUri;
 	private final JwtUtil jwtUtil;
-	private final TokenRepository tokenRepository;
+	private final AccessTokenRepository accessTokenRepository;
+	private final RefreshTokenRepository refreshTokenRepository;
 	private final CookieAuthorizationRequestRepository authorizationRequestRepository;
 
 	@Override
@@ -75,20 +78,36 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 		String accessToken = jwtUtil.createAccessToken(authentication);
 		String refreshToken = jwtUtil.createRefreshToken(authentication);
 
-		Optional<Token> existingToken = tokenRepository.findById(userInfo.getId());
-		if (existingToken.isPresent()) {
-			tokenRepository.delete(existingToken.get());
-			Token token = Token.builder()
+		Optional<AccessToken> existingAccessToken = accessTokenRepository.findById(userInfo.getEmail());
+		if (existingAccessToken.isPresent()) {
+			accessTokenRepository.delete(existingAccessToken.get());
+			AccessToken token = AccessToken.builder()
 				.email(userInfo.getEmail())
-				.refreshToken(refreshToken)
+				.accessToken(accessToken)
 				.build();
-			tokenRepository.save(token);
+			accessTokenRepository.save(token);
 		} else {
-			Token token = Token.builder()
+			AccessToken token = AccessToken.builder()
+				.email(userInfo.getEmail())
+				.accessToken(accessToken)
+				.build();
+			accessTokenRepository.save(token);
+		}
+
+		Optional<RefreshToken> existingRefreshToken = refreshTokenRepository.findById(userInfo.getEmail());
+		if (existingRefreshToken.isPresent()) {
+			refreshTokenRepository.delete(existingRefreshToken.get());
+			RefreshToken token = RefreshToken.builder()
 				.email(userInfo.getEmail())
 				.refreshToken(refreshToken)
 				.build();
-			tokenRepository.save(token);
+			refreshTokenRepository.save(token);
+		} else {
+			RefreshToken token = RefreshToken.builder()
+				.email(userInfo.getEmail())
+				.refreshToken(refreshToken)
+				.build();
+			refreshTokenRepository.save(token);
 		}
 
 		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, accessToken);

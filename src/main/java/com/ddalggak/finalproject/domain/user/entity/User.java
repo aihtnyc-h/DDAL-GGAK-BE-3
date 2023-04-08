@@ -71,25 +71,11 @@ public class User extends BaseTimeEntity {
 			.build();
 	}
 
-	public static void updateNickname(User user, String nickname) {
-		builder()
-			.email(user.getEmail())
-			.userId(user.getUserId())
-			.email(user.getEmail())
-			.password(user.getPassword())
-			.nickname(nickname)
-			.profile(user.getProfile())
-			.build();
+	public void updateNickname(String nickname) {
+		this.nickname = nickname;
 	}
 
-	public static void updateProfile(User user, String profile) {
-		builder()
-			.email(user.getEmail())
-			.userId(user.getUserId())
-			.email(user.getEmail())
-			.password(user.getPassword())
-			.nickname(user.getNickname())
-			.profile(profile)
-			.build();
+	public void updateProfile(String profile) {
+		this.profile = profile;
 	}
 }

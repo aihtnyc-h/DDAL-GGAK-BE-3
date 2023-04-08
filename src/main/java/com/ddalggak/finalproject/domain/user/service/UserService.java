@@ -68,12 +68,12 @@ public class UserService {
 	public ResponseEntity<UserPageDto> login(UserRequestDto userRequestDto, HttpServletResponse response) {
 		String email = userRequestDto.getEmail();
 		User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new RuntimeException("Invalid email or password"));
+			.orElseThrow(() -> new UserException(ErrorCode.INVALID_EMAIL_PASSWORD));
 		String password = userRequestDto.getPassword();
 		String dbPassword = user.getPassword();
 
 		if (!passwordEncoder.matches(password, dbPassword)) {
-			throw new RuntimeException("Invalid email or password");
+			throw new UserException(ErrorCode.INVALID_EMAIL_PASSWORD);
 		}
 
 		String accessToken = jwtUtil.login(email, user.getRole());
@@ -90,7 +90,7 @@ public class UserService {
 	public NicknameDto updateNickname(String nickname, String email) {
 		User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
 
-		User.updateNickname(user, nickname);
+		user.updateNickname(nickname);
 		return new NicknameDto(user.getNickname());
 	}
 
@@ -103,7 +103,7 @@ public class UserService {
 
 		String storedFileName = s3Uploader.upload(image, "profile");
 
-		User.updateProfile(user, storedFileName);
+		user.updateProfile(storedFileName);
 
 		return new ProfileDto(storedFileName);
 	}
@@ -129,8 +129,9 @@ public class UserService {
 	}
 
 	@Transactional(readOnly = true)
-	public ResponseEntity<?> getMyPage(String email) {
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
+	public ResponseEntity<UserPageDto> getMyPage(String email) {
+		User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
 
 		UserPageDto userPage = new UserPageDto(user);
 
