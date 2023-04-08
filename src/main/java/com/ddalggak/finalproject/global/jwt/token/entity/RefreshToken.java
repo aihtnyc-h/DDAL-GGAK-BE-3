@@ -14,18 +14,10 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@RedisHash(value = "token", timeToLive = 60 * 60 * 2 * 1000L)
-public class Token {
+@RedisHash(value = "refreshToken", timeToLive = 60 * 60 * 24 * 14 * 1000L)
+public class RefreshToken {
 	@Id
 	private String email;
-	private String accessToken;
 	private String refreshToken;
 
-	public static void update(Token token, String accessToken, String refreshToken) {
-		builder()
-			.email(token.getEmail())
-			.accessToken(accessToken)
-			.refreshToken(refreshToken)
-			.build();
-	}
 }

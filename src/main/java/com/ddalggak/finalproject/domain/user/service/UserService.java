@@ -15,10 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
-import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
+import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
+import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
@@ -26,7 +26,6 @@ import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
-import com.ddalggak.finalproject.global.jwt.token.entity.Token;
 import com.ddalggak.finalproject.infra.aws.S3Uploader;
 
 import lombok.RequiredArgsConstructor;
@@ -69,17 +68,16 @@ public class UserService {
 	public ResponseEntity<UserPageDto> login(UserRequestDto userRequestDto, HttpServletResponse response) {
 		String email = userRequestDto.getEmail();
 		User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new RuntimeException("Invalid email or password"));
+			.orElseThrow(() -> new UserException(ErrorCode.INVALID_EMAIL_PASSWORD));
 		String password = userRequestDto.getPassword();
 		String dbPassword = user.getPassword();
 
 		if (!passwordEncoder.matches(password, dbPassword)) {
-			throw new RuntimeException("Invalid email or password");
+			throw new UserException(ErrorCode.INVALID_EMAIL_PASSWORD);
 		}
 
-		Token token = jwtUtil.login(email, user.getRole());
-		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token.getAccessToken());
-		response.addHeader(JwtUtil.REFRESH_TOKEN_HEADER, token.getRefreshToken());
+		String accessToken = jwtUtil.login(email, user.getRole());
+		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, accessToken);
 
 		UserPageDto userPage = new UserPageDto(user);
 
@@ -92,7 +90,7 @@ public class UserService {
 	public NicknameDto updateNickname(String nickname, String email) {
 		User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
 
-		User.updateNickname(user, nickname);
+		user.updateNickname(nickname);
 		return new NicknameDto(user.getNickname());
 	}
 
@@ -105,7 +103,7 @@ public class UserService {
 
 		String storedFileName = s3Uploader.upload(image, "profile");
 
-		User.updateProfile(user, storedFileName);
+		user.updateProfile(storedFileName);
 
 		return new ProfileDto(storedFileName);
 	}
@@ -131,8 +129,9 @@ public class UserService {
 	}
 
 	@Transactional(readOnly = true)
-	public ResponseEntity<?> getMyPage(String email) {
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
+	public ResponseEntity<UserPageDto> getMyPage(String email) {
+		User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
 
 		UserPageDto userPage = new UserPageDto(user);
 

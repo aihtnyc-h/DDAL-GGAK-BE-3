@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.ddalggak.finalproject.global.error.ErrorCode;
+import com.ddalggak.finalproject.global.jwt.token.service.TokenService;
 import com.ddalggak.finalproject.global.security.exception.SecurityExceptionDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
 	private final JwtUtil jwtUtil;
+	private final TokenService tokenService;
 
 	@SneakyThrows
 	@Override
@@ -36,6 +38,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 		String token = jwtUtil.resolveToken(request);
 
 		if (token != null) {
+			if (jwtUtil.isAccessTokenAboutToExpire(token)) {
+				tokenService.getAccessToken(request, response);
+			}
 			if (jwtUtil.isExpired(token)) {
 				int httpStatus = 1002;
 				String message = "만료된 토큰입니다.";

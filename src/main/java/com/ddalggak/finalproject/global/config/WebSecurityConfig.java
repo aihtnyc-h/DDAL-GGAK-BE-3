@@ -23,7 +23,9 @@ import com.ddalggak.finalproject.domain.oauth.repository.CookieAuthorizationRequ
 import com.ddalggak.finalproject.domain.oauth.service.CustomOAuth2UserService;
 import com.ddalggak.finalproject.global.jwt.JwtAuthFilter;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
-import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
+import com.ddalggak.finalproject.global.jwt.token.repository.AccessTokenRepository;
+import com.ddalggak.finalproject.global.jwt.token.repository.RefreshTokenRepository;
+import com.ddalggak.finalproject.global.jwt.token.service.TokenService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,7 +36,11 @@ import lombok.RequiredArgsConstructor;
 public class WebSecurityConfig {
 	private final JwtUtil jwtUtil;
 	private final CustomOAuth2UserService customOAuth2UserService;
-	private final TokenRepository tokenRepository;
+	private final AccessTokenRepository accessTokenRepository;
+	private final RefreshTokenRepository refreshTokenRepository;
+	// private final CustomAccessDeniedHandler customAccessDeniedHandler;
+	// private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+	private final TokenService tokenService;
 
 	//
 	@Bean
@@ -46,7 +52,7 @@ public class WebSecurityConfig {
 	public WebSecurityCustomizer webSecurityCustomizer() {
 		// h2-console 사용 및 resources 접근 허용 설정
 		return (web) -> web.ignoring()
-			// .requestMatchers(PathRequest.toH2Console())
+			.requestMatchers(PathRequest.toH2Console())
 			.requestMatchers(PathRequest.toStaticResources().atCommonLocations());
 	}
 
@@ -92,11 +98,15 @@ public class WebSecurityConfig {
 			.and()
 			.successHandler(oAuth2AuthenticationSuccessHandler())
 			.failureHandler(oAuth2AuthenticationFailureHandler())
+			// .and()
+			// .exceptionHandling()
+			// .accessDeniedHandler(customAccessDeniedHandler)
+			// .authenticationEntryPoint(customAuthenticationEntryPoint)
 
 			//                .antMatchers(HttpMethod.POST, "/api/logout").permitAll()
 			// JWT 인증/인가를 사용하기 위한 설정
 			.and()
-			.addFilterBefore(new JwtAuthFilter(jwtUtil),
+			.addFilterBefore(new JwtAuthFilter(jwtUtil, tokenService),
 				UsernamePasswordAuthenticationFilter.class); //    private final JwtUtil jwtUtil; 추가하기!
 		http.cors();
 		// 로그인 사용
@@ -180,7 +190,8 @@ public class WebSecurityConfig {
 	public OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler() {
 		return new OAuth2AuthenticationSuccessHandler(
 			jwtUtil,
-			tokenRepository,
+			accessTokenRepository,
+			refreshTokenRepository,
 			cookieAuthorizationRequestRepository()
 		);
 	}
