@@ -75,23 +75,25 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 		String accessToken = jwtUtil.createAccessToken(authentication);
 		String refreshToken = jwtUtil.createRefreshToken(authentication);
 
-		// 토큰 저장
-		Token token = tokenRepository.findById(userInfo.getId())
-			.orElseGet(() -> Token.builder()
-				.accessToken(accessToken)
+		Optional<Token> existingToken = tokenRepository.findById(userInfo.getId());
+		if (existingToken.isPresent()) {
+			tokenRepository.delete(existingToken.get());
+			Token token = Token.builder()
+				.email(userInfo.getEmail())
 				.refreshToken(refreshToken)
-				.build());
-		Token.update(token, accessToken, refreshToken);
-		tokenRepository.save(token);
+				.build();
+			tokenRepository.save(token);
+		} else {
+			Token token = Token.builder()
+				.email(userInfo.getEmail())
+				.refreshToken(refreshToken)
+				.build();
+			tokenRepository.save(token);
+		}
 
-		// CookieUtil.deleteCookie(request, response, "REFRESH_TOKEN");
-		// CookieUtil.addCookie(response, "REFRESH_TOKEN", refreshToken, cookieMaxAge);
-
-		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token.getAccessToken());
-		response.addHeader(JwtUtil.REFRESH_TOKEN_HEADER, token.getRefreshToken());
+		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, accessToken);
 
 		return UriComponentsBuilder.fromUriString(targetUrl)
-			// .queryParam("token", accessToken)
 			.path("/login")            //프론트와 redirect url 정하기!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			.build().toUriString();
 	}
