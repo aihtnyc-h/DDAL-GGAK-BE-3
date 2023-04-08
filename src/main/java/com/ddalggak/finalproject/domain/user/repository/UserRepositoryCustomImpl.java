@@ -2,6 +2,8 @@ package com.ddalggak.finalproject.domain.user.repository;
 
 import static com.ddalggak.finalproject.domain.label.entity.QLabel.*;
 import static com.ddalggak.finalproject.domain.label.entity.QLabelUser.*;
+import static com.ddalggak.finalproject.domain.project.entity.QProject.*;
+import static com.ddalggak.finalproject.domain.project.entity.QProjectUser.*;
 import static com.ddalggak.finalproject.domain.task.entity.QTask.*;
 import static com.ddalggak.finalproject.domain.task.entity.QTaskUser.*;
 import static com.ddalggak.finalproject.domain.ticket.entity.QTicket.*;
@@ -11,6 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.ddalggak.finalproject.domain.label.entity.LabelUser;
+import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
 import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
 import com.ddalggak.finalproject.domain.ticket.dto.QDateTicket;
@@ -82,6 +85,25 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 			.selectFrom(taskUser)
 			.join(taskUser.task, task)
 			.where(task.taskId.eq(taskId))
+			.fetch();
+	}
+
+	@Override
+	public List<User> getUserFromProjectId(Long projectId) {
+		return queryFactory
+			.selectFrom(user)
+			.leftJoin(user.projectUserList, projectUser).fetchJoin()
+			.leftJoin(projectUser.project, project)
+			.where(project.projectId.eq(projectId))
+			.fetch();
+	}
+
+	@Override
+	public List<ProjectUser> getProjectUserFromProjectId(Long projectId) {
+		return queryFactory
+			.selectFrom(projectUser)
+			.join(projectUser.project, project)
+			.where(project.projectId.eq(projectId))
 			.fetch();
 	}
 
