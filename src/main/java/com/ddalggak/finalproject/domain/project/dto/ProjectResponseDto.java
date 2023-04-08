@@ -39,7 +39,7 @@ public class ProjectResponseDto {
 		thumbnail = project.getThumbnail();
 		projectLeader = project.getCreatedBy();
 		participants = projectUsers.stream().map(UserResponseDto::new).collect(Collectors.toList());
-		this.tasks = tasks.stream().map(TaskBriefResponseDto::new).collect(Collectors.toList());
+		// this.tasks = tasks.stream().map(TaskBriefResponseDto::new).collect(Collectors.toList());
 	}
 
 	public static ProjectResponseDto of(Project project) {
@@ -48,7 +48,7 @@ public class ProjectResponseDto {
 			.thumbnail(project.getThumbnail())
 			.projectLeader(project.getCreatedBy())
 			.participants(project.getProjectUserList().stream().map(UserResponseDto::new).collect(Collectors.toList()))
-			.tasks(project.getTaskList().stream().map(TaskBriefResponseDto::new).collect(Collectors.toList()))
+			// .tasks(project.getTaskList().stream().map(TaskBriefResponseDto::new).collect(Collectors.toList()))
 			.build();
 	}
 }
