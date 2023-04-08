@@ -1,12 +1,12 @@
 package com.ddalggak.finalproject.domain.task.repository;
 
 import java.util.List;
+import java.util.Optional;
 
-import com.ddalggak.finalproject.domain.task.dto.TaskBriefResponseDto;
-import com.ddalggak.finalproject.domain.task.dto.TaskResponseDto;
+import com.ddalggak.finalproject.domain.task.entity.Task;
 
 public interface TaskRepositoryCustom {
-	TaskResponseDto findTaskById(Long id);
+	Optional<Task> findTaskById(Long id);
 
-	List<TaskBriefResponseDto> findTaskByProject(Long projectid);
+	List<Task> findTaskByProject(Long projectId);
 }
