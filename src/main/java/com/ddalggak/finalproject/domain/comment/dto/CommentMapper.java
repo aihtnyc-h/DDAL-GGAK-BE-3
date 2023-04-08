@@ -14,9 +14,11 @@ public interface CommentMapper extends GenericMapper<CommentResponseDto, Comment
 
 	@Override
 	@Mappings({
-		@Mapping(target = "email", source = "comment.user.email")
+		@Mapping(target = "commentId", source = "entity.commentId"),
+		@Mapping(target = "email", source = "entity.user.email"),
+		@Mapping(target = "comment", source = "entity.comment")
 	})
-	CommentResponseDto toDto(Comment comment);
+	CommentResponseDto toDto(Comment entity);
 
 	@Mappings({
 		@Mapping(target = "comment", source = "commentRequestDto.comment"),

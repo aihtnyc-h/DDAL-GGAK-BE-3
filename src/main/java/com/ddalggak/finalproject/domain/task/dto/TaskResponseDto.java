@@ -7,12 +7,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.ddalggak.finalproject.domain.label.dto.LabelResponseDto;
-import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
-import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
 import com.ddalggak.finalproject.global.view.Views;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -39,7 +36,11 @@ public class TaskResponseDto {
 	@JsonView(Views.Task.class)
 	public String taskLeader;
 
-	@Schema(name = "when does this project expired at", example = "2023-03-22")
+	@Schema(name = "when does this task created at", example = "2023-03-22")
+	@JsonView(Views.Task.class)
+	public LocalDate createdAt;
+
+	@Schema(name = "when does this task expired at", example = "2023-03-22")
 	@JsonView(Views.Task.class)
 	public LocalDate expiredAt;
 
@@ -66,28 +67,4 @@ public class TaskResponseDto {
 			put(DONE, new ArrayList<>());
 		}
 	};
-
-	public TaskResponseDto(Task task) {
-		id = task.getTaskId();
-		taskTitle = task.getTaskTitle();
-		taskLeader = task.getTaskLeader();
-		expiredAt = task.getExpiredAt();
-		totalDifficulty = task.getTicketList().stream().mapToInt(Ticket::getDifficulty).sum();
-		totalPriority = task.getTicketList().stream().mapToInt(Ticket::getPriority).sum();
-		labels = task.getLabelList().stream().map(LabelResponseDto::of).collect(Collectors.toList());
-		task.getTicketList()
-			.stream()
-			.map(TicketResponseDto::new)
-			.forEach(ticket -> tickets.get(ticket.getStatus()).add(ticket));
-	}
-
-	// todo global response Dto 만들어서 전부 data에 넣기
-	// public static ResponseEntity<TaskResponseDto> toResponseEntity(Task task) {
-	// 	return ResponseEntity
-	// 		.status(200)
-	// 		.body(TaskResponseDto.builder()
-	// 			.task(task)
-	// 			.build()
-	// 		);
-	// }
 }

@@ -50,7 +50,7 @@ public enum ErrorCode {
 	TYPE_MISMATCH(UNSUPPORTED_MEDIA_TYPE, "F-001", "Unsupported media type."),
 
 	/* 500 INTERNAL_SERVER_ERROR : 서버에서 문제 일어남 */
-	SERVER_ERROR(INTERNAL_SERVER_ERROR, "F-001", "Please check your input value.");
+	SERVER_ERROR(INTERNAL_SERVER_ERROR, "G-001", "Please check your input value.");
 
 	private final HttpStatus httpStatus;
 	private final String errorCode;
