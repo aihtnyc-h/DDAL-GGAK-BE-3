@@ -143,12 +143,12 @@ public class UserController {
 			if (jwtUtil.validateToken(token)) {
 				claims = jwtUtil.getUserInfo(token);
 			} else {
-				return ErrorResponse.from(ErrorCode.INVALID_AUTH_TOKEN);
+				return ErrorResponse.from(ErrorCode.INVALID_REQUEST);
 			}
 			userRepository.findByEmail(claims.getSubject())
 				.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 		} else
-			throw new UserException(ErrorCode.INVALID_AUTH_TOKEN);
-		return SuccessResponseDto.of(SuccessCode.SUCCESS_LOGIN);
+			throw new UserException(ErrorCode.INVALID_REQUEST);
+		return SuccessResponseDto.of(SuccessCode.SUCCESS_AUTH);
 	}
 }
