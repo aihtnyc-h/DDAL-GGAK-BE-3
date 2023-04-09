@@ -48,7 +48,6 @@ public class JwtUtil {
 	private final RefreshTokenRepository refreshTokenRepository;
 	private final UserDetailsServiceImpl userDetailsService;
 	public static final String AUTHORIZATION_HEADER = "Authorization";
-	public static final String REFRESH_TOKEN_HEADER = "RefreshToken";
 	public static final String AUTHORIZATION_KEY = "auth";
 	private static final String BEARER_PREFIX = "Bearer ";
 
