@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
+import com.ddalggak.finalproject.domain.project.dto.ProjectResponseDto;
 import com.ddalggak.finalproject.domain.project.service.ProjectService;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
@@ -87,7 +88,7 @@ public class ProjectController {
 
 	@Operation(summary = "프로젝트 수정", description = "api for update project")
 	@PostMapping("/project/{projectId}/settings")
-	public ResponseEntity<ProjectBriefResponseDto> updateProject(
+	public ResponseEntity<ProjectResponseDto> updateProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId,
 		@RequestPart(value = "thumbnail", required = false) MultipartFile image,

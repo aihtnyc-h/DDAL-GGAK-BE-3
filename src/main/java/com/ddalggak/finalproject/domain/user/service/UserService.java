@@ -19,6 +19,7 @@ import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
 import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
 import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
+import com.ddalggak.finalproject.domain.user.dto.UserMapper;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
@@ -33,6 +34,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
+	private final UserMapper userMapper;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
@@ -79,11 +82,11 @@ public class UserService {
 		String accessToken = jwtUtil.login(email, user.getRole());
 		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, accessToken);
 
-		UserPageDto userPage = new UserPageDto(user);
+		UserPageDto userPageDto = userMapper.toUserPageDto(user);
 
 		return ResponseEntity
 			.status(HttpStatus.OK)
-			.body(userPage);
+			.body(userPageDto);
 	}
 
 	@Transactional
@@ -133,11 +136,11 @@ public class UserService {
 		User user = userRepository.findByEmail(email)
 			.orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
 
-		UserPageDto userPage = new UserPageDto(user);
+		UserPageDto userPageDto = userMapper.toUserPageDto(user);
 
 		return ResponseEntity
 			.status(HttpStatus.OK)
-			.body(userPage);
+			.body(userPageDto);
 	}
 
 	public ResponseEntity<?> getMyTickets(Long userId, TicketSearchCondition condition) {
