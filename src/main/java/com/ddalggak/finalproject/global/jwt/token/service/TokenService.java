@@ -39,9 +39,28 @@ public class TokenService {
 
 		accessTokenRepository.deleteById(email);
 		String recreateAccessToken = jwtUtil.recreateAccessToken(accessToken);
-		AccessToken newAccessToken = new AccessToken();
-		accessTokenRepository.save(newAccessToken);
+		AccessToken newAccessToken = new AccessToken(email, recreateAccessToken);
+
+		if (accessTokenRepository.findById(email).isEmpty()) {
+			accessTokenRepository.save(newAccessToken);
+		}
 
 		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, recreateAccessToken);
+	}
+
+	public boolean checkAccessToken(HttpServletRequest request) {
+		String accessToken = jwtUtil.resolveToken(request);
+		Claims userInfo = jwtUtil.getUserInfo(accessToken);
+		String email = userInfo.getSubject();
+
+		refreshTokenRepository.findById(email)
+			.orElseThrow(() -> new UserException(ErrorCode.INVALID_REFRESH_TOKEN));
+
+		AccessToken savedAccessToken = accessTokenRepository.findById(email)
+			.orElseThrow(() -> new UserException(ErrorCode.INVALID_AUTH_TOKEN));
+
+		String checkToken = savedAccessToken.getAccessToken().substring(7);
+
+		return checkToken.equals(accessToken);
 	}
 }
