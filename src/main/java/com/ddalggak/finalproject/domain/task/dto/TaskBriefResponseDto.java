@@ -22,7 +22,7 @@ public class TaskBriefResponseDto { // task 간단 요약제공
 	@Schema(name = "task title", example = "task title")
 	public String taskTitle;
 	@Schema(name = "when does this project create at", example = "2023-03-22")
-	public LocalDate createAt;
+	public LocalDate createdAt;
 
 	@Schema(name = "when does this project expired at", example = "2023-03-22")
 	public LocalDate expiredAt;
@@ -44,7 +44,7 @@ public class TaskBriefResponseDto { // task 간단 요약제공
 		id = task.getTaskId();
 		taskTitle = task.getTaskTitle();
 		expiredAt = task.getExpiredAt();
-		createAt = LocalDate.from(task.getCreatedAt());
+		createdAt = LocalDate.from(task.getCreatedAt());
 		// 	completedTickets = task.getCompletedTickets();
 		totalTickets = task.getTicketList().size();
 		participantsCount = task.getTaskUserList().size();
