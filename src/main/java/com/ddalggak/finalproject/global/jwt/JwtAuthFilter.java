@@ -38,6 +38,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 		String token = jwtUtil.resolveToken(request);
 
 		if (token != null) {
+			if (!jwtUtil.validateToken(token) || !tokenService.checkAccessToken(request)) {
+				jwtExceptionHandler(response, ErrorCode.INVALID_AUTH_TOKEN);
+				return;
+			}
 			if (jwtUtil.isAccessTokenAboutToExpire(token)) {
 				tokenService.getAccessToken(request, response);
 			}
@@ -46,10 +50,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 				String message = "만료된 토큰입니다.";
 				String errorCode = "EXPIRED_TOKEN";
 				setResponse(response, errorCode, httpStatus, message);
-				return;
-			}
-			if (!jwtUtil.validateToken(token)) {
-				jwtExceptionHandler(response, ErrorCode.INVALID_AUTH_TOKEN);
 				return;
 			}
 			Claims info = jwtUtil.getUserInfo(token);
