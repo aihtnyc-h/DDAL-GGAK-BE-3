@@ -4,6 +4,9 @@ import static com.ddalggak.finalproject.global.dto.SuccessCode.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,7 @@ import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.global.dto.GlobalResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
 import com.ddalggak.finalproject.global.error.ErrorCode;
+import com.ddalggak.finalproject.global.mail.MailService;
 import com.ddalggak.finalproject.infra.aws.S3Uploader;
 
 import lombok.RequiredArgsConstructor;
@@ -45,6 +49,7 @@ public class ProjectService {
 	private final ProjectRepository projectRepository;
 	private final S3Uploader s3Uploader;
 	private final UserRepository userRepository;
+	private final MailService mailService;
 
 	public ResponseEntity<?> createProject(User user, MultipartFile image,
 		ProjectRequestDto projectRequestDto) throws
@@ -174,6 +179,38 @@ public class ProjectService {
 			.map(userMapper::toUserResponseDtoWithProjectUser)
 			.collect(Collectors.toList());
 		return ResponseEntity.ok(userList);
+	}
+
+	public ResponseEntity<?> inviteProjectUser(User user, Long projectId, List<String> emails) {
+		// 유효성 검증
+		Project project = validateProject(projectId);
+		validateExistMember(project, ProjectUser.create(project, user));
+
+		// email 유효성 검증
+		Pattern pattern = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+		for (String email : emails) {
+			if (!pattern.matcher(email).matches()) {
+				return ResponseEntity.badRequest().body("Invalid email format: " + email);
+			}
+		}
+
+		if (project.getUuid() == null) {
+			String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+			project.createUuid(uuid);
+		}
+		String uuid = project.getUuid();
+
+		// 참여중인 유저 목록 리턴
+		List<UserResponseDto> userList = userRepository
+			.getProjectUserFromProjectId(projectId)
+			.stream()
+			.map(userMapper::toUserResponseDtoWithProjectUser)
+			.collect(Collectors.toList());
+
+		Map<String, Object> response = mailService.sendProjectCode(uuid, emails);
+		response.put("userResponseDtoList", userList);
+
+		return ResponseEntity.ok(response);
 	}
 
 	private void validateDuplicateMember(Project project, ProjectUser projectUser) {
