@@ -37,9 +37,8 @@ public class LabelController {
 	@DeleteMapping("/label/{labelId}")
 	public ResponseEntity<?> deleteLabel(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestBody LabelRequestDto labelRequestDto,
 		@PathVariable Long labelId) {
-		return labelService.deleteLabel(userDetails.getUser(), labelRequestDto.taskId, labelId);
+		return labelService.deleteLabel(userDetails.getUser(), labelId);
 	}
 
 	@Operation(summary = "Label 강제입성", description = "api for invite label")
