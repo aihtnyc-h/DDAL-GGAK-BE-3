@@ -56,16 +56,16 @@ public class MailService {
 		List<UserResponseDto> userResponseDtoList = new ArrayList<>();
 		List<String> readyToInviteEmails = new ArrayList<>();
 		for (String email : emails) {
-			readyToInviteEmails.add(email);
 			User user = userRepository.findByEmail(email)
 				.orElse(null);
 			if (user == null) {
+				readyToInviteEmails.add(email);
+
 				SimpleMailMessage loginMessage = new SimpleMailMessage();
 				loginMessage.setTo(email);
 				loginMessage.setSubject("DDAL-KKAK Login Link");
 				loginMessage.setText("localhost:8080/login");             //회원가입 페이지 발송 url 변경 필요
 				javaMailSender.send(loginMessage);
-				continue;
 			} else {
 				UserResponseDto savedUser = UserResponseDto.builder()
 					.id(user.getUserId())
@@ -75,16 +75,17 @@ public class MailService {
 					.role(user.getRole().toString())
 					.build();
 				userResponseDtoList.add(savedUser);
+
+				SimpleMailMessage simpleMessage = new SimpleMailMessage();
+				simpleMessage.setTo(email);
+				simpleMessage.setSubject("Welcome To DDAL-KKAK");
+				simpleMessage.setText(uuid);
+				javaMailSender.send(simpleMessage);
 			}
-			SimpleMailMessage simpleMessage = new SimpleMailMessage();
-			simpleMessage.setTo(email);
-			simpleMessage.setSubject("Welcome To DDAL-KKAK");
-			simpleMessage.setText(uuid);
-			javaMailSender.send(simpleMessage);
 		}
 		Map<String, Object> response = new HashMap<>();
-		response.put("userResponseDtoList", userResponseDtoList);
-		response.put("readyToInviteEmails", readyToInviteEmails);
+		response.put("invitedUsers", userResponseDtoList);
+		response.put("invitedNonUsers", readyToInviteEmails);
 		return response;
 	}
 
