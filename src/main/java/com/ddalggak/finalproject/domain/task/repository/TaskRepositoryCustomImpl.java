@@ -38,4 +38,15 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
 			.where(task.project.projectId.eq(projectId))
 			.fetch();
 	}
+
+	@Override
+	public Optional<Task> findTaskByLabelId(Long labelId) {
+		Task result = queryFactory
+			.selectFrom(task)
+			.leftJoin(task.labelList, label)
+			.where(label.labelId.eq(labelId))
+			.fetchOne();
+
+		return Optional.ofNullable(result);
+	}
 }

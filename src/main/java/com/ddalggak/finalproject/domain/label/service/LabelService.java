@@ -1,5 +1,7 @@
 package com.ddalggak.finalproject.domain.label.service;
 
+import static com.ddalggak.finalproject.global.error.ErrorCode.*;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -78,9 +80,9 @@ public class LabelService {
 
 	//라벨 삭제
 	@Transactional
-	public ResponseEntity<?> deleteLabel(User user, Long taskId, Long labelId) {
+	public ResponseEntity<?> deleteLabel(User user, Long labelId) {
 		// 유효성 검증
-		Task task = validateTask(taskId);
+		Task task = taskRepository.findTaskByLabelId(labelId).orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
 		Label label = validateLabel(labelId);
 		// 서비스 로직
 		if (!(task.getTaskLeader().equals(user.getEmail()) || label.getLabelLeader().equals(user.getEmail()))) {
@@ -164,7 +166,7 @@ public class LabelService {
 
 	private Task validateTask(Long id) { //todo AOP 적용
 		return taskRepository.findById(id).orElseThrow(
-			() -> new CustomException(ErrorCode.TASK_NOT_FOUND)
+			() -> new CustomException(TASK_NOT_FOUND)
 		);
 	}
 
