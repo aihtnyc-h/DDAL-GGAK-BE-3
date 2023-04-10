@@ -85,7 +85,7 @@ public class LabelService {
 		Task task = taskRepository.findTaskByLabelId(labelId).orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
 		Label label = validateLabel(labelId);
 		// 서비스 로직
-		if (!(task.getTaskLeader().equals(user.getEmail()) || label.getLabelLeader().equals(user.getEmail()))) {
+		if (task.getTaskLeader().equals(user.getEmail()) || label.getLabelLeader().equals(user.getEmail())) {
 			labelRepository.delete(label);
 		} else {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
