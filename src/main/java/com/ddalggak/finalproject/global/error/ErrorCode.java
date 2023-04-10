@@ -18,6 +18,8 @@ public enum ErrorCode {
 	INVALID_PASSWORD(BAD_REQUEST, "A-004", "Please enter valid password."),
 	INVALID_RANDOM_CODE(BAD_REQUEST, "A-005", "Please enter valid authentication code."),
 	INVALID_EMAIL(BAD_REQUEST, "A-006", "Please enter valid email."),
+	INVALID_REDIRECT_URI(BAD_REQUEST, "A-007", "redirect URIs are not matched"),
+	INVALID_PROVIDER_TYPE(BAD_REQUEST, "A-008", "Invalid Provider Type."),
 
 	/* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
 	INVALID_AUTH_TOKEN(UNAUTHORIZED, "B-001", "Please enter an authorized token. "),
@@ -35,12 +37,18 @@ public enum ErrorCode {
 	PROJECT_NOT_FOUND(NOT_FOUND, "D-006", "The project could not be found."),
 	TASK_NOT_FOUND(NOT_FOUND, "D-007", "The task could not be found."),
 	LABEL_NOT_FOUND(NOT_FOUND, "D-008", "The label could not be found"),
+	REVIEW_NOT_FOUND(NOT_FOUND, "D-009", "The review could not be found"),
+	REVIEW_COMMENT_NOT_FOUND(NOT_FOUND, "D-010", "The review comment could not be found"),
+	MESSAGE_NOT_READ(NOT_FOUND, "D-011", "The message read could not be found"),
+	CHATROOM_NOT_FOUND(NOT_FOUND, "D-012", "The chatroom not be found"),
 
 	/* 409 CONFLICT : Resource 의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
 	DUPLICATE_RESOURCE(CONFLICT, "E-001", "Data already exists."),
 	DUPLICATE_MEMBER(CONFLICT, "E-002", "Duplicate user exists."),
 	DUPLICATE_EMAIL(CONFLICT, "E-003", "Email address is already in use. Please try a different email address."),
-	
+
+
+
 	/* 415 UNSUPPORTED_MEDIA_TYPE : 지원하지 않는 미디어 타입 */
 	TYPE_MISMATCH(UNSUPPORTED_MEDIA_TYPE, "F-001", "Unsupported media type."),
 

@@ -1,7 +1,9 @@
 package com.ddalggak.finalproject.global.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 
 import lombok.AllArgsConstructor;
@@ -13,7 +15,7 @@ import lombok.Setter;
 @Setter
 @Builder
 @AllArgsConstructor
-public class SuccessResponseDto<T> {
+public class GlobalResponseDto<T> {
 
 	private final LocalDateTime timestamp = LocalDateTime.now();
 
@@ -21,28 +23,27 @@ public class SuccessResponseDto<T> {
 
 	private final String message;
 
-	public SuccessResponseDto(SuccessCode successCode) {
+	private T data;
+
+	private List<Link> links;
+
+	public GlobalResponseDto(SuccessCode successCode, T data, List<Link> links) {
 		this.status = successCode.getHttpStatus().value();
 		this.message = successCode.getDetail();
+		this.data = data;
+		this.links = links;
 	}
 
-	public static ResponseEntity<SuccessResponseDto> toResponseEntity(SuccessCode successCode) {
+	public static <T> ResponseEntity<GlobalResponseDto<T>> of(SuccessCode successCode, T data, List<Link> links) {
 		return ResponseEntity
 			.status(successCode.getHttpStatus())
-			.body(SuccessResponseDto.builder()
+			.body(GlobalResponseDto.<T>builder()
 				.status(successCode.getHttpStatus().value())
 				.message(successCode.getDetail())
+				.data(data)
+				.links(links)
 				.build()
 			);
 	}
 
-	public static <T> ResponseEntity<SuccessResponseDto<T>> of(SuccessCode successCode) {
-		return ResponseEntity
-			.status(successCode.getHttpStatus())
-			.body(SuccessResponseDto.<T>builder()
-				.status(successCode.getHttpStatus().value())
-				.message(successCode.getDetail())
-				.build()
-			);
-	}
 }

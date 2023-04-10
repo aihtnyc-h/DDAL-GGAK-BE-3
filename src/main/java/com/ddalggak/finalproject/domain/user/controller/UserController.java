@@ -9,9 +9,11 @@ import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,11 +22,12 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
 import com.ddalggak.finalproject.domain.user.dto.EmailRequestDto;
-import com.ddalggak.finalproject.domain.user.dto.NicknameRequestDto;
+import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
+import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
-import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.domain.user.service.UserService;
@@ -33,7 +36,6 @@ import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.error.ErrorResponse;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
-import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
 import com.ddalggak.finalproject.global.mail.MailService;
 import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeDto;
 import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeService;
@@ -51,7 +53,6 @@ public class UserController {
 	private final UserRepository userRepository;
 	private final MailService mailService;
 	private final RandomCodeService randomCodeService;
-	private final TokenRepository tokenRepository;
 
 	@PostMapping("/auth/email")
 	public ResponseEntity<?> emailAuthentication(@Valid @RequestBody EmailRequestDto emailRequestDto,
@@ -71,7 +72,7 @@ public class UserController {
 	@GetMapping("/auth/email")
 	public ResponseEntity<?> randomCoedAuthentication(@RequestBody RandomCodeDto randomCodeDto) {
 		randomCodeService.authenticate(randomCodeDto);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_SEND);
+		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_AUTH);
 	}
 
 	@PostMapping("/auth/signup")
@@ -97,48 +98,30 @@ public class UserController {
 	}
 
 	@PostMapping("/auth/logout")
-	public ResponseEntity<?> logout(HttpServletRequest request, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-		String token = jwtUtil.resolveToken(request);
-		Claims claims;
-		if (token != null) {
-			if (jwtUtil.validateToken(token)) {
-				claims = jwtUtil.getUserInfo(token);
-			} else {
-				return ErrorResponse.from(ErrorCode.INVALID_REQUEST);
-			}
-			User user = userRepository.findByEmail(claims.getSubject())
-				.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-			if (user.equals(userDetails.getUser())) {
-				jwtUtil.logoutToken(user.getUserId());
-				// jwtUtil.deleteToken(user.getUserId());
-			} else {
-				return ErrorResponse.from(ErrorCode.INVALID_REQUEST);
-			}
-		} else {
-			return ErrorResponse.from(ErrorCode.INVALID_REQUEST);
-		}
+	public ResponseEntity<?> logout(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		String email = userDetails.getEmail();
+		SecurityContextHolder.clearContext();
+		jwtUtil.logout(email);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_LOGOUT);
 	}
 
 	@PutMapping("/user/nickname")
-	public ResponseEntity<?> updateNickname(@Valid @RequestBody NicknameRequestDto nicknameRequestDto,
+	public NicknameDto updateNickname(@Valid @RequestBody NicknameDto nicknameDto,
 		@AuthenticationPrincipal UserDetailsImpl userDetails, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			List<ObjectError> list = bindingResult.getAllErrors();
 			for (ObjectError e : list) {
 				System.out.println(e.getDefaultMessage());
 			}
-			return ErrorResponse.from(ErrorCode.INVALID_REQUEST);
+			throw new UserException(ErrorCode.INVALID_REQUEST);
 		}
-		userService.updateNickname(nicknameRequestDto.getNickname(), userDetails.getEmail());
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_UPLOAD);
+		return userService.updateNickname(nicknameDto.getNickname(), userDetails.getEmail());
 	}
 
 	@PutMapping("/user/profile")
-	public ResponseEntity<?> updateProfile(@RequestPart(value = "image") MultipartFile image,
+	public ProfileDto updateProfile(@RequestPart(value = "image") MultipartFile image,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-		userService.updateProfile(image, userDetails.getEmail());
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_UPLOAD);
+		return userService.updateProfile(image, userDetails.getEmail());
 	}
 
 	@GetMapping("/user")
@@ -160,6 +143,12 @@ public class UserController {
 				.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 		} else
 			throw new UserException(ErrorCode.INVALID_AUTH_TOKEN);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_LOGIN);
+		return SuccessResponseDto.of(SuccessCode.SUCCESS_LOGIN);
+	}
+
+	@GetMapping("/user/{userId}/Tickets")
+	public ResponseEntity<?> getMyTickets(@PathVariable Long userId,
+		TicketSearchCondition condition) {
+		return userService.getMyTickets(userId, condition);
 	}
 }
