@@ -1,6 +1,7 @@
 package com.ddalggak.finalproject.domain.project.service;
 
 import static com.ddalggak.finalproject.global.dto.SuccessCode.*;
+import static com.ddalggak.finalproject.global.error.ErrorCode.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -44,18 +45,21 @@ import lombok.extern.slf4j.Slf4j;
 public class ProjectService {
 
 	private final ProjectMapper projectMapper;
-
 	private final UserMapper userMapper;
 	private final ProjectRepository projectRepository;
 	private final S3Uploader s3Uploader;
 	private final UserRepository userRepository;
 	private final MailService mailService;
 
+	@Transactional
 	public ResponseEntity<?> createProject(User user, MultipartFile image,
 		ProjectRequestDto projectRequestDto) throws
 		IOException {
+		//todo 로직 수정
+		User existUser = userRepository.findByEmail(user.getEmail())
+			.orElseThrow(() -> new UserException(MEMBER_NOT_FOUND));
 		//1. user로 projectUserRequestDto 생성
-		ProjectUserRequestDto projectUserRequestDto = ProjectUserRequestDto.create(user);
+		ProjectUserRequestDto projectUserRequestDto = ProjectUserRequestDto.create(existUser);
 		//2. projectUserDto로 projectUser생성
 		ProjectUser projectUser = ProjectUser.create(projectUserRequestDto);
 		//2.5 image S3 서버에 업로드 -> 분기처리
@@ -67,12 +71,10 @@ public class ProjectService {
 		projectRequestDto.setThumbnail(imageUrl);
 		//3. projectUser로 project생성
 		Project project = Project.create(projectRequestDto, projectUser);
-		//4. projectLeader 주입
-		project.setProjectLeader(user.getEmail());
-		//5. projectRepository에 project 저장
+		//4. projectRepository에 project 저장
 		projectRepository.save(project);
-		//6. projectResponseDto로 반환
-		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(user.getUserId());
+		//5. projectResponseDto로 반환
+		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(existUser.getUserId());
 		return GlobalResponseDto.of(CREATED_SUCCESSFULLY, result, null);
 	}
 
@@ -241,6 +243,5 @@ public class ProjectService {
 			}
 		}
 	}
-
 }
 

@@ -4,8 +4,10 @@ import javax.validation.constraints.Pattern;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class UserRequestDto {
 
 	@Schema(description = "인증이 가능한 이메일을 입력해주세요",

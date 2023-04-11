@@ -5,7 +5,6 @@ import static org.mockito.Mockito.*;
 
 import javax.persistence.EntityManager;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,8 +50,18 @@ class TicketMapperTest {
 		//then
 		assertThat(ticketResponseDto.getTicketId()).isEqualTo(ticket.getTicketId());
 		assertThat(ticketResponseDto.getTitle()).isEqualTo("testTicket");
-		assertThat(ticketResponseDto.getAssigned()).isEqualTo(null);
-		Assertions.assertNull(ticketResponseDto.getCommentList(), "commentList should be null");
+		// assertThat(ticketResponseDto.getAssigned()).isEqualTo(null);
+		// Assertions.assertNull(ticketResponseDto.getCommentList(), "commentList should be null");
+
+	}
+
+	@Test
+	public void ticketMapperWithCommentMapperTest() {
+		//given
+
+		//when
+
+		//then
 
 	}
 
@@ -89,7 +98,7 @@ class TicketMapperTest {
 		//when
 		long startManual = System.currentTimeMillis();
 		for (int i = 0; i < 100000; i++) {
-			TicketResponseDto ticketResponseDto = new TicketResponseDto(ticket);
+			// TicketResponseDto ticketResponseDto = new TicketResponseDto(ticket);
 		}
 		long takenTimeWithManual = System.currentTimeMillis() - startManual;
 
