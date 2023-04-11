@@ -2,6 +2,7 @@ package com.ddalggak.finalproject.domain.auth;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ddalggak.finalproject.domain.user.dto.EmailRequestDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
+import com.ddalggak.finalproject.domain.user.exception.UserException;
+import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.ErrorCode;
@@ -28,6 +31,7 @@ import com.ddalggak.finalproject.global.mail.MailService;
 import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -37,6 +41,7 @@ public class AuthController {
 	private final MailService mailService;
 	private final AuthService authService;
 	private final JwtUtil jwtUtil;
+	private final UserRepository userRepository;
 
 	@PostMapping("/email")
 	public ResponseEntity<?> emailAuthentication(@Valid @RequestBody EmailRequestDto emailRequestDto,
@@ -80,11 +85,28 @@ public class AuthController {
 		return authService.login(userRequestDto, response);
 	}
 
-	@PostMapping("/auth/logout")
+	@PostMapping("/logout")
 	public ResponseEntity<SuccessResponseDto> logout(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		String email = userDetails.getEmail();
 		SecurityContextHolder.clearContext();
 		jwtUtil.logout(email);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_LOGOUT);
+	}
+
+	@GetMapping("/validToken")
+	public ResponseEntity<?> validateToken(HttpServletRequest request, HttpServletResponse response) {
+		String token = jwtUtil.resolveToken(request);
+		Claims claims;
+		if (token != null) {
+			if (jwtUtil.validateToken(token)) {
+				claims = jwtUtil.getUserInfo(token);
+			} else {
+				return ErrorResponse.from(ErrorCode.INVALID_REQUEST);
+			}
+			userRepository.findByEmail(claims.getSubject())
+				.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+		} else
+			throw new UserException(ErrorCode.INVALID_REQUEST);
+		return SuccessResponseDto.of(SuccessCode.SUCCESS_AUTH);
 	}
 }
