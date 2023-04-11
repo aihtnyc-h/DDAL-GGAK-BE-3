@@ -50,7 +50,7 @@ public class TicketController {
 		@PathVariable Long ticketId,
 		@RequestParam Long taskId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
-		return ticketService.getTicket(ticketId, userDetails.getUser());
+		return ticketService.getTicket(ticketId, taskId, userDetails.getUser());
 	}
 
 	// 티켓 수정

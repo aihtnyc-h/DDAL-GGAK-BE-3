@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
+import com.ddalggak.finalproject.domain.project.dto.ProjectResponseDto;
 import com.ddalggak.finalproject.domain.project.service.ProjectService;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
@@ -87,7 +89,7 @@ public class ProjectController {
 
 	@Operation(summary = "프로젝트 수정", description = "api for update project")
 	@PostMapping("/project/{projectId}/settings")
-	public ResponseEntity<ProjectBriefResponseDto> updateProject(
+	public ResponseEntity<ProjectResponseDto> updateProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId,
 		@RequestPart(value = "thumbnail", required = false) MultipartFile image,
@@ -126,5 +128,14 @@ public class ProjectController {
 		@PathVariable Long projectId,
 		@PathVariable Long userId) {
 		return projectService.deleteProjectUser(userDetails.getUser(), projectId, userId);
+	}
+
+	@Operation(summary = "프로젝트 사용자 초대", description = "api for inviting a user to a project")
+	@PostMapping("/project/{projectId}")
+	public ResponseEntity<?> inviteProjectUser(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
+		@PathVariable Long projectId,
+		@RequestBody List<String> emails) {
+		return projectService.inviteProjectUser(userDetails.getUser(), projectId, emails);
 	}
 }

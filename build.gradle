@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        queryDslVersion = '5.0.0'
+        queryDslVersion = "5.0.0"
     }
 }
 
@@ -16,6 +16,8 @@ jar {
 group = 'com.ddalgak'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
+
+ext["hibernate.version"] = "5.6.5.Final"
 
 configurations {
     compileOnly {
@@ -98,6 +100,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+//querydsl 추가 시작
 def querydslDir = "$buildDir/generated/querydsl"
 querydsl {
     jpa = true
@@ -111,4 +114,8 @@ configurations {
 }
 compileQuerydsl {
     options.annotationProcessorPath = configurations.querydsl
+}
+
+clean {
+    delete file('src/main/generated')
 }

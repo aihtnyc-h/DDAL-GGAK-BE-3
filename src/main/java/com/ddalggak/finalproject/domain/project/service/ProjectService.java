@@ -4,6 +4,9 @@ import static com.ddalggak.finalproject.global.dto.SuccessCode.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -14,12 +17,14 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
+import com.ddalggak.finalproject.domain.project.dto.ProjectMapper;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectUserRequestDto;
 import com.ddalggak.finalproject.domain.project.entity.Project;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.project.repository.ProjectRepository;
+import com.ddalggak.finalproject.domain.user.dto.UserMapper;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
@@ -27,6 +32,7 @@ import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.global.dto.GlobalResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
 import com.ddalggak.finalproject.global.error.ErrorCode;
+import com.ddalggak.finalproject.global.mail.MailService;
 import com.ddalggak.finalproject.infra.aws.S3Uploader;
 
 import lombok.RequiredArgsConstructor;
@@ -36,9 +42,14 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
+
+	private final ProjectMapper projectMapper;
+
+	private final UserMapper userMapper;
 	private final ProjectRepository projectRepository;
 	private final S3Uploader s3Uploader;
 	private final UserRepository userRepository;
+	private final MailService mailService;
 
 	public ResponseEntity<?> createProject(User user, MultipartFile image,
 		ProjectRequestDto projectRequestDto) throws
@@ -73,14 +84,19 @@ public class ProjectService {
 			.body(result);
 	}
 
+	//프로젝트 확인
 	@Transactional(readOnly = true)
 	public ResponseEntity<ProjectResponseDto> viewProject(User user, Long id) {
+		// 유효성 검증
 		Project project = validateProject(id);
 		validateExistMember(project, ProjectUser.create(project, user));
 
+		// 리턴
+		ProjectResponseDto projectResponseDto = projectMapper.toDto(project);
+
 		return ResponseEntity
 			.status(HttpStatus.OK)
-			.body(ProjectResponseDto.of(project));
+			.body(projectResponseDto);
 	}
 
 	@Transactional
@@ -106,25 +122,32 @@ public class ProjectService {
 		return ResponseEntity.ok(projectRepository.findProjectAllByUserId(user.getUserId()));
 	}
 
+	// 프로젝트 정보 변경
 	@Transactional
-	public ResponseEntity<ProjectBriefResponseDto> updateProject(User user, Long projectId,
+	public ResponseEntity<ProjectResponseDto> updateProject(User user, Long projectId,
 		MultipartFile image, ProjectRequestDto projectRequestDto) throws IOException {
+		// 유효성 검사
 		Project project = validateProject(projectId);
 		if (!project.getProjectLeader().equals(user.getEmail())) {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
+		// 기존 이미지 삭제 후 새로운 이미지 업로드
 		String imageUrl = null;
 		if (!(image == null)) {
 			fileCheck(image);
 			imageUrl = s3Uploader.upload(image, "project");
 		}
+		// 업로드한 이미지의 url을 바탕으로 update 쿼리
 		projectRequestDto.setThumbnail(imageUrl);
 		projectRepository.update(projectId, projectRequestDto);
-		new ProjectBriefResponseDto(project);
-		return ResponseEntity.ok(new ProjectBriefResponseDto(project));
+
+		// 새로운 프로젝트 다시 받아옴 , todo 무엇을 반환해야 할까?
+		ProjectResponseDto projectResponseDto = projectMapper.toDto(projectRepository.findById(projectId).get());
+		return ResponseEntity.ok(projectResponseDto);
 	}
 
 	public ResponseEntity<?> deleteProjectUser(User user, Long projectId, Long userId) {
+		// 유효성 검사
 		Project project = validateProject(projectId);
 		User projectUser = userRepository.findById(userId).orElseThrow(
 			() -> new UserException(ErrorCode.EMPTY_CLIENT)
@@ -133,18 +156,61 @@ public class ProjectService {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		project.getProjectUserList().remove(ProjectUser.create(project, projectUser));
-		//참여중인 유저 목록 리턴
-		return ResponseEntity.ok(
-			project.getProjectUserList().stream().map(UserResponseDto::of).collect(Collectors.toList()));
+		// 참여중인 유저 목록 리턴
+		List<UserResponseDto> userList = userRepository
+			.getProjectUserFromProjectId(projectId)
+			.stream()
+			.map(userMapper::toUserResponseDtoWithProjectUser)
+			.collect(Collectors.toList());
+		return ResponseEntity.ok(userList);
 	}
 
+	// 프로젝트에 참여중인 유저 목록 조회
 	@Transactional(readOnly = true)
 	public ResponseEntity<?> viewProjectUsers(User user, Long projectId) {
+		// 유효성 검증
 		Project project = validateProject(projectId);
 		validateExistMember(project, ProjectUser.create(project, user));
-		return ResponseEntity
-			.status(HttpStatus.OK)
-			.body(project.getProjectUserList().stream().map(UserResponseDto::of).collect(Collectors.toList()));
+
+		// 참여중인 유저 목록 리턴
+		List<UserResponseDto> userList = userRepository
+			.getProjectUserFromProjectId(projectId)
+			.stream()
+			.map(userMapper::toUserResponseDtoWithProjectUser)
+			.collect(Collectors.toList());
+		return ResponseEntity.ok(userList);
+	}
+
+	public ResponseEntity<?> inviteProjectUser(User user, Long projectId, List<String> emails) {
+		// 유효성 검증
+		Project project = validateProject(projectId);
+		validateExistMember(project, ProjectUser.create(project, user));
+
+		// email 유효성 검증
+		Pattern pattern = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+		for (String email : emails) {
+			if (!pattern.matcher(email).matches()) {
+				return ResponseEntity.badRequest().body("Invalid email format: " + email);
+			}
+		}
+
+		if (project.getUuid() == null) {
+			String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+			project.createUuid(uuid);
+		}
+		String uuid = project.getUuid();
+
+		// 참여중인 유저 목록 리턴
+		List<UserResponseDto> userList = userRepository
+			.getProjectUserFromProjectId(projectId)
+			.stream()
+			.map(userMapper::toUserResponseDtoWithProjectUser)
+			.collect(Collectors.toList());
+
+		Map<String, Object> response = mailService.sendProjectCode(uuid, emails);
+		response.put("userResponseDtoList", userList);
+
+		return ResponseEntity.ok(response);
 	}
 
 	private void validateDuplicateMember(Project project, ProjectUser projectUser) {

@@ -20,8 +20,10 @@ import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.domain.user.role.UserRole;
 import com.ddalggak.finalproject.global.error.ErrorCode;
-import com.ddalggak.finalproject.global.jwt.token.entity.Token;
-import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
+import com.ddalggak.finalproject.global.jwt.token.entity.AccessToken;
+import com.ddalggak.finalproject.global.jwt.token.entity.RefreshToken;
+import com.ddalggak.finalproject.global.jwt.token.repository.AccessTokenRepository;
+import com.ddalggak.finalproject.global.jwt.token.repository.RefreshTokenRepository;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 import com.ddalggak.finalproject.global.security.UserDetailsServiceImpl;
 
@@ -41,11 +43,11 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
+	private final AccessTokenRepository accessTokenRepository;
 	private final UserRepository userRepository;
-	private final TokenRepository tokenRepository;
+	private final RefreshTokenRepository refreshTokenRepository;
 	private final UserDetailsServiceImpl userDetailsService;
 	public static final String AUTHORIZATION_HEADER = "Authorization";
-	public static final String REFRESH_TOKEN_HEADER = "RefreshToken";
 	public static final String AUTHORIZATION_KEY = "auth";
 	private static final String BEARER_PREFIX = "Bearer ";
 
@@ -64,20 +66,32 @@ public class JwtUtil {
 		key = Keys.hmacShaKeyFor(bytes);
 	}
 
-	public Token login(String email, UserRole role) {
-		if (tokenRepository.existsById(email)) {
-			log.info("기존의 존재하는 모든 토큰 삭제");
-			tokenRepository.deleteById(email);
+	public String login(String email, UserRole role) {
+		if (accessTokenRepository.existsById(email)) {
+			log.info("기존의 존재하는 액세스 토큰 삭제");
+			accessTokenRepository.deleteById(email);
+		}
+		if (refreshTokenRepository.existsById(email)) {
+			log.info("기존의 존재하는 리프레시 토큰 삭제");
+			refreshTokenRepository.deleteById(email);
 		}
 
-		String accessToken = createAccessToken(email, role).getAccessToken();
+		String accessToken = createAccessToken(email, role);
 		String refreshToken = createRefreshToken(email, role).getRefreshToken();
 
-		return Token.builder()
+		AccessToken newAccessToken = AccessToken.builder()
 			.email(email)
 			.accessToken(accessToken)
+			.build();
+		accessTokenRepository.save(newAccessToken);
+
+		RefreshToken newRefreshToken = RefreshToken.builder()
+			.email(email)
 			.refreshToken(refreshToken)
 			.build();
+		refreshTokenRepository.save(newRefreshToken);
+
+		return accessToken;
 	}
 
 	public String resolveToken(HttpServletRequest request) {
@@ -88,18 +102,17 @@ public class JwtUtil {
 		return null;
 	}
 
-	private String resolveRefreshToken(HttpServletRequest request) {
-		String bearerToken = request.getHeader(REFRESH_TOKEN_HEADER);
-		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-			return bearerToken.substring(7);
+	public String resolveRefreshToken(String refreshToken) {
+		if (StringUtils.hasText(refreshToken) && refreshToken.startsWith(BEARER_PREFIX)) {
+			return refreshToken.substring(7);
 		}
 		return null;
 	}
 
-	public Token createAccessToken(String email, UserRole role) {
+	public String createAccessToken(String email, UserRole role) {
 		Date date = new Date();
 
-		String accessToken = BEARER_PREFIX +
+		return BEARER_PREFIX +
 			Jwts.builder()
 				.setSubject(email)
 				.claim(AUTHORIZATION_KEY, role)
@@ -107,15 +120,6 @@ public class JwtUtil {
 				.setIssuedAt(date)
 				.signWith(key, signatureAlgorithm)
 				.compact();
-
-		Token toSaveAccessToken = Token.builder()
-			.email(email)
-			.accessToken(accessToken)
-			.build();
-
-		tokenRepository.save(toSaveAccessToken);
-
-		return toSaveAccessToken;
 
 	}
 
@@ -129,16 +133,24 @@ public class JwtUtil {
 			.map(GrantedAuthority::getAuthority)
 			.collect(Collectors.joining(","));
 
-		return Jwts.builder()
-			.setSubject(email)
-			.claim(AUTHORIZATION_KEY, role)
-			.setExpiration(new Date(date.getTime() + accessTokenTime))
-			.setIssuedAt(date)
-			.signWith(key, signatureAlgorithm)
-			.compact();
+		String accessToken = BEARER_PREFIX +
+			Jwts.builder()
+				.setSubject(email)
+				.claim(AUTHORIZATION_KEY, role)
+				.setExpiration(new Date(date.getTime() + accessTokenTime))
+				.setIssuedAt(date)
+				.signWith(key, signatureAlgorithm)
+				.compact();
+
+		AccessToken toSaveAccessToken = AccessToken.builder()
+			.email(email)
+			.accessToken(accessToken)
+			.build();
+
+		return toSaveAccessToken.getAccessToken();
 	}
 
-	public Token createRefreshToken(String email, UserRole role) {
+	public RefreshToken createRefreshToken(String email, UserRole role) {
 		Date date = new Date();
 
 		String refreshToken = BEARER_PREFIX +
@@ -150,12 +162,12 @@ public class JwtUtil {
 				.signWith(key, signatureAlgorithm)
 				.compact();
 
-		Token toSaveRefreshToken = Token.builder()
+		RefreshToken toSaveRefreshToken = RefreshToken.builder()
 			.email(email)
 			.refreshToken(refreshToken)
 			.build();
 
-		tokenRepository.save(toSaveRefreshToken);
+		refreshTokenRepository.save(toSaveRefreshToken);
 
 		return toSaveRefreshToken;
 
@@ -171,23 +183,24 @@ public class JwtUtil {
 			.map(GrantedAuthority::getAuthority)
 			.collect(Collectors.joining(","));
 
-		return Jwts.builder()
-			.setSubject(email)
-			.claim(AUTHORIZATION_KEY, role)
-			.setExpiration(new Date(date.getTime() + refreshTokenTime))
-			.setIssuedAt(date)
-			.signWith(key, signatureAlgorithm)
-			.compact();
+		return BEARER_PREFIX +
+			Jwts.builder()
+				.setSubject(email)
+				.claim(AUTHORIZATION_KEY, role)
+				.setExpiration(new Date(date.getTime() + refreshTokenTime))
+				.setIssuedAt(date)
+				.signWith(key, signatureAlgorithm)
+				.compact();
 	}
 
 	public void logout(String email) {
-		Token token = tokenRepository.findById(email).orElseThrow(() -> new UserException(ErrorCode.INVALID_REQUEST));
-		String accessToken = token.getAccessToken();
+		RefreshToken token = refreshTokenRepository.findById(email)
+			.orElseThrow(() -> new UserException(ErrorCode.INVALID_REQUEST));
 		String refreshToken = token.getRefreshToken();
 
-		if (accessToken != null || refreshToken != null) {
+		if (refreshToken != null) {
 			log.info("기존의 존재하는 토큰 모두 삭제");
-			tokenRepository.deleteById(email);
+			refreshTokenRepository.deleteById(email);
 		}
 	}
 
@@ -197,6 +210,8 @@ public class JwtUtil {
 			return true;
 		} catch (SecurityException | MalformedJwtException e) {
 			log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
+		} catch (ExpiredJwtException e) {
+			log.info("Expired JWT token, 만료된 JWT token 입니다.");
 		} catch (UnsupportedJwtException e) {
 			log.info("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
 		} catch (IllegalArgumentException e) {
@@ -218,6 +233,8 @@ public class JwtUtil {
 			}
 		} catch (SecurityException | MalformedJwtException e) {
 			log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
+		} catch (ExpiredJwtException e) {
+			log.info("Expired JWT token, 만료된 JWT token 입니다.");
 		} catch (UnsupportedJwtException e) {
 			log.info("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
 		} catch (IllegalArgumentException e) {
@@ -265,12 +282,16 @@ public class JwtUtil {
 		return false;
 	}
 
-	// public void setErrorResponse(HttpServletResponse response) throws IOException {
-	// 	response.setStatus(999);
-	// 	response.setContentType("application/json; charset=UTF-8");
-	//
-	// 	JwtExceptionResponse jwtExceptionResponse = new JwtExceptionResponse(ErrorCode.INVALID_AUTH_TOKEN);
-	// 	response.getWriter().write(jwtExceptionResponse.convertToJson());
-	// }
+	public boolean isAccessTokenAboutToExpire(String accessToken) {
+		Long now = new Date().getTime();
+		if (getExpirationTime(accessToken).getTime() - now <= 120000) {
+			return true;
+		}
+		return false;
+	}
+
+	public Date getExpirationTime(String token) {
+		return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody().getExpiration();
+	}
 
 }

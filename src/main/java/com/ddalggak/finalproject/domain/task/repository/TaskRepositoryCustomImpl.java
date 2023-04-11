@@ -5,14 +5,9 @@ import static com.ddalggak.finalproject.domain.task.entity.QTask.*;
 import static com.ddalggak.finalproject.domain.ticket.entity.QTicket.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
-import com.ddalggak.finalproject.domain.task.dto.TaskBriefResponseDto;
-import com.ddalggak.finalproject.domain.task.dto.TaskResponseDto;
 import com.ddalggak.finalproject.domain.task.entity.Task;
-import com.ddalggak.finalproject.domain.ticket.dto.TicketMapper;
-import com.ddalggak.finalproject.global.error.CustomException;
-import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -22,11 +17,8 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
 
 	private final JPAQueryFactory queryFactory;
 
-	private final TicketMapper ticketMapper;
-
 	@Override
-	public TaskResponseDto findTaskById(Long id) {
-
+	public Optional<Task> findTaskById(Long id) {
 		Task result = queryFactory
 			.selectFrom(task)
 			.leftJoin(task.labelList, label)
@@ -35,25 +27,26 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
 			.where(task.taskId.eq(id))
 			.distinct()
 			.fetchOne();
-
-		if (result == null) {
-			throw new CustomException(ErrorCode.TASK_NOT_FOUND);
-		}
-
-		return new TaskResponseDto(result);
+		return Optional.ofNullable(result);
 	}
 
 	@Override
-	public List<TaskBriefResponseDto> findTaskByProject(Long projectId) {
-		List<Task> result = queryFactory
+	public List<Task> findTaskByProject(Long projectId) {
+		return queryFactory
 			.selectFrom(task)
 			.orderBy(task.createdAt.desc())
 			.where(task.project.projectId.eq(projectId))
 			.fetch();
+	}
 
-		return result
-			.stream()
-			.map(TaskBriefResponseDto::new)
-			.collect(Collectors.toList());
+	@Override
+	public Optional<Task> findTaskByLabelId(Long labelId) {
+		Task result = queryFactory
+			.selectFrom(task)
+			.leftJoin(task.labelList, label)
+			.where(label.labelId.eq(labelId))
+			.fetchOne();
+
+		return Optional.ofNullable(result);
 	}
 }

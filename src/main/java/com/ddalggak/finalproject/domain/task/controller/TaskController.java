@@ -58,7 +58,7 @@ public class TaskController {
 	}
 
 	@Operation(summary = "Task 리더 부여", description = "api for assign admin to task")
-	@PostMapping("/task/{taskId}/admin")
+	@PostMapping("/task/{taskId}/leader")
 	public ResponseEntity<?> assignLeader(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@PathVariable Long taskId,
