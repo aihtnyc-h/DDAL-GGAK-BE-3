@@ -80,7 +80,7 @@ public class AuthController {
 		return authService.login(userRequestDto, response);
 	}
 
-	@PostMapping("/auth/logout")
+	@PostMapping("/logout")
 	public ResponseEntity<SuccessResponseDto> logout(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		String email = userDetails.getEmail();
 		SecurityContextHolder.clearContext();
