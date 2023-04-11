@@ -78,14 +78,16 @@ jobs:
         aws-region: ${{ env.AWS_REGION }}
 
    # (8) 빌드 결과물을 S3 버킷에 업로드
-    - name: Upload to AWS S3
-      run: |
-        aws deploy push \
-          --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
-          --ignore-hidden-files \
-          --s3-location s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip \
-          --source .
-          
+#     - name: Upload to AWS S3
+#       run: |
+#         aws deploy push \
+#           --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+#           --ignore-hidden-files \
+#           --s3-location s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip \
+#           --source .
+ # 배포 그룹으로 애플리케이션 전송
+    - name: Code Deploy
+      run: aws deploy create-deployment --application-name $CODE_DEPLOY_APP_NAME --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name $CODE_DEPLOY_GROUP_NAME --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=practice-deploy.zip         
 #      # 압축한 프로젝트를 S3로 전송
 #     - name: Upload to S3
 #       run: aws s3 cp --region ap-northeast-2 ./practice-deploy.zip s3://$S3_BUCKET_NAME/practice-deploy.zip      
