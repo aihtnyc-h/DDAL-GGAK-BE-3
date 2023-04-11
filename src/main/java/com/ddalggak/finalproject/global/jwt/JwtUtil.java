@@ -3,6 +3,7 @@ package com.ddalggak.finalproject.global.jwt;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -294,4 +295,17 @@ public class JwtUtil {
 		return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody().getExpiration();
 	}
 
+	public boolean tokenExist(HttpServletRequest request) {
+		String accessToken = resolveToken(request);
+		Claims userInfo = getUserInfo(accessToken);
+		String email = userInfo.getSubject();
+
+		Optional<RefreshToken> savedRefreshToken = refreshTokenRepository.findById(email);
+		Optional<AccessToken> savedAccessToken = accessTokenRepository.findById(email);
+
+		if (savedRefreshToken.isEmpty() || savedAccessToken.isEmpty()) {
+			return false;
+		}
+		return true;
+	}
 }

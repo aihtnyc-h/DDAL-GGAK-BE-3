@@ -32,8 +32,11 @@ import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import io.jsonwebtoken.Claims;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Auth Controller", description = "인증 관련 API 입니다.")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -43,9 +46,12 @@ public class AuthController {
 	private final JwtUtil jwtUtil;
 	private final UserRepository userRepository;
 
+	@Operation(summary = "email authentication", description = "email 인증 코드 발송 post 메서드 체크")
 	@PostMapping("/email")
-	public ResponseEntity<?> emailAuthentication(@Valid @RequestBody EmailRequestDto emailRequestDto,
+	public ResponseEntity<?> emailAuthentication(
+		@Valid @RequestBody EmailRequestDto emailRequestDto,
 		BindingResult bindingResult) {
+
 		if (bindingResult.hasErrors()) {
 			List<ObjectError> list = bindingResult.getAllErrors();
 			for (ObjectError e : list) {
@@ -57,15 +63,21 @@ public class AuthController {
 		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_SEND);
 	}
 
+	@Operation(summary = "email authentication check", description = "email 인증 코드 일치 확인 get 메서드 체크")
 	@GetMapping("/email")
-	public ResponseEntity<?> emailAuthenticationWithRandomCode(@RequestBody RandomCodeDto randomCodeDto) {
+	public ResponseEntity<?> emailAuthenticationWithRandomCode(
+		@RequestBody RandomCodeDto randomCodeDto) {
+
 		authService.emailAuthenticationWithRandomCode(randomCodeDto);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_AUTH);
 	}
 
+	@Operation(summary = "signup", description = "회원가입 post 메서드 체크")
 	@PostMapping("/signup")
-	public ResponseEntity<?> signup(@Valid @RequestBody UserRequestDto userRequestDto,
+	public ResponseEntity<?> signup(
+		@Valid @RequestBody UserRequestDto userRequestDto,
 		BindingResult bindingResult) {
+
 		if (bindingResult.hasErrors()) {
 			List<ObjectError> list = bindingResult.getAllErrors();
 			for (ObjectError e : list) {
@@ -80,21 +92,31 @@ public class AuthController {
 
 	}
 
+	@Operation(summary = "login", description = "로그인 post 메서드 체크")
 	@PostMapping("/login")
-	public ResponseEntity<UserPageDto> login(@RequestBody UserRequestDto userRequestDto, HttpServletResponse response) {
+	public ResponseEntity<UserPageDto> login(
+		@RequestBody UserRequestDto userRequestDto,
+		HttpServletResponse response) {
+
 		return authService.login(userRequestDto, response);
 	}
 
+	@Operation(summary = "logout", description = "로그아웃 post 메서드 체크")
 	@PostMapping("/logout")
-	public ResponseEntity<SuccessResponseDto> logout(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+	public ResponseEntity<SuccessResponseDto> logout(
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+
 		String email = userDetails.getEmail();
 		SecurityContextHolder.clearContext();
 		jwtUtil.logout(email);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_LOGOUT);
 	}
 
+	@Operation(summary = "validate token", description = "권한 확인 get 메서드 체크")
 	@GetMapping("/validToken")
-	public ResponseEntity<?> validateToken(HttpServletRequest request, HttpServletResponse response) {
+	public ResponseEntity<?> validateToken(
+		HttpServletRequest request) {
+
 		String token = jwtUtil.resolveToken(request);
 		Claims claims;
 		if (token != null) {
