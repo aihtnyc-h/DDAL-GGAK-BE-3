@@ -44,15 +44,17 @@ public class TaskService {
 	// 태스크 생성
 	@Transactional
 	public ResponseEntity<?> createTask(User user, TaskRequestDto taskRequestDto) {
+		User existUser = userRepository.findByEmail(user.getEmail())
+			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		// 1.유효성 검증
 		Project project = validateProject(taskRequestDto.projectId);
-		validateExistMember(project, ProjectUser.create(project, user));
-		if (!(project.getProjectLeader().equals(user.getEmail())) || project.getTaskLeadersList()
-			.contains(user.getEmail())) {
+		validateExistMember(project, ProjectUser.create(project, existUser));
+		if (!(project.getProjectLeader().equals(existUser.getEmail())) || project.getTaskLeadersList()
+			.contains(existUser.getEmail())) {
 			throw new CustomException(UNAUTHENTICATED_USER);
 		}
 		// 2. 태스크 생성
-		TaskUserRequestDto taskUserRequestDto = TaskUserRequestDto.create(user);
+		TaskUserRequestDto taskUserRequestDto = TaskUserRequestDto.create(existUser);
 		TaskUser taskUser = TaskUser.create(taskUserRequestDto);
 		Task task = Task.create(taskRequestDto, taskUser, project);
 
