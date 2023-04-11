@@ -45,8 +45,7 @@ jobs:
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
       with:
         arguments: build -x test
-    - name: Build application
-      run: ./mvnw clean package        
+     
     # (4) 디렉토리 생성
     - name: Make Directory
       run: mkdir -p deploy
