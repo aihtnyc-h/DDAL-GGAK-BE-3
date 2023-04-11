@@ -21,14 +21,19 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Builder
+@Slf4j
+@ToString
 public class UserDetailsImpl implements UserDetails, OAuth2User, OidcUser {
 
+	private static final long serialVersionUID = 1L;
 	private final User user;
 	private final String email;
 	private final String nickname;
