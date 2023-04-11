@@ -3,7 +3,7 @@ os: linux
 
 files:
   - source:  /
-    destination: /home/ubuntu/app/zip
+    destination: /home/ubuntu/app/step2/zip
     overwrite: yes
 
 permissions:
@@ -18,6 +18,6 @@ hooks:
 #       timeout: 60
 #       runas: root
   ApplicationStart:
-    - location: start.sh
+    - location: scripts/start.sh
       timeout: 60
       runas: root
