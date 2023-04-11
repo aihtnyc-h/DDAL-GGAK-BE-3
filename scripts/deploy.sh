@@ -35,7 +35,7 @@ chmod +x $JAR_NAME # Jar 파일은 실행 권한이 없는 상태이므로 권�
 echo "> $JAR_NAME 실행"
 
 nohup java -jar \
-    -Dspring.config.location=classpath:/application.properties,classpath:/application-real.properties,/home/ec2-user/app/application-oauth.properties,/home/ec2-user/app/application-real-db.properties \
+    -Dspring.config.location=classpath:/application.yaml,classpath:/application.yaml,/home/ubuntu/app/config/prod-application-set1.yaml,/home/ubuntu/app/config/prod-application-set2.yaml \
     -Dspring.profiles.active=real \
     $JAR_NAME > $REPOSITORY/nohup.out 2>&1 &
 # nohup 실행 시 CodeDeploy는 무한 대기한다. 이를 해결하기 위해 nohup.out 파일을 표준 입출력용으로 별도로 사용한다.
