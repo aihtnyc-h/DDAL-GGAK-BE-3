@@ -1,8 +1,10 @@
 package com.ddalggak.finalproject.domain.user.entity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -30,7 +32,7 @@ import lombok.NoArgsConstructor;
 @Entity(name = "Users")
 @Builder
 
-public class User extends BaseTimeEntity {
+public class User extends BaseTimeEntity implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long userId;
@@ -55,7 +57,7 @@ public class User extends BaseTimeEntity {
 	@Enumerated(value = EnumType.STRING)
 	private ProviderType providerType;
 
-	@OneToMany(mappedBy = "user")
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	List<ProjectUser> projectUserList = new ArrayList<>();
 
 	@OneToMany(mappedBy = "user")

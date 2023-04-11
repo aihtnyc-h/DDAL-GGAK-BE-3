@@ -1,5 +1,6 @@
 package com.ddalggak.finalproject.domain.task.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -32,7 +33,7 @@ public class TaskUser {
 	@JoinColumn(name = "UserId")
 	private User user;
 
-	@ManyToOne //todo 오류 발생하면 여기임
+	@ManyToOne(cascade = CascadeType.ALL) //todo 오류 발생하면 여기임
 	@JoinColumn(name = "TaskId")
 	private Task task;
 
