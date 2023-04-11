@@ -84,4 +84,8 @@ public class Project extends BaseEntity {
 		taskList.add(task);
 	}
 
+	public void createUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
 }
