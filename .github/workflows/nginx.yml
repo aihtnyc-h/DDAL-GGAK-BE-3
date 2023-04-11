@@ -15,8 +15,8 @@ on:
 env:
   AWS_REGION: ap-northeast-2
   S3_BUCKET_NAME: ddal-ggak-codedeploy-app
-  CODE_DEPLOY_APPLICATION_NAME: test1
-  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: nginx-test1-g #변경필요 블루 그린으로 만들어야함
+  CODE_DEPLOY_APPLICATION_NAME: nginx-1
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: nginx-1 #변경필요 블루 그린으로 만들어야함
   ZIP_NAME: zip -r ./finalproject.zip .
   
 permissions:
