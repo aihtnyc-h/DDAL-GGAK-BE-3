@@ -3,7 +3,6 @@ package com.ddalggak.finalproject.global.config;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,6 +25,8 @@ import com.ddalggak.finalproject.global.jwt.JwtUtil;
 import com.ddalggak.finalproject.global.jwt.token.repository.AccessTokenRepository;
 import com.ddalggak.finalproject.global.jwt.token.repository.RefreshTokenRepository;
 import com.ddalggak.finalproject.global.jwt.token.service.TokenService;
+import com.ddalggak.finalproject.global.security.CustomAccessDeniedHandler;
+import com.ddalggak.finalproject.global.security.CustomAuthenticationEntryPoint;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,8 +39,8 @@ public class WebSecurityConfig {
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final AccessTokenRepository accessTokenRepository;
 	private final RefreshTokenRepository refreshTokenRepository;
-	// private final CustomAccessDeniedHandler customAccessDeniedHandler;
-	// private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+	private final CustomAccessDeniedHandler customAccessDeniedHandler;
+	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 	private final TokenService tokenService;
 
 	//
@@ -66,18 +67,9 @@ public class WebSecurityConfig {
 		http.authorizeRequests()
 			.antMatchers("/api/auth/email", "/api/auth/signup", "/api/auth/login")
 			.permitAll()
-			.antMatchers("/api/auth/**")
+			.antMatchers("/api/auth/**", "/api/user/**", "/api/project/**", "/api/task/**", "/api/ticket/**",
+				"/oauth2/**")
 			.fullyAuthenticated()
-			.antMatchers("/api/user/**")
-			.fullyAuthenticated()
-			.antMatchers(HttpMethod.GET, "/api/project/**")
-			.permitAll()
-			.antMatchers(HttpMethod.GET, "/api/task/**")
-			.permitAll()
-			.antMatchers(HttpMethod.GET, "/api/ticket/**")
-			.permitAll()
-			.antMatchers("/oauth2/**")
-			.permitAll()
 			.antMatchers("/ddal-ggak/docs")
 			.permitAll()
 			.antMatchers("/ddal-ggak.html")
@@ -98,16 +90,15 @@ public class WebSecurityConfig {
 			.and()
 			.successHandler(oAuth2AuthenticationSuccessHandler())
 			.failureHandler(oAuth2AuthenticationFailureHandler())
-			// .and()
-			// .exceptionHandling()
-			// .accessDeniedHandler(customAccessDeniedHandler)
-			// .authenticationEntryPoint(customAuthenticationEntryPoint)
 
 			//                .antMatchers(HttpMethod.POST, "/api/logout").permitAll()
 			// JWT 인증/인가를 사용하기 위한 설정
 			.and()
 			.addFilterBefore(new JwtAuthFilter(jwtUtil, tokenService),
-				UsernamePasswordAuthenticationFilter.class); //    private final JwtUtil jwtUtil; 추가하기!
+				UsernamePasswordAuthenticationFilter.class)
+			.exceptionHandling()
+			.accessDeniedHandler(customAccessDeniedHandler)
+			.authenticationEntryPoint(customAuthenticationEntryPoint); //    private final JwtUtil jwtUtil; 추가하기!
 		http.cors();
 		// 로그인 사용
 		http.formLogin().permitAll();// 로그인 페이지가 있을 경우 넣기!.loginPage(".api/user/login-page").permitAll();

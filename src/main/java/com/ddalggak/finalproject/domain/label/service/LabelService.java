@@ -53,10 +53,13 @@ public class LabelService {
 	//라벨 생성
 	@Transactional
 	public ResponseEntity<?> createLabel(User user, LabelRequestDto labelRequestDto) {
+		User existUser = userRepository.findByEmail(user.getEmail())
+			.orElseThrow(() -> new CustomException(UNAUTHENTICATED_USER));
 		// 유효성 검증
 		Task task = validateTask(labelRequestDto.getTaskId());
-		validateExistMember(task, TaskUser.create(task, user));
-		if (!(task.getTaskLeader().equals(user.getEmail()) || task.getLabelLeadersList().contains(user.getEmail()))) {
+		validateExistMember(task, TaskUser.create(task, existUser));
+		if (!(task.getTaskLeader().equals(existUser.getEmail()) || task.getLabelLeadersList()
+			.contains(existUser.getEmail()))) {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		for (Label label : task.getLabelList()) {
@@ -64,7 +67,7 @@ public class LabelService {
 				throw new CustomException(ErrorCode.DUPLICATE_RESOURCE);
 		}
 		// label create 작업
-		LabelUserRequestDto labelUserRequestDto = LabelUserRequestDto.create(user);
+		LabelUserRequestDto labelUserRequestDto = LabelUserRequestDto.create(existUser);
 		LabelUser labelUser = LabelUser.create(labelUserRequestDto);
 		Label label = Label.create(labelRequestDto, labelUser, task);
 		// label 저장
