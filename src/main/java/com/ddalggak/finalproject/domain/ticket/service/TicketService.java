@@ -174,22 +174,6 @@ public class TicketService {
 		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
 	}
 
-	@Transactional
-	public ResponseEntity<?> ticketStatusChange(User user, Long ticketId) {
-		Ticket ticket = validateTicket(ticketId);
-		Task task = validateTask(ticket.getTask().getTaskId());
-
-		if (ticket.getUser().getUserId().equals(user.getUserId())) {
-			ticket.ticketStatusChange(ticket.getStatus());
-		} else {
-			throw new CustomException(UNAUTHORIZED_MEMBER);
-		}
-		ticketRepository.save(ticket);
-		List<Ticket> ticketList = ticketRepository.findWithTaskId(task.getTaskId());
-		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
-		return ResponseEntity.ok(ListWithTicketStatus);
-	}
-
 	private void validateExistMember(Project project, ProjectUser projectUser) {
 		if (!project.getProjectUserList().contains(projectUser)) {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
