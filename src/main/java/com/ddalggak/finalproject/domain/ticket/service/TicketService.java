@@ -1,10 +1,12 @@
 package com.ddalggak.finalproject.domain.ticket.service;
 
+import static com.ddalggak.finalproject.global.dto.SuccessCode.*;
 import static com.ddalggak.finalproject.global.error.ErrorCode.*;
 
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
 import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
 import com.ddalggak.finalproject.domain.user.entity.User;
+import com.ddalggak.finalproject.global.dto.GlobalResponseDto;
 import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
@@ -63,14 +66,12 @@ public class TicketService {
 		List<Ticket> ticketList = ticketRepository.findWithTaskId(task.getTaskId());
 		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
 
-		return ResponseEntity
-			.status(201)
-			.body(ListWithTicketStatus);
+		return GlobalResponseDto.of(CREATED_SUCCESSFULLY, ListWithTicketStatus);
 	}
 
 	// 티켓 상세조회
 	@Transactional(readOnly = true)
-	public ResponseEntity<TicketResponseDto> getTicket(Long ticketId, Long taskId, User user) {
+	public ResponseEntity<?> getTicket(Long ticketId, Long taskId, User user) {
 		// 유효성 검증 todo 더 나은 유효성 검증 방향이 있나 검사해보기
 		Project project = projectRepository.findProjectByTaskId(taskId).orElseThrow(
 			() -> new CustomException(PROJECT_NOT_FOUND)
@@ -83,7 +84,7 @@ public class TicketService {
 		);
 		// return
 		TicketResponseDto ticketResponseDto = ticketMapper.toDto(ticket);
-		return ResponseEntity.ok(ticketResponseDto);
+		return GlobalResponseDto.of(HttpStatus.OK, ticketResponseDto);
 	}
 
 	// 티켓 수정하기
@@ -105,7 +106,7 @@ public class TicketService {
 		// 수정 내역 반영된 ticketList 다시 조회
 		List<Ticket> ticketList = ticketRepository.findWithTaskId(task.getTaskId());
 		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
-		return ResponseEntity.ok(ListWithTicketStatus);
+		return GlobalResponseDto.of(UPDATED_SUCCESSFULLY, ListWithTicketStatus);
 	}
 
 	// 티켓 삭제하기
@@ -128,9 +129,10 @@ public class TicketService {
 		// 6. 남은 티켓 return
 		List<Ticket> ticketList = ticketRepository.findWithTaskId(task.getTaskId());
 		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
-		return ResponseEntity.ok(ListWithTicketStatus);
+		return GlobalResponseDto.of(DELETED_SUCCESSFULLY, ListWithTicketStatus);
 	}
 
+	// 티켓 완료 처리 todo 수정처리로 같이 넘어가야함
 	@Transactional
 	public ResponseEntity<?> completeTicket(User user, Long ticketId) {
 		Ticket ticket = validateTicket(ticketId);
@@ -161,6 +163,7 @@ public class TicketService {
 		ticket.addLabel(label);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
 	}
+
 	// 티켓 이동
 	@Transactional
 	public ResponseEntity<?> movementTicket(User user, Long ticketId) {

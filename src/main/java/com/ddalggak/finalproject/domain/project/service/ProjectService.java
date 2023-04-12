@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,7 +101,9 @@ public class ProjectService {
 				s3Uploader.delete(project.getThumbnail());
 			}
 			projectRepository.delete(project);
-			return ResponseEntity.ok(projectRepository.findProjectAllByUserId(user.getUserId()));
+			List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(
+				user.getUserId());
+			return GlobalResponseDto.of(DELETED_SUCCESSFULLY, result);
 		} else {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
@@ -112,12 +115,14 @@ public class ProjectService {
 		ProjectUser projectUser = ProjectUser.create(project, user);
 		validateDuplicateMember(project, projectUser);
 		project.addProjectUser(projectUser);
-		return ResponseEntity.ok(projectRepository.findProjectAllByUserId(user.getUserId()));
+		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(
+			user.getUserId());
+		return GlobalResponseDto.of(DELETED_SUCCESSFULLY, result);
 	}
 
 	// 프로젝트 정보 변경
 	@Transactional
-	public ResponseEntity<ProjectResponseDto> updateProject(User user, Long projectId,
+	public ResponseEntity<?> updateProject(User user, Long projectId,
 		MultipartFile image, ProjectRequestDto projectRequestDto) throws IOException {
 		// 유효성 검사
 		Project project = validateProject(projectId);
@@ -136,7 +141,7 @@ public class ProjectService {
 
 		// 새로운 프로젝트 다시 받아옴 , todo 무엇을 반환해야 할까?
 		ProjectResponseDto projectResponseDto = projectMapper.toDto(projectRepository.findById(projectId).get());
-		return ResponseEntity.ok(projectResponseDto);
+		return GlobalResponseDto.of(UPDATED_SUCCESSFULLY, projectResponseDto);
 	}
 
 	public ResponseEntity<?> deleteProjectUser(User user, Long projectId, Long userId) {
@@ -155,7 +160,7 @@ public class ProjectService {
 			.stream()
 			.map(userMapper::toUserResponseDtoWithProjectUser)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(userList);
+		return GlobalResponseDto.of(DELETED_SUCCESSFULLY, userList);
 	}
 
 	// 프로젝트에 참여중인 유저 목록 조회
@@ -171,7 +176,7 @@ public class ProjectService {
 			.stream()
 			.map(userMapper::toUserResponseDtoWithProjectUser)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(userList);
+		return GlobalResponseDto.of(HttpStatus.OK, userList);
 	}
 
 	public ResponseEntity<?> inviteProjectUser(User user, Long projectId, List<String> emails) {
@@ -203,7 +208,7 @@ public class ProjectService {
 		Map<String, Object> response = mailService.sendProjectCode(uuid, emails);
 		response.put("userResponseDtoList", userList);
 
-		return ResponseEntity.ok(response);
+		return GlobalResponseDto.of(HttpStatus.OK, response);
 	}
 
 	private void validateDuplicateMember(Project project, ProjectUser projectUser) {
