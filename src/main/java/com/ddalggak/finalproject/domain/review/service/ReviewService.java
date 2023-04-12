@@ -45,7 +45,6 @@ public class ReviewService {
 		Ticket ticket = validateTicket(reviewRequestDto.getTicketId());
 		Review review = Review.create(reviewRequestDto, ticket);
 		reviewRepository.save(review);
-		simpMessagingTemplate.convertAndSend("/topic/mewReview", review);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 	}
 

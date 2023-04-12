@@ -21,6 +21,7 @@ public interface CommentMapper extends GenericMapper<CommentResponseDto, Comment
 	CommentResponseDto toDto(Comment entity);
 
 	@Mappings({
+		@Mapping(target = "commentId", ignore = true),
 		@Mapping(target = "comment", source = "commentRequestDto.comment"),
 		@Mapping(target = "ticket", source = "ticket"),
 		@Mapping(target = "user", source = "user")

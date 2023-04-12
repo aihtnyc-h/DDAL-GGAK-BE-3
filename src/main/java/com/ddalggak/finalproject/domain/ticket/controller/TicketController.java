@@ -34,7 +34,6 @@ import lombok.RequiredArgsConstructor;
 public class TicketController {
 	private final TicketService ticketService;
 
-
 	// 티켓 등록
 	@Operation(summary = "ticket 생성", description = "Ticket 등록 post 메서드 체크")
 	@PostMapping("/ticket")
@@ -49,6 +48,15 @@ public class TicketController {
 	@GetMapping("/ticket/{ticketId}")
 	@JsonView(Views.Ticket.class)
 	public ResponseEntity<TicketResponseDto> getTicket(
+		@PathVariable Long ticketId,
+		@RequestParam Long taskId,
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		return ticketService.getTicket(ticketId, taskId, userDetails.getUser());
+	}
+	// 티켓 수정
+	@Operation(summary = "patch ticket", description = "Ticket 수정 patch 메서드 체크")
+	@PatchMapping("/ticket/{ticketId}")
+	public ResponseEntity<?> updateTicket(
 		@PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody TicketRequestDto ticketRequestDto) {
@@ -87,7 +95,7 @@ public class TicketController {
 		return ticketService.getLabelForTicket(userDetails.getUser(), ticketId, ticketLabelRequestDto);
 	}
 	// 티켓 이동하기
-	@PutMapping("/ticket/{ticketId}/movement")
+	@PostMapping("/ticket/{ticketId}/movement")
 	public ResponseEntity<?> movementTicket(@PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return ticketService.movementTicket(userDetails.getUser(), ticketId);

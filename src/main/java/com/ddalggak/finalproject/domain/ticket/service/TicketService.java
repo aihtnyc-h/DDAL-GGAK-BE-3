@@ -161,11 +161,12 @@ public class TicketService {
 		ticket.addLabel(label);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
 	}
+	// 티켓 이동
 	@Transactional
 	public ResponseEntity<?> movementTicket(User user, Long ticketId) {
 		Ticket ticket = validateTicket(ticketId);
 		if (ticket.getUser().getUserId().equals(user.getUserId())) {
-		ticket.movementTicket(ticket.getStatus());
+			ticket.movementTicket(ticket.getStatus());
 		} else {
 			throw new CustomException(UNAUTHORIZED_MEMBER);
 		}

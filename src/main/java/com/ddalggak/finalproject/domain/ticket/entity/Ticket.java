@@ -17,9 +17,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.security.core.parameters.P;
 
 import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.label.entity.Label;
+import com.ddalggak.finalproject.domain.review.entity.Review;
 import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketRequestDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
@@ -71,6 +73,8 @@ public class Ticket extends BaseEntity {
 	// 댓글 연관관계
 	@OneToMany(mappedBy = "ticket", cascade = CascadeType.REMOVE)
 	private List<Comment> comment = new ArrayList<>();
+	@OneToMany(mappedBy = "ticket", cascade = CascadeType.REMOVE)
+	private List<Review> reviews = new ArrayList<>();
 
 	@Builder
 	public Ticket(TicketRequestDto ticketRequestDto, Task task) {
@@ -120,6 +124,7 @@ public class Ticket extends BaseEntity {
 		this.task = task;
 		task.addTicket(this);
 	}
+
 	public void movementTicket(TicketStatus ticketStatus) {
 		if (ticketStatus == TicketStatus.TODO) {
 			this.status = TicketStatus.IN_PROGRESS;
