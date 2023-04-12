@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectResponseDto;
 import com.ddalggak.finalproject.domain.project.service.ProjectService;
@@ -59,7 +58,7 @@ public class ProjectController {
 	@Operation(summary = "프로젝트 전체조회", description = "api for view all projects")
 	@GetMapping("/projects")
 	@ExecutionTimer
-	public ResponseEntity<List<ProjectBriefResponseDto>> viewProjectAll(
+	public ResponseEntity<?> viewProjectAll(
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return projectService.viewProjectAll(userDetails.getUser());
 	}
