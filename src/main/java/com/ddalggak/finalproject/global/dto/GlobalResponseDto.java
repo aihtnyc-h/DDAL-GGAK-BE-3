@@ -2,6 +2,7 @@ package com.ddalggak.finalproject.global.dto;
 
 import java.time.LocalDateTime;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import lombok.AllArgsConstructor;
@@ -26,6 +27,17 @@ public class GlobalResponseDto<T> {
 			.body(GlobalResponseDto.<T>builder()
 				.status(successCode.getHttpStatus().value())
 				.message(successCode.getDetail())
+				.data(data)
+				.build()
+			);
+	}
+
+	public static <T> ResponseEntity<GlobalResponseDto<T>> of(HttpStatus httpStatus, T data) {
+		return ResponseEntity
+			.status(httpStatus.value())
+			.body(GlobalResponseDto.<T>builder()
+				.status(httpStatus.value())
+				.message(httpStatus.getReasonPhrase())
 				.data(data)
 				.build()
 			);
