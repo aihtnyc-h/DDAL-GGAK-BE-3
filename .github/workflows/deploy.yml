@@ -50,8 +50,8 @@ jobs:
       with:
         arguments: clean build -x test
         
-    - name: Build application
-      run: ./mvnw clean package
+#     - name: Build application
+#       run: ./mvnw clean package
 
     # (5) 디렉토리 생성
     - name: Make Directory
