@@ -54,7 +54,6 @@ public class TicketController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return ticketService.getTicket(ticketId, taskId, userDetails.getUser());
 	}
-	
 	// 티켓 수정
 	@Operation(summary = "patch ticket", description = "Ticket 수정 patch 메서드 체크")
 	@PatchMapping("/ticket/{ticketId}")
