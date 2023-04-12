@@ -125,8 +125,6 @@ public class Ticket extends BaseEntity {
 			this.status = TicketStatus.IN_PROGRESS;
 		} else if (ticketStatus == TicketStatus.IN_PROGRESS) {
 			this.status = TicketStatus.TODO;
-		} else if (ticketStatus == TicketStatus.DONE) {
-		this.status = TicketStatus.REVIEW;
 		}
 	}
 }
