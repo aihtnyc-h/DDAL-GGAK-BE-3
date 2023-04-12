@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.security.core.parameters.P;
 
 import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.label.entity.Label;
@@ -124,6 +125,8 @@ public class Ticket extends BaseEntity {
 			this.status = TicketStatus.IN_PROGRESS;
 		} else if (ticketStatus == TicketStatus.IN_PROGRESS) {
 			this.status = TicketStatus.TODO;
+		} else if (ticketStatus == TicketStatus.DONE) {
+		this.status = TicketStatus.REVIEW;
 		}
 	}
 }
