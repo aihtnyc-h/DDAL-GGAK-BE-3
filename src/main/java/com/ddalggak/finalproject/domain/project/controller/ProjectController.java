@@ -21,6 +21,7 @@ import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectResponseDto;
 import com.ddalggak.finalproject.domain.project.service.ProjectService;
+import com.ddalggak.finalproject.global.aop.ExecutionTimer;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,6 +48,7 @@ public class ProjectController {
 		@Parameter(name = "projectRequestDto", description = "프로젝트 생성에 필요한 정보입니다.", required = true)
 	})
 	@PostMapping("/project")
+	@ExecutionTimer
 	public ResponseEntity<?> createProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestPart(value = "thumbnail", required = false) MultipartFile image,
@@ -56,6 +58,7 @@ public class ProjectController {
 
 	@Operation(summary = "프로젝트 전체조회", description = "api for view all projects")
 	@GetMapping("/projects")
+	@ExecutionTimer
 	public ResponseEntity<List<ProjectBriefResponseDto>> viewProjectAll(
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return projectService.viewProjectAll(userDetails.getUser());
@@ -65,6 +68,7 @@ public class ProjectController {
 		@Parameter(name = "projectId", description = "조회할 프로젝트의 id입니다.", required = true)
 	})
 	@GetMapping("/project/{projectId}")
+	@ExecutionTimer
 	public ResponseEntity<?> viewProjectOne(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId) {
@@ -93,7 +97,7 @@ public class ProjectController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId,
 		@RequestPart(value = "thumbnail", required = false) MultipartFile image,
-		@Valid @RequestPart(value = "data", required = false) ProjectRequestDto projectRequestDto) throws IOException {
+		@Valid @RequestPart(value = "data") ProjectRequestDto projectRequestDto) throws IOException {
 		return projectService.updateProject(userDetails.getUser(), projectId, image, projectRequestDto);
 	}
 
