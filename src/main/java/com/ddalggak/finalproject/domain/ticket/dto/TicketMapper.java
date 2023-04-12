@@ -25,6 +25,7 @@ public interface TicketMapper {
 		@Mapping(target = "difficulty", source = "entity.difficulty"),
 		@Mapping(target = "assigned", expression = "java(checkAssigned(entity))"),
 		@Mapping(target = "expiredAt", source = "entity.expiredAt"),
+		// @Mapping(target = "review_status", source = "entity.expiredAt"),
 		@Mapping(target = "label", source = "entity.label.labelTitle"),
 		@Mapping(target = "commentList", source = "entity.comment")
 	})
@@ -54,6 +55,11 @@ public interface TicketMapper {
 	@Named("checkLabel")
 	default String checkLabel(Ticket ticket) {
 		return ticket.getLabel() == null ? null : ticket.getLabel().getLabelTitle();
+	}
+
+	@Named("checkTicket")
+	default String checkMovementTicket(Ticket ticket) {
+		return ticket.getStatus() == null ? null : ticket.getStatus().toString();
 	}
 
 	List<TicketResponseDto> toDtoList(List<Ticket> tickets);
