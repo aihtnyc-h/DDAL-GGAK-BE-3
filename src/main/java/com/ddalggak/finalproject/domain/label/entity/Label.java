@@ -20,7 +20,7 @@ import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.global.entity.BaseEntity;
 
-import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,7 +28,8 @@ import lombok.Setter;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@AllArgsConstructor
 public class Label extends BaseEntity {
 
 	@Id
