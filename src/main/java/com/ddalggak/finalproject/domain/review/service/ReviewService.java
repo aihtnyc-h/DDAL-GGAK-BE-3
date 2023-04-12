@@ -67,7 +67,7 @@ public class ReviewService {
 		Review review = reviewRepository.findById(reviewId).orElseThrow(
 			()-> new CustomException(REVIEW_NOT_FOUND));
 		List<ReviewCommentResponseDto> reviewCommentResponseDtoList = getReviewComment(review);
-		ReviewResponseDto reviewResponseDto = new ReviewResponseDto(review); //, reviewCommentResponseDtoList);
+		ReviewResponseDto reviewResponseDto = new ReviewResponseDto(review, reviewCommentResponseDtoList);
 		return ResponseEntity.ok().body(reviewResponseDto);
 	}
 	// 리뷰 수정 (리뷰 작성자만 작성가능)
