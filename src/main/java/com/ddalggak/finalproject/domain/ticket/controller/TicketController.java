@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -93,5 +94,12 @@ public class TicketController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody TicketLabelRequestDto ticketLabelRequestDto) {
 		return ticketService.getLabelForTicket(userDetails.getUser(), ticketId, ticketLabelRequestDto);
+	}
+
+	// 티켓 이동하기
+	@PutMapping("/ticket/{ticketId}/status")
+	public ResponseEntity<?> ticketStatusChange(@PathVariable Long ticketId,
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		return ticketService.ticketStatusChange(userDetails.getUser(), ticketId);
 	}
 }

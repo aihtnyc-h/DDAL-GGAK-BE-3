@@ -118,4 +118,12 @@ public class Ticket extends BaseEntity {
 		this.task = task;
 		task.addTicket(this);
 	}
+
+	public void ticketStatusChange(TicketStatus ticketStatus) {
+		if (ticketStatus == TicketStatus.TODO) {
+			this.status = TicketStatus.IN_PROGRESS;
+		} else if (ticketStatus == TicketStatus.IN_PROGRESS) {
+			this.status = TicketStatus.TODO;
+		}
+	}
 }
