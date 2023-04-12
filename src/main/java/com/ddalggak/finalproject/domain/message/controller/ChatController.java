@@ -60,17 +60,17 @@ public class ChatController {
 	/**
 	 * 채팅방의 모든 메시지 조회
 	 */
-	// @GetMapping("/rooms/{roomId}/messages")
-	// public ResponseEntity<List<ChatMessageDto>> getChatMessages(@PathVariable Long roomId){
-	// 	List<ChatMessageDto> messageDtoList = chatService.getChatMessages(roomId);
-	// 	return ResponseEntity.ok().body(messageDtoList);
-	// }
-	//
-	// @MessageMapping("/chat/{roomId}")
-	// @SendTo("/topic/chat/{roomId}")
-	// public ChatMessageDto sendMessage(@DestinationVariable Long roomId, ChatMessageDto messageDto) {
-	// 	chatService.sendMessage(messageDto);
-	// 	return messageDto;
-	// }
+	@GetMapping("/rooms/{roomId}/messages")
+	public ResponseEntity<List<ChatMessageDto>> getChatMessages(@PathVariable Long roomId){
+		List<ChatMessageDto> messageDtoList = chatService.getChatMessages(roomId);
+		return ResponseEntity.ok().body(messageDtoList);
+	}
+	//페이지 단위로 채팅방 조회
+	@MessageMapping("/chat/{roomId}")
+	@SendTo("/topic/chat/{roomId}")
+	public ChatMessageDto sendMessage(@DestinationVariable Long roomId, ChatMessageDto messageDto) {
+		chatService.sendMessage(messageDto);
+		return messageDto;
+	}
 }
 

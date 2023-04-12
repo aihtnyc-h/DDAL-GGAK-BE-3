@@ -5,7 +5,9 @@ import static com.ddalggak.finalproject.global.error.ErrorCode.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +45,7 @@ public class ReviewService {
 		Ticket ticket = validateTicket(reviewRequestDto.getTicketId());
 		Review review = Review.create(reviewRequestDto, ticket);
 		reviewRepository.save(review);
+		simpMessagingTemplate.convertAndSend("/topic/mewReview", review);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 	}
 
@@ -110,5 +113,5 @@ public class ReviewService {
 		return userRepository.findByEmail(email).orElseThrow(
 			() -> new CustomException(UNAUTHORIZED_MEMBER));
 	}
-
+	private SimpMessagingTemplate simpMessagingTemplate;
 }

@@ -161,6 +161,17 @@ public class TicketService {
 		ticket.addLabel(label);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
 	}
+	@Transactional
+	public ResponseEntity<?> movementTicket(User user, Long ticketId) {
+		Ticket ticket = validateTicket(ticketId);
+		if (ticket.getUser().getUserId().equals(user.getUserId())) {
+		ticket.movementTicket(ticket.getStatus());
+		} else {
+			throw new CustomException(UNAUTHORIZED_MEMBER);
+		}
+		ticketRepository.save(ticket);
+		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
+	}
 
 	private void validateExistMember(Project project, ProjectUser projectUser) {
 		if (!project.getProjectUserList().contains(projectUser)) {

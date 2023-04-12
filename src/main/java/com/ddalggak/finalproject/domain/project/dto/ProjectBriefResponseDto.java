@@ -1,5 +1,9 @@
 package com.ddalggak.finalproject.domain.project.dto;
 
+import com.ddalggak.finalproject.domain.project.entity.Project;
+import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
+import com.querydsl.core.annotations.QueryProjection;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

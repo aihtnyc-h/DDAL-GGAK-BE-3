@@ -76,6 +76,11 @@ public class WebSecurityConfig {
 			.permitAll()
 			.antMatchers("/?accessToken=*")
 			.permitAll()
+			//nginx관련
+			.antMatchers("/nginx").permitAll()
+			.antMatchers("/actuator/**").permitAll()
+			.antMatchers("/health").permitAll()
+			.antMatchers("/version").permitAll()
 			.and()
 			.oauth2Login()
 			.authorizationEndpoint()
@@ -90,6 +95,7 @@ public class WebSecurityConfig {
 			.and()
 			.successHandler(oAuth2AuthenticationSuccessHandler())
 			.failureHandler(oAuth2AuthenticationFailureHandler())
+
 
 			//                .antMatchers(HttpMethod.POST, "/api/logout").permitAll()
 			// JWT 인증/인가를 사용하기 위한 설정

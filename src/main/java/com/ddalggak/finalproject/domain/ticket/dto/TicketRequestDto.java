@@ -4,6 +4,10 @@ import java.time.LocalDate;
 
 import javax.validation.constraints.NotNull;
 
+import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
+import com.ddalggak.finalproject.global.view.Views;
+import com.fasterxml.jackson.annotation.JsonView;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +26,9 @@ public class TicketRequestDto {
 	private Long taskId;
 	@Schema(name = "ticket title", example = "ticket title")
 	private String ticketTitle;
+	@Schema(name = "ticket status", example = "TODO")
+	@JsonView(Views.Task.class)
+	private TicketStatus status;
 	@Schema(name = "ticket Description", example = "ticket Description")
 	private String ticketDescription;
 	@Schema(name = "ticket priority", example = "ticket priority")
