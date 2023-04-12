@@ -63,6 +63,9 @@ public class Ticket extends BaseEntity {
 	@Enumerated(value = EnumType.STRING)
 	private TicketStatus status;
 
+	@Enumerated(value = EnumType.STRING)
+	private ReviewStatus reviewStatus;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "label_Id")
 	private Label label;
@@ -78,6 +81,7 @@ public class Ticket extends BaseEntity {
 		difficulty = ticketRequestDto.getDifficulty();
 		expiredAt = ticketRequestDto.getTicketExpiredAt();
 		status = TicketStatus.TODO;
+		reviewStatus = ReviewStatus.REVIEW_BEFORE_PROGRESS;
 		addTask(task);
 	}
 
@@ -117,12 +121,5 @@ public class Ticket extends BaseEntity {
 	public void addTask(Task task) {
 		this.task = task;
 		task.addTicket(this);
-	}
-	public void movementTicket(TicketStatus ticketStatus) {
-		if (ticketStatus == TicketStatus.TODO) {
-			this.status = TicketStatus.IN_PROGRESS;
-		} else if (ticketStatus == TicketStatus.IN_PROGRESS) {
-			this.status = TicketStatus.TODO;
-		}
 	}
 }

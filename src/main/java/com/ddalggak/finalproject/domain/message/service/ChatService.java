@@ -6,10 +6,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -24,6 +20,7 @@ import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
+import com.ddalggak.finalproject.global.error.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -111,22 +108,22 @@ public class ChatService extends ChatServiceImpl {
 	/**
 	 * 채팅방의 모든 메시지 조회
 	 */
-	public List<ChatMessageDto> getChatMessages(Long roomId) {
-		List<ChatMessage> messages = chatMessageRepository.findAllByRoomIdOrderByCreatedAtAsc(roomId);
-		return messages.stream()
-			.map(ChatMessageDto::from)
-			.collect(Collectors.toList());
-	}
-	//페이지 단위로 채팅방 조회
-	public List<ChatMessageDto> getChatMessages(Long roomId, int pageNumber, int pageSize) {
-		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").ascending());
-		Page<ChatMessage> messagePage = (Page<ChatMessage>)chatMessageRepository.findAllByRoomIdOrderByCreatedAtAsc(roomId);
-		List<ChatMessageDto> messageDtoList = messagePage.getContent()
-			.stream()
-			.map(ChatMessageDto::from)
-			.collect(Collectors.toList());
-		return messageDtoList;
-	}
+	// public List<ChatMessageDto> getChatMessages(Long roomId) {
+	// 	List<ChatMessage> messages = chatMessageRepository.findAllByRoomIdOrderByCreatedAtAsc(roomId);
+	// 	return messages.stream()
+	// 		.map(ChatMessageDto::from)
+	// 		.collect(Collectors.toList());
+	// }
+	// 페이지 단위로 채팅방 조회
+	// public List<ChatMessageDto> getChatMessages(Long roomId, int pageNumber, int pageSize) {
+	// 	Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").ascending());
+	// 	Page<ChatMessage> messagePage = chatMessageRepository.findAllByRoomId(roomId, pageable);
+	// 	List<ChatMessageDto> messageDtoList = messagePage.getContent()
+	// 		.stream()
+	// 		.map(ChatMessageDto::from)
+	// 		.collect(Collectors.toList());
+	// 	return messageDtoList;
+	// }
 }
 
 

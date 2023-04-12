@@ -60,7 +60,6 @@ package com.ddalggak.finalproject.domain.message.dto;
 import java.time.LocalDateTime;
 
 import com.ddalggak.finalproject.domain.message.entity.ChatMessage;
-import com.ddalggak.finalproject.domain.message.entity.ChatRoom;
 import com.ddalggak.finalproject.domain.user.entity.User;
 
 import lombok.Getter;
@@ -84,26 +83,15 @@ public class ChatMessageDto {
 		this.user = user;
 		this.createdAt = createdAt;
 	}
-	public static ChatMessageDto from(ChatMessage message) {
-		ChatMessageDto messageDto = new ChatMessageDto();
-		messageDto.setChatMessageId(message.getChatMessageId());
-		messageDto.setRoomId(message.getChatRoom());
-		messageDto.setContent(message.getContent());
-		messageDto.setCreatedAt(message.getCreatedAt());
-		messageDto.setUser(message.getUser());
-		return messageDto;
-	}
-	public ChatMessage toEntity() {
-		ChatMessage chatMessage = new ChatMessage();
-		// chatMessage.getChatMessageId();
-		chatMessage.setChatMessageId(chatMessageId);
-		chatMessage.setContent(content);
-		chatMessage.setRoomId(roomId);
-		// chatMessage.setChatRoom(new ChatRoom(roomId));
-		chatMessage.setUser(user);
-		// chatMessage.setSender(user);
-		chatMessage.setCreatedAt(createdAt);
-		return chatMessage;
-	}
+
+	// public static ChatMessageDto from(ChatMessage message) {
+	// 	ChatMessageDto messageDto = new ChatMessageDto();
+	// 	messageDto.setChatMessageId(message.());
+	// 	messageDto.setRoomId(message.getChatRoom().getId());
+	// 	messageDto.setContent(message.getContent());
+	// 	messageDto.setCreatedAt(message.getCreatedAt());
+	// 	messageDto.setUser(message.getSender());
+	// 	return messageDto;
+	// }
 
 }

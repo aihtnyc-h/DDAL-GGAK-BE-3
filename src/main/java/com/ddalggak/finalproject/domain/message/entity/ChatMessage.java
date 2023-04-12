@@ -11,14 +11,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.metamodel.IdentifiableType;
 
-import com.ddalggak.finalproject.domain.oauth.dto.OAuth2UserInfo;
 import com.ddalggak.finalproject.domain.user.entity.User;
 
-import lombok.Data;
-
-@Data
 @Entity
 @Table(name = "chat_message")
 public class ChatMessage {
@@ -54,6 +49,4 @@ public class ChatMessage {
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
-
-	public Long getChatRoom() { return roomId; }
 }
