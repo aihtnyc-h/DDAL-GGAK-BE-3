@@ -1,9 +1,10 @@
 package com.ddalggak.finalproject.domain.user.service;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
+import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
 import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
 import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.user.dto.UserMapper;
@@ -31,6 +33,7 @@ public class UserService {
 
 	private final UserMapper userMapper;
 	private final UserRepository userRepository;
+	private final TicketRepository ticketRepository;
 	private final S3Uploader s3Uploader;
 
 	@Value("${file.size.limit}")
@@ -90,11 +93,12 @@ public class UserService {
 			.body(userPageDto);
 	}
 
-	public ResponseEntity<?> getMyTickets(Long userId, TicketSearchCondition condition) {
+	public ResponseEntity<?> getMyTickets(Long userId, Pageable pageable, TicketSearchCondition condition) {
 		User user = userRepository.findById(userId).orElseThrow(
 			() -> new UserException(ErrorCode.MEMBER_NOT_FOUND)
 		);
-		List<DateTicket> completedTicketCountByDate = userRepository.getCompletedTicketCountByDate(condition, userId);
+		Slice<DateTicket> completedTicketCountByDate = ticketRepository.getSlicedCompletedTicketCountByDate(condition,
+			pageable, user.getUserId());
 		return ResponseEntity.ok(completedTicketCountByDate);
 	}
 }
