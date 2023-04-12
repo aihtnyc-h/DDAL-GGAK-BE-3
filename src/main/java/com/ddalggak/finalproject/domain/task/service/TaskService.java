@@ -1,6 +1,7 @@
 package com.ddalggak.finalproject.domain.task.service;
 
 import static com.ddalggak.finalproject.global.error.ErrorCode.*;
+import static org.springframework.http.HttpStatus.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ import com.ddalggak.finalproject.domain.user.dto.UserMapper;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
+import com.ddalggak.finalproject.global.dto.GlobalResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 
@@ -66,12 +68,12 @@ public class TaskService {
 			.stream()
 			.map(taskMapper::toBriefDto)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(result);
+		return GlobalResponseDto.of(CREATED, result);
 	}
 
 	// 태스크 조회
 	@Transactional(readOnly = true) // project member면 누구나 task 조회 가능하다. task 멤버가 아닐지라도.
-	public ResponseEntity<TaskResponseDto> viewTask(User user, Long projectId, Long taskId) {
+	public ResponseEntity<?> viewTask(User user, Long projectId, Long taskId) {
 		// 유효성 검증
 		Project project = validateProject(projectId);
 		validateExistMember(project, ProjectUser.create(project, user));
@@ -83,7 +85,7 @@ public class TaskService {
 
 		// 리턴
 		TaskResponseDto taskResponseDto = taskMapper.toDto(task);
-		return ResponseEntity.ok(taskResponseDto);
+		return GlobalResponseDto.of(OK, taskResponseDto);
 	}
 
 	// 태스크 삭제
@@ -103,7 +105,7 @@ public class TaskService {
 			.stream()
 			.map(taskMapper::toBriefDto)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(result);
+		return GlobalResponseDto.of(CREATED, result);
 	}
 
 	/*
@@ -134,7 +136,7 @@ public class TaskService {
 			.stream()
 			.map(userMapper::toUserResponseDtoWithTaskUser)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(result);
+		return GlobalResponseDto.of(OK, result);
 	}
 
 	/*
@@ -159,7 +161,7 @@ public class TaskService {
 			.stream()
 			.map(userMapper::toUserResponseDtoWithTaskUser)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(result);
+		return GlobalResponseDto.of(OK, result);
 	}
 
 	private void validateExistMember(Task task, TaskUser taskUser) {
