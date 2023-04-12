@@ -42,19 +42,12 @@ public class Review extends BaseEntity {
 	private List<ReviewComment> reviewComments = new ArrayList<>();
 
 	public Review(ReviewRequestDto reviewRequestDto, User user, List<ReviewComment> reviewCommentList) {
-		this.reviewTitle = reviewRequestDto.getReviewTitle();
-		this.reviewDescription = reviewRequestDto.getReviewDescription();
-		// this.reviewComments = reviewCommentList;
 	}
 	@Builder
 	public Review(ReviewRequestDto reviewRequestDto, Ticket ticket) {
-		this.reviewTitle = reviewRequestDto.getReviewTitle();
-		this.reviewDescription = reviewRequestDto.getReviewDescription();
 		this.ticket = ticket;
 	}
 	public void update(ReviewRequestDto reviewRequestDto) {
-		this.reviewTitle = reviewRequestDto.getReviewTitle();
-		this.reviewDescription = reviewRequestDto.getReviewDescription();
 		this.reviewComments = getReviewComments();
 	}
 
