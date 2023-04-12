@@ -1,6 +1,7 @@
 package com.ddalggak.finalproject.domain.project.service;
 
 import static com.ddalggak.finalproject.global.dto.SuccessCode.*;
+import static com.ddalggak.finalproject.global.error.ErrorCode.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,8 +55,11 @@ public class ProjectService {
 	public ResponseEntity<?> createProject(User user, MultipartFile image,
 		ProjectRequestDto projectRequestDto) throws
 		IOException {
+		//todo 로직 수정
+		User existUser = userRepository.findByEmail(user.getEmail())
+			.orElseThrow(() -> new UserException(MEMBER_NOT_FOUND));
 		//1. user로 projectUserRequestDto 생성
-		ProjectUserRequestDto projectUserRequestDto = ProjectUserRequestDto.create(user);
+		ProjectUserRequestDto projectUserRequestDto = ProjectUserRequestDto.create(existUser);
 		//2. projectUserDto로 projectUser생성
 		ProjectUser projectUser = ProjectUser.create(projectUserRequestDto);
 		//2.5 image S3 서버에 업로드 -> 분기처리
@@ -69,19 +74,21 @@ public class ProjectService {
 		//4. projectRepository에 project 저장
 		projectRepository.save(project);
 		//5. projectResponseDto로 반환
-		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(user.getUserId());
-		return GlobalResponseDto.of(CREATED_SUCCESSFULLY, result);
+		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(existUser.getUserId());
+		return GlobalResponseDto.of(CREATED_SUCCESSFULLY, result, null);
 	}
 
 	@Transactional(readOnly = true)
-	public ResponseEntity<?> viewProjectAll(User user) {
+	public ResponseEntity<List<ProjectBriefResponseDto>> viewProjectAll(User user) {
 		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(user.getUserId());
-		return GlobalResponseDto.of(SUCCESS_SEND, result);
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(result);
 	}
 
 	//프로젝트 확인
 	@Transactional(readOnly = true)
-	public ResponseEntity<?> viewProject(User user, Long id) {
+	public ResponseEntity<ProjectResponseDto> viewProject(User user, Long id) {
 		// 유효성 검증
 		Project project = validateProject(id);
 		validateExistMember(project, ProjectUser.create(project, user));
@@ -89,7 +96,9 @@ public class ProjectService {
 		// 리턴
 		ProjectResponseDto projectResponseDto = projectMapper.toDto(project);
 
-		return GlobalResponseDto.of(SUCCESS_SEND, projectResponseDto);
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(projectResponseDto);
 	}
 
 	@Transactional
@@ -125,14 +134,14 @@ public class ProjectService {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		// 기존 이미지 삭제 후 새로운 이미지 업로드
-		String imageUrl = project.getThumbnail() == null ? null : project.getThumbnail();
+		String imageUrl = null;
 		if (!(image == null)) {
 			fileCheck(image);
 			imageUrl = s3Uploader.upload(image, "project");
 		}
 		// 업로드한 이미지의 url을 바탕으로 update 쿼리
 		projectRequestDto.setThumbnail(imageUrl);
-		project.update(projectRequestDto);
+		projectRepository.update(projectId, projectRequestDto);
 
 		// 새로운 프로젝트 다시 받아옴 , todo 무엇을 반환해야 할까?
 		ProjectResponseDto projectResponseDto = projectMapper.toDto(projectRepository.findById(projectId).get());
