@@ -1,11 +1,11 @@
 package com.ddalggak.finalproject.domain.task.service;
 
 import static com.ddalggak.finalproject.global.error.ErrorCode.*;
-import static org.springframework.http.HttpStatus.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +26,7 @@ import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.global.dto.GlobalResponseDto;
+import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.error.CustomException;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 
@@ -68,7 +69,7 @@ public class TaskService {
 			.stream()
 			.map(taskMapper::toBriefDto)
 			.collect(Collectors.toList());
-		return GlobalResponseDto.of(CREATED, result);
+		return GlobalResponseDto.of(SuccessCode.CREATED_SUCCESSFULLY, result);
 	}
 
 	// 태스크 조회
@@ -85,7 +86,7 @@ public class TaskService {
 
 		// 리턴
 		TaskResponseDto taskResponseDto = taskMapper.toDto(task);
-		return GlobalResponseDto.of(OK, taskResponseDto);
+		return GlobalResponseDto.of(HttpStatus.OK, taskResponseDto);
 	}
 
 	// 태스크 삭제
@@ -105,7 +106,7 @@ public class TaskService {
 			.stream()
 			.map(taskMapper::toBriefDto)
 			.collect(Collectors.toList());
-		return GlobalResponseDto.of(CREATED, result);
+		return GlobalResponseDto.of(SuccessCode.DELETED_SUCCESSFULLY, result);
 	}
 
 	/*
@@ -136,7 +137,7 @@ public class TaskService {
 			.stream()
 			.map(userMapper::toUserResponseDtoWithTaskUser)
 			.collect(Collectors.toList());
-		return GlobalResponseDto.of(OK, result);
+		return GlobalResponseDto.of(SuccessCode.JOINED_SUCCESSFULLY, result);
 	}
 
 	/*
@@ -161,7 +162,7 @@ public class TaskService {
 			.stream()
 			.map(userMapper::toUserResponseDtoWithTaskUser)
 			.collect(Collectors.toList());
-		return GlobalResponseDto.of(OK, result);
+		return GlobalResponseDto.of(SuccessCode.UPDATED_SUCCESSFULLY, result);
 	}
 
 	private void validateExistMember(Task task, TaskUser taskUser) {
