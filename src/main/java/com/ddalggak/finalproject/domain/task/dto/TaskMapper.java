@@ -64,4 +64,9 @@ public interface TaskMapper {
 	default int countOfParticipants(Task task) {
 		return task.getTaskUserList().size();
 	}
+
+	// @Named("countOfMovementTicket")
+	// default int countOfMovementTicket(Task task) {
+	// 	return (int)task.getTicketList().stream().filter(ticket -> ticket.movementTicket == IN_PROGRESS).count();
+	// }
 }

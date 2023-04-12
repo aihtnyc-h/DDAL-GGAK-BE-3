@@ -94,4 +94,10 @@ public class TicketController {
 		@Valid @RequestBody TicketLabelRequestDto ticketLabelRequestDto) {
 		return ticketService.getLabelForTicket(userDetails.getUser(), ticketId, ticketLabelRequestDto);
 	}
+	// 티켓 이동하기
+	@PutMapping("/ticket/{ticketId}/movement")
+	public ResponseEntity<?> movementTicket(@PathVariable Long ticketId,
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		return ticketService.movementTicket(userDetails.getUser(), ticketId);
+	}
 }

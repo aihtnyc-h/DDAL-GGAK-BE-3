@@ -56,5 +56,10 @@ public interface TicketMapper {
 		return ticket.getLabel() == null ? null : ticket.getLabel().getLabelTitle();
 	}
 
+	@Named("checkTicket")
+	default String checkMovementTicket(Ticket ticket) {
+		return ticket.getStatus() == null ? null : ticket.getStatus().toString();
+	}
+
 	List<TicketResponseDto> toDtoList(List<Ticket> tickets);
 }
