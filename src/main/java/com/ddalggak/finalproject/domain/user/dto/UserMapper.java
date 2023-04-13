@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
 import com.ddalggak.finalproject.domain.label.entity.LabelUser;
+import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
 import com.ddalggak.finalproject.domain.user.entity.User;
@@ -36,7 +37,6 @@ public interface UserMapper {
 		@Mapping(target = "email", source = "entity.email"),
 		@Mapping(target = "nickname", source = "entity.nickname"),
 		@Mapping(target = "profile", source = "entity.profile"),
-		@Mapping(target = "projects", source = "entity.projectUserList")
 	})
 	UserPageDto toUserPageDto(User entity);
 
@@ -48,6 +48,16 @@ public interface UserMapper {
 		@Mapping(target = "role", expression = "java(isLeaderOfLabel(entity))")
 	})
 	UserResponseDto toUserResponseDtoWithLabel(LabelUser entity);
+
+	/*
+	 * queryDsl에서 constructor Projection 사용 안하고 project 다 땡겨올 시 사용하는 용도
+	 */
+	@Mappings({
+		@Mapping(target = "id", source = "entity.project.projectId"),
+		@Mapping(target = "thumbnail", source = "entity.project.thumbnail"),
+		@Mapping(target = "projectTitle", source = "entity.project.projectTitle")
+	})
+	ProjectBriefResponseDto toBriefDtoWithProjectUser(ProjectUser entity);
 
 	default String isLeaderOfTask(TaskUser taskUser) {
 		return StringUtils.isNullOrEmpty(taskUser.getTask().getTaskLeader()) ? "MEMBER" :
