@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ddalggak.finalproject.domain.label.dto.LabelResponseDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskBriefResponseDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskResponseDto;
@@ -74,6 +75,14 @@ public class TaskController {
 		@Valid @RequestBody TaskRequestDto taskRequestDto,
 		@PathVariable Long taskId) {
 		return taskService.inviteTask(user.getUser(), taskRequestDto, taskId);
+	}
+
+	@Operation(summary = "Task의 label 전체조회", description = "api for view all labels of task")
+	@GetMapping("/task/{taskId}/labels")
+	public ResponseEntity<List<LabelResponseDto>> viewLabels(
+		@AuthenticationPrincipal UserDetailsImpl user,
+		@PathVariable Long taskId) {
+		return taskService.viewLabels(user.getUser(), taskId);
 	}
 
 }
