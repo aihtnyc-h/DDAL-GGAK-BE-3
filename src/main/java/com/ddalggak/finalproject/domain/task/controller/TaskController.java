@@ -1,6 +1,7 @@
 package com.ddalggak.finalproject.domain.task.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -20,6 +21,8 @@ import com.ddalggak.finalproject.domain.task.dto.TaskBriefResponseDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskResponseDto;
 import com.ddalggak.finalproject.domain.task.service.TaskService;
+import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
+import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
@@ -85,4 +88,11 @@ public class TaskController {
 		return taskService.viewLabels(user.getUser(), taskId);
 	}
 
+	@Operation(summary = "Task의 ticket 전체조회", description = "api for view all tickets of task")
+	@GetMapping("/task/{taskId}/tickets")
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> viewTickets(
+		@AuthenticationPrincipal UserDetailsImpl user,
+		@PathVariable Long taskId) {
+		return taskService.viewTickets(user.getUser(), taskId);
+	}
 }
