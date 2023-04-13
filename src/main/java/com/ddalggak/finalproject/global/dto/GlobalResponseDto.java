@@ -25,15 +25,6 @@ public class GlobalResponseDto<T> {
 
 	private T data;
 
-	private List<Link> links;
-
-	public GlobalResponseDto(SuccessCode successCode, T data, List<Link> links) {
-		this.status = successCode.getHttpStatus().value();
-		this.message = successCode.getDetail();
-		this.data = data;
-		this.links = links;
-	}
-
 	public static <T> ResponseEntity<GlobalResponseDto<T>> of(SuccessCode successCode, T data, List<Link> links) {
 		return ResponseEntity
 			.status(successCode.getHttpStatus())
@@ -41,7 +32,6 @@ public class GlobalResponseDto<T> {
 				.status(successCode.getHttpStatus().value())
 				.message(successCode.getDetail())
 				.data(data)
-				.links(links)
 				.build()
 			);
 	}
