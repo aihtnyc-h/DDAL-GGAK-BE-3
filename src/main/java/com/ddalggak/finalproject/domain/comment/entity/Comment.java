@@ -25,25 +25,21 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 public class Comment extends BaseEntity {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long commentId;
+
 	@Column(nullable = false)
 	private String comment; //logDescription 바꾸기
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "ticket_Id")
-	private Ticket ticket;
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_Id")
-	private User user;
 
-	@Builder
-	public Comment(User user, Ticket ticket, CommentRequestDto commentList) {
-		this.commentId = getCommentId();
-		this.user = user;
-		this.ticket = ticket;
-		this.comment = commentList.getComment();
-	}
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "ticketId")
+	private Ticket ticket;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "userId")
+	private User user;
 
 	public void update(CommentRequestDto commentRequestDto) {
 		this.comment = commentRequestDto.getComment();
