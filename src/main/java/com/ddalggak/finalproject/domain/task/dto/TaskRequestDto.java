@@ -21,7 +21,6 @@ public class TaskRequestDto {
 	public String taskTitle;
 	@Schema(name = "when does this project expired at", example = "2023-03-22")
 	public LocalDate expiredAt;
-
 	@Schema(name = "email for inviting user", example = "kimdaehyun@daum.net")
 	public String email;
 }

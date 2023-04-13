@@ -1,6 +1,7 @@
 package com.ddalggak.finalproject.domain.task.service;
 
 import static com.ddalggak.finalproject.global.error.ErrorCode.*;
+import static org.springframework.http.ResponseEntity.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ddalggak.finalproject.domain.label.dto.LabelMapper;
+import com.ddalggak.finalproject.domain.label.dto.LabelResponseDto;
+import com.ddalggak.finalproject.domain.label.repository.LabelRepository;
 import com.ddalggak.finalproject.domain.project.entity.Project;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.project.repository.ProjectRepository;
@@ -25,7 +29,6 @@ import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.global.error.CustomException;
-import com.ddalggak.finalproject.global.error.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +40,15 @@ public class TaskService {
 
 	private final TaskMapper taskMapper;
 	private final UserMapper userMapper;
+	private final LabelMapper labelMapper;
 	private final TaskRepository taskRepository;
 	private final ProjectRepository projectRepository;
 	private final UserRepository userRepository;
+	private final LabelRepository labelRepository;
 
 	// 태스크 생성
 	@Transactional
-	public ResponseEntity<?> createTask(User user, TaskRequestDto taskRequestDto) {
+	public ResponseEntity<List<TaskBriefResponseDto>> createTask(User user, TaskRequestDto taskRequestDto) {
 		User existUser = userRepository.findByEmail(user.getEmail())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		// 1.유효성 검증
@@ -66,7 +71,7 @@ public class TaskService {
 			.stream()
 			.map(taskMapper::toBriefDto)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(result);
+		return ok(result);
 	}
 
 	// 태스크 조회
@@ -83,12 +88,12 @@ public class TaskService {
 
 		// 리턴
 		TaskResponseDto taskResponseDto = taskMapper.toDto(task);
-		return ResponseEntity.ok(taskResponseDto);
+		return ok(taskResponseDto);
 	}
 
 	// 태스크 삭제
 	@Transactional
-	public ResponseEntity<?> deleteTask(User user, Long taskId) {
+	public ResponseEntity<List<TaskBriefResponseDto>> deleteTask(User user, Long taskId) {
 		// 유효성 검증
 		Task task = validateTask(taskId);
 		if (task.getProject().getProjectLeader().equals(user.getEmail()) ||
@@ -103,7 +108,7 @@ public class TaskService {
 			.stream()
 			.map(taskMapper::toBriefDto)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(result);
+		return ok(result);
 	}
 
 	/*
@@ -112,7 +117,7 @@ public class TaskService {
 	 */
 	// 태스크 내부로 유저 초대
 	@Transactional
-	public ResponseEntity<?> inviteTask(User user, TaskRequestDto taskRequestDto, Long taskId) {
+	public ResponseEntity<List<UserResponseDto>> inviteTask(User user, TaskRequestDto taskRequestDto, Long taskId) {
 		//유효성 검증
 		Task task = validateTask(taskId);
 		Project project = validateProject(taskRequestDto.getProjectId());
@@ -120,7 +125,11 @@ public class TaskService {
 		TaskUser taskUser = TaskUser.create(task, invited);
 		// 유효성 검증 : task에 이미 있는 멤버면 안됨, 프로젝트 리더이거나 taskLeader(이 태스크 아니어도 됨)인 경우만 초대가능
 		if (task.getTaskUserList().contains(taskUser)) {
-			throw new CustomException(ErrorCode.DUPLICATE_MEMBER);
+			throw new CustomException(DUPLICATE_MEMBER);
+		} else if (project.getTaskList().stream().noneMatch(
+			t -> t.getTaskId().equals(taskId)
+		)) { // task가 project안에 있는지 확인해야함
+			throw new CustomException(INVALID_REQUEST);
 		} else if (project.getProjectLeader().equals(user.getEmail()) ||
 			project.getTaskLeadersList().stream().anyMatch(taskLeader -> taskLeader.equals(user.getEmail()))) {
 			validateExistMember(project, ProjectUser.create(project, invited)); // user가 프로젝트에 있는 유저인지 검증
@@ -134,15 +143,12 @@ public class TaskService {
 			.stream()
 			.map(userMapper::toUserResponseDtoWithTaskUser)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(result);
+		return ok(result);
 	}
 
-	/*
-	 * 지금은 projectId가 필요하지 않지만 만약 taskId가 아닌 taskName을 url로 지정하게 될 경우 projectId가 필요할 수 있음.
-	 */
 	// 태스크 리더 지정
 	@Transactional
-	public ResponseEntity<?> assignLeader(User user, TaskRequestDto taskRequestDto, Long taskId) {
+	public ResponseEntity<List<UserResponseDto>> assignLeader(User user, TaskRequestDto taskRequestDto, Long taskId) {
 		//유효성 검증
 		User userToLeader = validateUserByEmail(taskRequestDto.getEmail());
 		Task task = validateTask(taskId);
@@ -159,6 +165,19 @@ public class TaskService {
 			.stream()
 			.map(userMapper::toUserResponseDtoWithTaskUser)
 			.collect(Collectors.toList());
+		return ok(result);
+	}
+
+	@Transactional(readOnly = true)
+	public ResponseEntity<List<LabelResponseDto>> viewLabels(User user, Long taskId) {
+		// 유효성 검증
+		Task task = validateTask(taskId);
+		validateExistMember(task.getProject(), ProjectUser.create(task.getProject(), user));
+		// 결과 리턴
+		List<LabelResponseDto> result = labelRepository.findByTaskId(taskId)
+			.stream()
+			.map(labelMapper::toDto)
+			.collect(Collectors.toList());
 		return ResponseEntity.ok(result);
 	}
 
@@ -170,25 +189,25 @@ public class TaskService {
 
 	private void validateExistMember(Project project, ProjectUser projectUser) {
 		if (!project.getProjectUserList().contains(projectUser)) {
-			throw new CustomException(ErrorCode.EMPTY_CLIENT);
+			throw new CustomException(EMPTY_CLIENT);
 		}
 	}
 
 	private User validateUserByEmail(String email) {
 		return userRepository.findByEmail(email).orElseThrow(
-			() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
+			() -> new CustomException(MEMBER_NOT_FOUND)
 		);
 	}
 
 	private Project validateProject(Long id) {
 		return projectRepository.findById(id).orElseThrow(
-			() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND)
+			() -> new CustomException(PROJECT_NOT_FOUND)
 		);
 	}
 
 	private Task validateTask(Long id) {
 		return taskRepository.findById(id).orElseThrow(
-			() -> new CustomException(ErrorCode.TASK_NOT_FOUND)
+			() -> new CustomException(TASK_NOT_FOUND)
 		);
 	}
 

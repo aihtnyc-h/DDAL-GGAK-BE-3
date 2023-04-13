@@ -1,6 +1,7 @@
 package com.ddalggak.finalproject.domain.label.service;
 
 import static com.ddalggak.finalproject.global.error.ErrorCode.*;
+import static org.springframework.http.ResponseEntity.*;
 
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class LabelService {
 
 	//라벨 생성
 	@Transactional
-	public ResponseEntity<?> createLabel(User user, LabelRequestDto labelRequestDto) {
+	public ResponseEntity<List<LabelResponseDto>> createLabel(User user, LabelRequestDto labelRequestDto) {
 		User existUser = userRepository.findByEmail(user.getEmail())
 			.orElseThrow(() -> new CustomException(UNAUTHENTICATED_USER));
 		// 유효성 검증
@@ -78,12 +79,14 @@ public class LabelService {
 			.stream()
 			.map(labelMapper::toDto)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(labelList);
+		return ResponseEntity
+			.status(201)
+			.body(labelList);
 	}
 
 	//라벨 삭제
 	@Transactional
-	public ResponseEntity<?> deleteLabel(User user, Long labelId) {
+	public ResponseEntity<List<LabelResponseDto>> deleteLabel(User user, Long labelId) {
 		// 유효성 검증
 		Task task = taskRepository.findTaskByLabelId(labelId).orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
 		Label label = validateLabel(labelId);
@@ -99,12 +102,12 @@ public class LabelService {
 			.stream()
 			.map(labelMapper::toDto)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(labelList);
+		return ok(labelList);
 	}
 
 	//라벨 초대
 	@Transactional
-	public ResponseEntity<?> inviteLabel(User user, LabelRequestDto labelRequestDto, Long labelId) {
+	public ResponseEntity<List<UserResponseDto>> inviteLabel(User user, LabelRequestDto labelRequestDto, Long labelId) {
 		Task task = validateTask(labelRequestDto.getTaskId());
 		Label label = validateLabel(labelId);
 		// 1. user의 유효성 검증 -> task, label, project Leader가 아닐 경우 403 FORBIDDEN
@@ -126,12 +129,13 @@ public class LabelService {
 			.stream()
 			.map(userMapper::toUserResponseDtoWithLabel)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(userList);
+		return ok(userList);
 	}
 
 	// label leader 위임
 	@Transactional
-	public ResponseEntity<?> assignLeader(User user, LabelRequestDto labelRequestDto, Long labelId) {
+	public ResponseEntity<List<UserResponseDto>> assignLeader(User user, LabelRequestDto labelRequestDto,
+		Long labelId) {
 		// task 검증
 		Task task = validateTask(labelRequestDto.getTaskId());
 		// label 검증
@@ -150,12 +154,12 @@ public class LabelService {
 			.stream()
 			.map(userMapper::toUserResponseDtoWithLabel)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(userList);
+		return ok(userList);
 	}
 
 	// 라벨당 존재하는 티켓 리스트 조회
 	@Transactional(readOnly = true)
-	public ResponseEntity<?> getTicketListByLabel(User user, Long labelId) {
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> getTicketListByLabel(User user, Long labelId) {
 		// label 검증
 		Label label = validateLabel(labelId);
 		//project 내에 존재하는 유저들은 label별 티켓 확인 가능
@@ -164,7 +168,7 @@ public class LabelService {
 		// label에 속한 티켓들을 가져옴
 		List<Ticket> ticketList = ticketRepository.findWithLabelId(labelId);
 		Map<TicketStatus, List<TicketResponseDto>> tickets = ticketMapper.toDtoMapWithStatus(ticketList);
-		return ResponseEntity.ok(tickets);
+		return ok(tickets);
 	}
 
 	private Task validateTask(Long id) { //todo AOP 적용
