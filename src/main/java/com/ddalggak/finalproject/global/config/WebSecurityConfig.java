@@ -76,6 +76,11 @@ public class WebSecurityConfig {
 			.permitAll()
 			.antMatchers("/?accessToken=*")
 			.permitAll()
+			//nginx관련
+			.antMatchers("/nginx").permitAll()
+			.antMatchers("/actuator/**").permitAll()
+			.antMatchers("/health").permitAll()
+			.antMatchers("/version").permitAll()
 			.and()
 			.oauth2Login()
 			.authorizationEndpoint()
