@@ -16,7 +16,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
-import com.ddalggak.finalproject.domain.ticket.dto.TicketMapper;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
 import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
@@ -37,7 +36,6 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
 	private final UserMapper userMapper;
-	private final TicketMapper ticketMapper;
 	private final UserRepository userRepository;
 	private final TicketRepository ticketRepository;
 	private final S3Uploader s3Uploader;
