@@ -25,12 +25,12 @@ echo "> $IDLE_PROFILE 배포"
 sudo fuser -k -n tcp $IDLE_PORT
 sudo nohup java -jar /home/ubuntu/app/DDAL-GGAK-BE-0.0.1-SNAPSHOT.jar --spring.config.location=file:/home/ubuntu/app/config/prod-application.yaml --spring.profiles.active=$IDLE_PROFILE --server.port=$IDLE_PORT &
 echo "> $IDLE_PROFILE 10초 후 Health check 시작"
-echo "> curl -s ${{ secrets.INSTANCE_URL }}/actuator/health"
+echo "> curl -s ${{ secrets.INSTANCE_URL }}:$IDLE_PORT/api/health"
 sleep 10
 
 for retry_count in {1..10}
 do
-response=$(curl -s ${{ secrets.INSTANCE_URL }}/actuator/health)
+response=$(curl -s ${{ secrets.INSTANCE_URL }}:$IDLE_PORT/actuator/health)
  up_count=$(echo $response | grep 'UP' | wc -l)
 
  if [ $up_count -ge 1 ]
