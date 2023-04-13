@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        queryDslVersion = '5.0.0'
+        queryDslVersion = "5.0.0"
     }
 }
 
@@ -17,6 +17,8 @@ group = 'com.ddalgak'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
+ext["hibernate.version"] = "5.6.5.Final"
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -31,7 +33,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+//    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.h2database:h2'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -83,6 +85,13 @@ dependencies {
     //hateoas
     implementation 'org.springframework.boot:spring-boot-starter-hateoas'
 
+    // websocket, stomp
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.webjars:stomp-websocket:2.3.3'
+    implementation 'org.webjars:webjars-locator-core'
+    implementation 'org.webjars:sockjs-client:1.0.2'
+    implementation 'org.webjars:bootstrap:3.3.7'
+    implementation 'org.webjars:jquery:3.1.1-1'
     // 엔드포인트 조회
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
@@ -91,6 +100,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+//querydsl 추가 시작
 def querydslDir = "$buildDir/generated/querydsl"
 querydsl {
     jpa = true
@@ -104,4 +114,8 @@ configurations {
 }
 compileQuerydsl {
     options.annotationProcessorPath = configurations.querydsl
+}
+
+clean {
+    delete file('src/main/generated')
 }
