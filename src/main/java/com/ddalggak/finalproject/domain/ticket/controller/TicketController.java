@@ -83,14 +83,14 @@ public class TicketController {
 	//티켓 가져가기
 	@Operation(summary = "assign ticket", description = "Ticket 가져가기 assign 메서드 체크")
 	@PostMapping("/ticket/{ticketId}/assign")
-	public ResponseEntity<TicketResponseDto> assignTicket(@PathVariable Long ticketId,
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> assignTicket(@PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return ticketService.assignTicket(userDetails.getUser(), ticketId);
 	}
 
 	@Operation(summary = "get label for ticket", description = "Ticket에 라벨 부여하기")
 	@PostMapping("/ticket/{ticketId}/label")
-	public ResponseEntity<TicketResponseDto> getLabelForTicket(@PathVariable Long ticketId,
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> getLabelForTicket(@PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody TicketLabelRequestDto ticketLabelRequestDto) {
 		return ticketService.getLabelForTicket(userDetails.getUser(), ticketId, ticketLabelRequestDto);
@@ -99,7 +99,7 @@ public class TicketController {
 	// 티켓 이동하기
 	@Operation(summary = "move ticketStatus", description = "ticket의 상태 todo와 inprogress 전환")
 	@PostMapping("/ticket/{ticketId}/movement")
-	public ResponseEntity<TicketResponseDto> movementTicket(@PathVariable Long ticketId,
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> movementTicket(@PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return ticketService.movementTicket(userDetails.getUser(), ticketId);
 	}
@@ -107,7 +107,7 @@ public class TicketController {
 	// 티켓 리뷰 상태로 전환
 	@Operation(summary = "move ticketStatus to review-enrollment", description = "검증이 끝난 ticket의 상태를 review로 전환")
 	@PostMapping("/ticket/{ticketId}/review")
-	public ResponseEntity<TicketResponseDto> moveTicketToReview(@PathVariable Long ticketId,
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> moveTicketToReview(@PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return ticketService.moveTicketToReview(userDetails.getUser(), ticketId);
 	}
