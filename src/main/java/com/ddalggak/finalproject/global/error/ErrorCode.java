@@ -21,6 +21,7 @@ public enum ErrorCode {
 	INVALID_REDIRECT_URI(BAD_REQUEST, "A-007", "redirect URIs are not matched"),
 	INVALID_PROVIDER_TYPE(BAD_REQUEST, "A-008", "Invalid Provider Type."),
 	INVALID_EMAIL_PASSWORD(BAD_REQUEST, "A-009", "Invalid email or password"),
+	INVALID_TICKET_STATUS(BAD_REQUEST, "A-010", "Invalid ticket status"),
 
 	/* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
 	INVALID_AUTH_TOKEN(UNAUTHORIZED, "B-001", "Please enter an authorized token. "),
@@ -47,8 +48,6 @@ public enum ErrorCode {
 	DUPLICATE_RESOURCE(CONFLICT, "E-001", "Data already exists."),
 	DUPLICATE_MEMBER(CONFLICT, "E-002", "Duplicate user exists."),
 	DUPLICATE_EMAIL(CONFLICT, "E-003", "Email address is already in use. Please try a different email address."),
-
-
 
 	/* 415 UNSUPPORTED_MEDIA_TYPE : 지원하지 않는 미디어 타입 */
 	TYPE_MISMATCH(UNSUPPORTED_MEDIA_TYPE, "F-001", "Unsupported media type."),

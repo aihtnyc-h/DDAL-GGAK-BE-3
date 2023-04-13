@@ -12,13 +12,14 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 
 import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
 import com.ddalggak.finalproject.domain.ticket.dto.QDateTicket;
+import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -60,7 +61,7 @@ public class TicketRepositoryCustomImpl implements TicketRepositoryCustom {
 			.fetch();
 	}
 
-	@Override // todo 365개 뿌리기
+	@Override
 	public List<DateTicket> getCompletedTicketCountByDate(TicketSearchCondition condition, Long userId) {
 		return queryFactory
 			.select(new QDateTicket(
@@ -73,38 +74,44 @@ public class TicketRepositoryCustomImpl implements TicketRepositoryCustom {
 			)
 			.groupBy(ticket.completedAt)
 			.orderBy(ticket.completedAt.asc())
-			.limit(365)
 			.fetch();
 	}
 
 	@Override // todo 무한스크롤 이용
 	public Slice<DateTicket> getSlicedCompletedTicketCountByDate(TicketSearchCondition condition, Pageable pageable,
 		Long userId) {
-		List<DateTicket> content = new ArrayList<>();
+		List<TicketResponseDto> content = new ArrayList<>();
 		queryFactory
-			.select(new QDateTicket(
-				ticket.completedAt.as("date"),
-				ticket.count().as("completedTicket")
+			.select(Projections.constructor(
+				TicketResponseDto.class,
+				ticket.ticketId,
+				ticket.ticketTitle.as("title"),
+				ticket.ticketDescription.as("description"),
+				ticket.status,
+				ticket.priority,
+				ticket.difficulty,
+				ticket.user.nickname.as("assigned"),
+				ticket.expiredAt,
+				ticket.completedAt,
+				ticket.label.labelTitle.as("label")
+				//commentList 제외함
 			))
 			.from(ticket)
 			.where(ticket.user.userId.eq(userId),
-				getWithOneYear(condition.getDate())
+				statusEq(condition.getStatus())
 			)
-			.groupBy(ticket.completedAt)
-			.orderBy(ticket.completedAt.asc())
+			.orderBy(ticket.createdAt.asc())
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize() + 1)
 			.fetch()
-			.forEach(
-				dateTicket -> content.add(new DateTicket(dateTicket.getDate(), dateTicket.getCompletedTicket()))
-			);
+		;
 		boolean hasNext = false;
 		if (content.size() > pageable.getPageSize()) {
 			content.remove(pageable.getPageSize());
 			hasNext = true;
 		}
-		return new SliceImpl<>(content, pageable, hasNext);
-
+		// return new SliceImpl<>(content, pageable, hasNext);
+		return null;
 	}
 
 	@Override
