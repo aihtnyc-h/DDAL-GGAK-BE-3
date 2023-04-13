@@ -1,5 +1,7 @@
 package com.ddalggak.finalproject.domain.task.controller;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -13,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ddalggak.finalproject.domain.task.dto.TaskBriefResponseDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskResponseDto;
 import com.ddalggak.finalproject.domain.task.service.TaskService;
+import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
-import com.ddalggak.finalproject.global.view.Views;
-import com.fasterxml.jackson.annotation.JsonView;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,7 +35,7 @@ public class TaskController {
 
 	@Operation(summary = "Task 생성", description = "api for creating task")
 	@PostMapping("/task")
-	public ResponseEntity<?> createTask(
+	public ResponseEntity<List<TaskBriefResponseDto>> createTask(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody TaskRequestDto taskRequestDto) {
 		return taskService.createTask(userDetails.getUser(), taskRequestDto);
@@ -41,7 +43,6 @@ public class TaskController {
 
 	@Operation(summary = "Task 조회", description = "api for view one task")
 	@GetMapping("/task/{taskId}")
-	@JsonView(Views.Task.class)
 	public ResponseEntity<TaskResponseDto> viewTask(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestParam Long projectId,
@@ -51,7 +52,7 @@ public class TaskController {
 
 	@Operation(summary = "Task 삭제", description = "api for delete one task")
 	@DeleteMapping("/task/{taskId}")
-	public ResponseEntity<?> deleteTask(
+	public ResponseEntity<List<TaskBriefResponseDto>> deleteTask(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@PathVariable Long taskId) {
 		return taskService.deleteTask(user.getUser(), taskId);
@@ -59,7 +60,7 @@ public class TaskController {
 
 	@Operation(summary = "Task 리더 부여", description = "api for assign admin to task")
 	@PostMapping("/task/{taskId}/leader")
-	public ResponseEntity<?> assignLeader(
+	public ResponseEntity<List<UserResponseDto>> assignLeader(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@PathVariable Long taskId,
 		@Valid @RequestBody TaskRequestDto taskRequestDto) {
@@ -68,7 +69,7 @@ public class TaskController {
 
 	@Operation(summary = "Task 초대", description = "api for invite user to task")
 	@PostMapping("/task/{taskId}/invite")
-	public ResponseEntity<?> inviteTask(
+	public ResponseEntity<List<UserResponseDto>> inviteTask(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@Valid @RequestBody TaskRequestDto taskRequestDto,
 		@PathVariable Long taskId) {
