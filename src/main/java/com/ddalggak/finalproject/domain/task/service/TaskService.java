@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ddalggak.finalproject.domain.label.dto.LabelMapper;
+import com.ddalggak.finalproject.domain.label.dto.LabelResponseDto;
+import com.ddalggak.finalproject.domain.label.repository.LabelRepository;
 import com.ddalggak.finalproject.domain.project.entity.Project;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.project.repository.ProjectRepository;
@@ -37,9 +40,11 @@ public class TaskService {
 
 	private final TaskMapper taskMapper;
 	private final UserMapper userMapper;
+	private final LabelMapper labelMapper;
 	private final TaskRepository taskRepository;
 	private final ProjectRepository projectRepository;
 	private final UserRepository userRepository;
+	private final LabelRepository labelRepository;
 
 	// 태스크 생성
 	@Transactional
@@ -161,6 +166,19 @@ public class TaskService {
 			.map(userMapper::toUserResponseDtoWithTaskUser)
 			.collect(Collectors.toList());
 		return ok(result);
+	}
+
+	@Transactional(readOnly = true)
+	public ResponseEntity<List<LabelResponseDto>> viewLabels(User user, Long taskId) {
+		// 유효성 검증
+		Task task = validateTask(taskId);
+		validateExistMember(task.getProject(), ProjectUser.create(task.getProject(), user));
+		// 결과 리턴
+		List<LabelResponseDto> result = labelRepository.findByTaskId(taskId)
+			.stream()
+			.map(labelMapper::toDto)
+			.collect(Collectors.toList());
+		return ResponseEntity.ok(result);
 	}
 
 	private void validateExistMember(Task task, TaskUser taskUser) {
