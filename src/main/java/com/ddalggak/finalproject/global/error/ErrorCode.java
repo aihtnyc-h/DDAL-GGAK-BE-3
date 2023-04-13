@@ -22,6 +22,7 @@ public enum ErrorCode {
 	INVALID_PROVIDER_TYPE(BAD_REQUEST, "A-008", "Invalid Provider Type."),
 	INVALID_EMAIL_PASSWORD(BAD_REQUEST, "A-009", "Invalid email or password"),
 	INVALID_TICKET_STATUS(BAD_REQUEST, "A-010", "Invalid ticket status"),
+	INVALID_INVITE_CODE(BAD_REQUEST, "A-011", "Invalid invite code"),
 
 	/* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
 	INVALID_AUTH_TOKEN(UNAUTHORIZED, "B-001", "Please enter an authorized token. "),
