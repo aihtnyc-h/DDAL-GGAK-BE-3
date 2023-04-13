@@ -14,7 +14,6 @@ public class CommentRequestDto{
 	@Schema(name = "ticket Id")
 	@NotNull(message = "ticket Id is required")
 	private Long ticketId;
-	@Schema(name = "comment", example = "comment")
 	private String comment;
 
 }
