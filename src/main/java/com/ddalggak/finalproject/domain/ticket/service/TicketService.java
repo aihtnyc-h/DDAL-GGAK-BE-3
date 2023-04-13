@@ -158,7 +158,7 @@ public class TicketService {
 
 	// 티켓 가져가기
 	@Transactional
-	public ResponseEntity<TicketResponseDto> assignTicket(User user, Long ticketId) {
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> assignTicket(User user, Long ticketId) {
 		//유효성 검사 & 0413 조영준 NPE 반환 고려 로직수정
 		Ticket ticket = validateTicket(ticketId);
 		if (ticket.getTask().getTaskUserList().stream().noneMatch(
@@ -171,13 +171,14 @@ public class TicketService {
 			ticket.assignTicket(user);
 		}
 		// 결과 반환
-		TicketResponseDto result = ticketMapper.toDto(ticket);
-		return ok(result);
+		List<Ticket> ticketList = ticketRepository.findWithTaskId(ticket.getTask().getTaskId());
+		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
+		return ok(ListWithTicketStatus);
 	}
 
 	// ticket에 라벨 부여
 	@Transactional
-	public ResponseEntity<TicketResponseDto> getLabelForTicket(User user, Long ticketId,
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> getLabelForTicket(User user, Long ticketId,
 		TicketLabelRequestDto ticketLabelRequestDto) {
 		Ticket ticket = validateTicket(ticketId);
 		if (ticket.getTask().getTaskUserList().stream().noneMatch(
@@ -187,13 +188,14 @@ public class TicketService {
 		}
 		Label label = validateLabel(ticketLabelRequestDto.labelId);
 		ticket.addLabel(label);
-		TicketResponseDto result = ticketMapper.toDto(ticket);
-		return ok(result);
+		List<Ticket> ticketList = ticketRepository.findWithTaskId(ticket.getTask().getTaskId());
+		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
+		return ok(ListWithTicketStatus);
 	}
 
 	// 티켓 이동
 	@Transactional
-	public ResponseEntity<TicketResponseDto> movementTicket(User user, Long ticketId) {
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> movementTicket(User user, Long ticketId) {
 		Ticket ticket = validateTicket(ticketId);
 		if (ticket.getStatus() == DONE) {
 			throw new CustomException(INVALID_TICKET_STATUS);
@@ -202,16 +204,16 @@ public class TicketService {
 		} else if (ticket.getUser() == null) {
 			throw new CustomException(INVALID_TICKET_STATUS);
 		} else {
-			throw new CustomException(UNAUTHORIZED_MEMBER);
+			throw new CustomException(UNAUTHENTICATED_USER);
 		}
-		ticketRepository.save(ticket);
-		TicketResponseDto result = ticketMapper.toDto(ticket);
-		return ok(result);
+		List<Ticket> ticketList = ticketRepository.findWithTaskId(ticket.getTask().getTaskId());
+		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
+		return ok(ListWithTicketStatus);
 	}
 
 	// 완료된 티켓을 review-enrollment 상태로 전환해야 한다.
 	@Transactional
-	public ResponseEntity<TicketResponseDto> moveTicketToReview(User user, Long ticketId) {
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> moveTicketToReview(User user, Long ticketId) {
 		Ticket ticket = validateTicket(ticketId);
 		if (ticket.getStatus().equals(DONE)) {
 			throw new CustomException(INVALID_TICKET_STATUS);
@@ -224,8 +226,9 @@ public class TicketService {
 			ticket.moveStatusToReview();
 		}
 		ticketRepository.save(ticket);
-		TicketResponseDto result = ticketMapper.toDto(ticket);
-		return ok(result);
+		List<Ticket> ticketList = ticketRepository.findWithTaskId(ticket.getTask().getTaskId());
+		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
+		return ok(ListWithTicketStatus);
 	}
 
 	/* == 반복 로직 == */
