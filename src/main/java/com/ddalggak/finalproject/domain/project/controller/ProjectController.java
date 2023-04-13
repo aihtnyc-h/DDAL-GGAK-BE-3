@@ -19,7 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
+import com.ddalggak.finalproject.domain.project.dto.ProjectResponseDto;
 import com.ddalggak.finalproject.domain.project.service.ProjectService;
+import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,7 +48,7 @@ public class ProjectController {
 		@Parameter(name = "projectRequestDto", description = "프로젝트 생성에 필요한 정보입니다.", required = true)
 	})
 	@PostMapping("/project")
-	public ResponseEntity<?> createProject(
+	public ResponseEntity<List<ProjectBriefResponseDto>> createProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestPart(value = "thumbnail", required = false) MultipartFile image,
 		@Valid @RequestPart(value = "data") ProjectRequestDto projectRequestDto) throws IOException {
@@ -64,7 +66,7 @@ public class ProjectController {
 		@Parameter(name = "projectId", description = "조회할 프로젝트의 id입니다.", required = true)
 	})
 	@GetMapping("/project/{projectId}")
-	public ResponseEntity<?> viewProjectOne(
+	public ResponseEntity<ProjectResponseDto> viewProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId) {
 		return projectService.viewProject(userDetails.getUser(), projectId);
@@ -80,7 +82,7 @@ public class ProjectController {
 	)
 	@Operation(summary = "프로젝트 참여", description = "api for join project")
 	@PostMapping("/project/{projectId}/join")
-	public ResponseEntity<?> joinProject(
+	public ResponseEntity<List<ProjectBriefResponseDto>> joinProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId) {
 		return projectService.joinProject(userDetails.getUser(), projectId);
@@ -88,7 +90,7 @@ public class ProjectController {
 
 	@Operation(summary = "프로젝트 수정", description = "api for update project")
 	@PostMapping("/project/{projectId}/settings")
-	public ResponseEntity<?> updateProject(
+	public ResponseEntity<ProjectResponseDto> updateProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId,
 		@RequestPart(value = "thumbnail", required = false) MultipartFile image,
@@ -106,7 +108,7 @@ public class ProjectController {
 	)
 	@Operation(summary = "프로젝트 삭제", description = "api for delete project")
 	@DeleteMapping("/project/{projectId}")
-	public ResponseEntity<?> deleteProject(
+	public ResponseEntity<List<ProjectBriefResponseDto>> deleteProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId) {
 		return projectService.deleteProject(userDetails.getUser(), projectId);
@@ -114,7 +116,7 @@ public class ProjectController {
 
 	@Operation(summary = "프로젝트 참여자 조회", description = "api for view project members")
 	@GetMapping("/project/{projectId}/users")
-	public ResponseEntity<?> viewProjectUsers(
+	public ResponseEntity<List<UserResponseDto>> viewProjectUsers(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId) {
 		return projectService.viewProjectUsers(userDetails.getUser(), projectId);
@@ -122,7 +124,7 @@ public class ProjectController {
 
 	@Operation(summary = "프로젝트 참여자 삭제", description = "api for delete project member")
 	@DeleteMapping("/project/{projectId}/user/{userId}")
-	public ResponseEntity<?> deleteProjectUser(
+	public ResponseEntity<List<UserResponseDto>> deleteProjectUser(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId,
 		@PathVariable Long userId) {
