@@ -6,6 +6,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
+import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
 import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
 import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
@@ -74,12 +77,20 @@ public class UserController {
 		return userService.getMyPage(userDetails.getEmail());
 	}
 
+	@Operation(summary = "get user's completed ticket All", description = "유저의 모든 티켓 확인")
+	@GetMapping("/{userId}/completedTickets")
+	public ResponseEntity<List<DateTicket>> getMyCompletedTickets(
+		@PathVariable Long userId,
+		TicketSearchCondition condition) {
+		return userService.getMyCompletedTickets(userId, condition);
+	}
+
 	@Operation(summary = "get user ticket page", description = "user ticket page 찾기 get 메서드 체크")
 	@GetMapping("/{userId}/Tickets")
-	public ResponseEntity<?> getMyTickets(
+	public ResponseEntity<Slice<TicketResponseDto>> getMyTickets(
 		@PathVariable Long userId,
 		TicketSearchCondition condition,
-		@PageableDefault(size = 365) Pageable pageable) {
+		@PageableDefault(size = 100) Pageable pageable) {
 		return userService.getMyTickets(userId, pageable, condition);
 	}
 }
