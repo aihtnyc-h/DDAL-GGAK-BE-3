@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ddalggak.finalproject.domain.comment.dto.CommentRequestDto;
-import com.ddalggak.finalproject.domain.comment.dto.CommentResponseDto;
 import com.ddalggak.finalproject.domain.comment.service.CommentService;
-import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,14 +23,14 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Log Controller", description = "로그 관련 API 입니다.")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping(value = "/api")
 public class CommentController {
 	private final CommentService commentService;
 
 	// 댓글 등록
 	@Operation(summary = "ticket comment", description = "comment 등록 post 메서드 체크")
 	@PostMapping("/comment")
-	public ResponseEntity<CommentResponseDto> createComment(
+	public ResponseEntity<?> createComment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody CommentRequestDto commentRequestDto) {
 		return commentService.createComment(userDetails.getUser(), commentRequestDto);
@@ -51,7 +49,7 @@ public class CommentController {
 	// 댓글 삭제
 	@Operation(summary = "delete ticket comment", description = "comment 삭제 delete 메서드 체크")
 	@DeleteMapping("/comment/{commentId}")
-	public ResponseEntity<SuccessResponseDto> deleteComment(
+	public ResponseEntity<?> deleteComment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable("commentId") Long commentId) {
 		return commentService.deleteComment(userDetails, commentId);
