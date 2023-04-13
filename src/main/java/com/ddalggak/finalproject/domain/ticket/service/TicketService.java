@@ -1,12 +1,12 @@
 package com.ddalggak.finalproject.domain.ticket.service;
 
-import static com.ddalggak.finalproject.global.dto.SuccessCode.*;
+import static com.ddalggak.finalproject.domain.ticket.entity.TicketStatus.*;
 import static com.ddalggak.finalproject.global.error.ErrorCode.*;
+import static org.springframework.http.ResponseEntity.*;
 
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,9 +26,6 @@ import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
 import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
 import com.ddalggak.finalproject.domain.user.entity.User;
-import com.ddalggak.finalproject.global.dto.GlobalResponseDto;
-import com.ddalggak.finalproject.global.dto.SuccessCode;
-import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 
@@ -48,7 +45,8 @@ public class TicketService {
 
 	// 티켓 등록
 	@Transactional
-	public ResponseEntity<?> createTicket(User user, TicketRequestDto ticketRequestDto) {
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> createTicket(User user,
+		TicketRequestDto ticketRequestDto) {
 		//1. task가 존재하는지 확인
 		Task task = validateTask(ticketRequestDto.getTaskId());
 		//2. 유효성 검증
@@ -66,13 +64,15 @@ public class TicketService {
 		List<Ticket> ticketList = ticketRepository.findWithTaskId(task.getTaskId());
 		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
 
-		return GlobalResponseDto.of(CREATED_SUCCESSFULLY, ListWithTicketStatus);
+		return ResponseEntity
+			.status(201)
+			.body(ListWithTicketStatus);
 	}
 
 	// 티켓 상세조회
 	@Transactional(readOnly = true)
-	public ResponseEntity<?> getTicket(Long ticketId, Long taskId, User user) {
-		// 유효성 검증 todo 더 나은 유효성 검증 방향이 있나 검사해보기
+	public ResponseEntity<TicketResponseDto> getTicket(Long ticketId, Long taskId, User user) {
+		// 유효성 검증
 		Project project = projectRepository.findProjectByTaskId(taskId).orElseThrow(
 			() -> new CustomException(PROJECT_NOT_FOUND)
 		);
@@ -84,12 +84,13 @@ public class TicketService {
 		);
 		// return
 		TicketResponseDto ticketResponseDto = ticketMapper.toDto(ticket);
-		return GlobalResponseDto.of(HttpStatus.OK, ticketResponseDto);
+		return ok(ticketResponseDto);
 	}
 
 	// 티켓 수정하기
 	@Transactional
-	public ResponseEntity<?> updateTicket(Long ticketId, TicketRequestDto ticketRequestDto, User user) {
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> updateTicket(Long ticketId,
+		TicketRequestDto ticketRequestDto, User user) {
 		// 유효성검증
 		Ticket ticket = validateTicket(ticketId);
 		Task task = validateTask(ticketRequestDto.getTaskId());
@@ -106,12 +107,12 @@ public class TicketService {
 		// 수정 내역 반영된 ticketList 다시 조회
 		List<Ticket> ticketList = ticketRepository.findWithTaskId(task.getTaskId());
 		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
-		return GlobalResponseDto.of(UPDATED_SUCCESSFULLY, ListWithTicketStatus);
+		return ok(ListWithTicketStatus);
 	}
 
 	// 티켓 삭제하기
 	@Transactional
-	public ResponseEntity<?> deleteTicket(User user, Long ticketId) {
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> deleteTicket(User user, Long ticketId) {
 		// 1. 티켓 존재하는지 확인
 		Ticket ticket = validateTicket(ticketId);
 		// 2. task 존재하는지 확인
@@ -129,58 +130,102 @@ public class TicketService {
 		// 6. 남은 티켓 return
 		List<Ticket> ticketList = ticketRepository.findWithTaskId(task.getTaskId());
 		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
-		return GlobalResponseDto.of(DELETED_SUCCESSFULLY, ListWithTicketStatus);
+		return ok(ListWithTicketStatus);
 	}
 
-	// 티켓 완료 처리 todo 수정처리로 같이 넘어가야함
+	// 티켓 완료 처리
 	@Transactional
-	public ResponseEntity<?> completeTicket(User user, Long ticketId) {
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> completeTicket(User user, Long ticketId) {
+		// 유효성 검사
 		Ticket ticket = validateTicket(ticketId);
-		if (ticket.getUser().getUserId().equals(user.getUserId())) {
+		// ticket의 status 검사
+		if (ticket.getStatus() != REVIEW) {
+			throw new CustomException(INVALID_TICKET_STATUS);
+		} else if (
+			ticket.getTask().getProject().getProjectLeader().equals(user.getEmail()) ||
+				ticket.getTask().getTaskLeader().equals(user.getEmail()) ||
+				(ticket.getLabel() != null && ticket.getLabel().getLabelLeader().equals(user.getEmail()))) {
+			//dirty checking에 의해 ticket은 dynamic update를 따르도록 한다.
 			ticket.completeTicket();
 		} else {
+			throw new CustomException(UNAUTHENTICATED_USER);
+		}
+		// 티켓 목록 갱신
+		List<Ticket> ticketList = ticketRepository.findWithTaskId(ticket.getTask().getTaskId());
+		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
+		return ok(ListWithTicketStatus);
+	}
+
+	// 티켓 가져가기
+	@Transactional
+	public ResponseEntity<TicketResponseDto> assignTicket(User user, Long ticketId) {
+		//유효성 검사 & 0413 조영준 NPE 반환 고려 로직수정
+		Ticket ticket = validateTicket(ticketId);
+		if (ticket.getTask().getTaskUserList().stream().noneMatch(
+			taskUser -> taskUser.getUser().getUserId().equals(user.getUserId())
+		) || (ticket.getUser() != null && !(ticket.getUser().getEmail().equals(user.getEmail())))) {
+			throw new CustomException(UNAUTHENTICATED_USER);
+		} else if (ticket.getUser() != null) {
+			ticket.unAssignTicket(); //
+		} else {
+			ticket.assignTicket(user);
+		}
+		// 결과 반환
+		TicketResponseDto result = ticketMapper.toDto(ticket);
+		return ok(result);
+	}
+
+	// ticket에 라벨 부여
+	@Transactional
+	public ResponseEntity<TicketResponseDto> getLabelForTicket(User user, Long ticketId,
+		TicketLabelRequestDto ticketLabelRequestDto) {
+		Ticket ticket = validateTicket(ticketId);
+		if (ticket.getTask().getTaskUserList().stream().noneMatch(
+			taskUser -> taskUser.getUser().getUserId().equals(user.getUserId())
+		)) {
 			throw new CustomException(UNAUTHORIZED_MEMBER);
 		}
-		ticketRepository.save(ticket);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
-	}
-
-	@Transactional
-	public ResponseEntity<?> assignTicket(User user, Long ticketId) {
-		Ticket ticket = validateTicket(ticketId);
-		//todo task에 유저 있는지 검사
-		ticket.assignTicket(user);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
-	}
-
-	@Transactional
-	public ResponseEntity<?> getLabelForTicket(User user, Long ticketId, TicketLabelRequestDto ticketLabelRequestDto) {
-		Ticket ticket = validateTicket(ticketId);
-		//todo task에 유저 있는지 검사, 로직 수정 매우필요
-		Label label = labelRepository.findById(ticketLabelRequestDto.labelId).orElseThrow(
-			() -> new CustomException(LABEL_NOT_FOUND)
-		);
+		Label label = validateLabel(ticketLabelRequestDto.labelId);
 		ticket.addLabel(label);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
+		TicketResponseDto result = ticketMapper.toDto(ticket);
+		return ok(result);
 	}
 
 	// 티켓 이동
 	@Transactional
-	public ResponseEntity<?> movementTicket(User user, Long ticketId) {
+	public ResponseEntity<TicketResponseDto> movementTicket(User user, Long ticketId) {
 		Ticket ticket = validateTicket(ticketId);
-		if (ticket.getUser().getUserId().equals(user.getUserId())) {
+		if (ticket.getStatus() == DONE) {
+			throw new CustomException(INVALID_TICKET_STATUS);
+		} else if (ticket.getUser() != null && ticket.getUser().getUserId().equals(user.getUserId())) {
 			ticket.movementTicket(ticket.getStatus());
+		} else if (ticket.getUser() == null) {
+			throw new CustomException(INVALID_TICKET_STATUS);
 		} else {
 			throw new CustomException(UNAUTHORIZED_MEMBER);
 		}
 		ticketRepository.save(ticket);
-		return SuccessResponseDto.toResponseEntity(SuccessCode.UPDATED_SUCCESSFULLY);
+		TicketResponseDto result = ticketMapper.toDto(ticket);
+		return ok(result);
 	}
 
-	private void validateExistMember(Project project, ProjectUser projectUser) {
-		if (!project.getProjectUserList().contains(projectUser)) {
-			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
+	// 완료된 티켓을 review-enrollment 상태로 전환해야 한다.
+	@Transactional
+	public ResponseEntity<TicketResponseDto> moveTicketToReview(User user, Long ticketId) {
+		Ticket ticket = validateTicket(ticketId);
+		if (ticket.getStatus().equals(DONE)) {
+			throw new CustomException(INVALID_TICKET_STATUS);
+		} else if (ticket.getStatus().equals(REVIEW)) {
+			//다른 팀원의 로직상 TODO로 status 줘야 status가 in-progress로 들어간다.
+			ticket.movementTicket(TODO);
+		} else if (!ticket.getUser().getEmail().equals(user.getEmail())) {
+			throw new CustomException(UNAUTHENTICATED_USER);
+		} else {
+			ticket.moveStatusToReview();
 		}
+		ticketRepository.save(ticket);
+		TicketResponseDto result = ticketMapper.toDto(ticket);
+		return ok(result);
 	}
 
 	/* == 반복 로직 == */
@@ -194,4 +239,14 @@ public class TicketService {
 		return ticketRepository.findById(ticketId).orElseThrow(() -> new CustomException(TICKET_NOT_FOUND));
 	}
 
+	// label 우무 확인
+	public Label validateLabel(Long labelId) {
+		return labelRepository.findById(labelId).orElseThrow(() -> new CustomException(LABEL_NOT_FOUND));
+	}
+
+	private void validateExistMember(Project project, ProjectUser projectUser) {
+		if (!project.getProjectUserList().contains(projectUser)) {
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
+		}
+	}
 }
