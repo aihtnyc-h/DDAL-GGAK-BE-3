@@ -138,9 +138,9 @@ public class ProjectService {
 			fileCheck(image);
 			imageUrl = s3Uploader.upload(image, "project");
 		}
-		// 업로드한 이미지의 url을 바탕으로 update 쿼리
+		// 업로드한 이미지의 url을 바탕으로 update 쿼리, dynamic update 기준 업데이트
 		projectRequestDto.setThumbnail(imageUrl);
-		projectRepository.update(projectId, projectRequestDto);
+		project.update(projectRequestDto);
 
 		// 새로운 프로젝트 다시 받아옴 , todo 무엇을 반환해야 할까?
 		ProjectResponseDto projectResponseDto = projectMapper.toDto(projectRepository.findById(projectId).get());
