@@ -23,6 +23,8 @@ import com.ddalggak.finalproject.domain.project.dto.ProjectResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectUserRequestDto;
 import com.ddalggak.finalproject.domain.project.entity.Project;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
+import com.ddalggak.finalproject.domain.project.projectInviteCode.ProjectInviteCode;
+import com.ddalggak.finalproject.domain.project.projectInviteCode.ProjectInviteCodeRepository;
 import com.ddalggak.finalproject.domain.project.repository.ProjectRepository;
 import com.ddalggak.finalproject.domain.user.dto.UserMapper;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
@@ -41,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
+	private final ProjectInviteCodeRepository projectInviteCodeRepository;
 
 	private final ProjectMapper projectMapper;
 	private final UserMapper userMapper;
@@ -113,9 +116,12 @@ public class ProjectService {
 	}
 
 	@Transactional
-	public ResponseEntity<List<ProjectBriefResponseDto>> joinProject(User user, Long projectId) {
+	public ResponseEntity<List<ProjectBriefResponseDto>> joinProject(User user, Long projectId,
+		String projectInviteCode) {
 		Project project = validateProject(projectId);
 		ProjectUser projectUser = ProjectUser.create(project, user);
+		projectInviteCodeRepository.findById(projectInviteCode).orElseThrow(() -> new CustomException(
+			INVALID_INVITE_CODE));
 		validateDuplicateMember(project, projectUser);
 		project.addProjectUser(projectUser);
 		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(
@@ -180,6 +186,28 @@ public class ProjectService {
 			.map(userMapper::toUserResponseDtoWithProjectUser)
 			.collect(Collectors.toList());
 		return ok(userList);
+	}
+
+	public ResponseEntity<String> createInviteCode(User user, Long projectId) {
+		// 유효성 검증
+		Project project = validateProject(projectId);
+		validateExistMember(project, ProjectUser.create(project, user));
+		if (!project.getProjectLeader().equals(user.getEmail())) {
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
+		}
+
+		ProjectInviteCode savedProjectInviteCode = projectInviteCodeRepository.findById(projectId.toString())
+			.orElse(null);
+		if (savedProjectInviteCode != null) {
+			String savedUuid = savedProjectInviteCode.getProjectInviteCode();
+			return ok(savedUuid);
+		}
+
+		String uuid = UUID.randomUUID().toString();
+		ProjectInviteCode projectInviteCode = new ProjectInviteCode(uuid, projectId.toString());
+		projectInviteCodeRepository.save(projectInviteCode);
+
+		return ok(uuid);
 	}
 
 	public ResponseEntity<?> inviteProjectUser(User user, Long projectId, List<String> emails) {
