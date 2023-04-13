@@ -1,9 +1,7 @@
 package com.ddalggak.finalproject.global.dto;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 
 import lombok.AllArgsConstructor;
@@ -25,7 +23,7 @@ public class GlobalResponseDto<T> {
 
 	private T data;
 
-	public static <T> ResponseEntity<GlobalResponseDto<T>> of(SuccessCode successCode, T data, List<Link> links) {
+	public static <T> ResponseEntity<GlobalResponseDto<T>> of(SuccessCode successCode, T data) {
 		return ResponseEntity
 			.status(successCode.getHttpStatus())
 			.body(GlobalResponseDto.<T>builder()
