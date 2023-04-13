@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
@@ -76,8 +78,8 @@ public class UserController {
 	@GetMapping("/{userId}/Tickets")
 	public ResponseEntity<?> getMyTickets(
 		@PathVariable Long userId,
-		TicketSearchCondition condition) {
-
-		return userService.getMyTickets(userId, condition);
+		TicketSearchCondition condition,
+		@PageableDefault(size = 365) Pageable pageable) {
+		return userService.getMyTickets(userId, pageable, condition);
 	}
 }
