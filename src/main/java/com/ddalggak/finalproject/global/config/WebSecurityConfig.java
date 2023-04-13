@@ -200,10 +200,6 @@ public class WebSecurityConfig {
 }
 
 
-
-
-
-
 /*
 - **CSRF(사이트 간 요청 위조, Cross-site request forgery)**
     - 공격자가 인증된 브라우저에 저장된 쿠키의 세션 정보를 활용하여 웹 서버에 사용자가 의도하지 않은 요청을 전달하는 것

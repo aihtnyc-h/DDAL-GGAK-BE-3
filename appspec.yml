@@ -3,7 +3,7 @@ os: linux
 
 files:
   - source:  /
-    destination: /home/ubuntu/app
+    destination: /home/ubuntu/app/step2/zip
     overwrite: yes
 
 permissions:
@@ -13,10 +13,10 @@ permissions:
     group: ubuntu
 
 hooks:
-  AfterInstall:
-    - location: scripts/stop.sh
-      timeout: 60
-      runas: root
+#   AfterInstall:
+#     - location: scripts/stop.sh
+#       timeout: 60
+#       runas: root
   ApplicationStart:
     - location: scripts/start.sh
       timeout: 60
