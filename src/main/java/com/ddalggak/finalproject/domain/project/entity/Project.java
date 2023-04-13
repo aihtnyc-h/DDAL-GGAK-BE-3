@@ -89,8 +89,4 @@ public class Project extends BaseEntity {
 		this.uuid = uuid;
 	}
 
-	public void update(ProjectRequestDto projectRequestDto) {
-		projectTitle = projectRequestDto.getProjectTitle();
-		thumbnail = projectRequestDto.getThumbnail();
-	}
 }
