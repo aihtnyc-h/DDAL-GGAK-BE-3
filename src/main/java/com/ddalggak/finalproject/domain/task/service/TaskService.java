@@ -4,6 +4,7 @@ import static com.ddalggak.finalproject.global.error.ErrorCode.*;
 import static org.springframework.http.ResponseEntity.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,11 @@ import com.ddalggak.finalproject.domain.task.dto.TaskUserRequestDto;
 import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
 import com.ddalggak.finalproject.domain.task.repository.TaskRepository;
+import com.ddalggak.finalproject.domain.ticket.dto.TicketMapper;
+import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
+import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
+import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
+import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
 import com.ddalggak.finalproject.domain.user.dto.UserMapper;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
@@ -41,7 +47,9 @@ public class TaskService {
 	private final TaskMapper taskMapper;
 	private final UserMapper userMapper;
 	private final LabelMapper labelMapper;
+	private final TicketMapper ticketMapper;
 	private final TaskRepository taskRepository;
+	private final TicketRepository ticketRepository;
 	private final ProjectRepository projectRepository;
 	private final UserRepository userRepository;
 	private final LabelRepository labelRepository;
@@ -178,7 +186,18 @@ public class TaskService {
 			.stream()
 			.map(labelMapper::toDto)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(result);
+		return ok(result);
+	}
+
+	@Transactional(readOnly = true)
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> viewTickets(User user, Long taskId) {
+		//유효성 검증
+		Task task = validateTask(taskId);
+		validateExistMember(task.getProject(), ProjectUser.create(task.getProject(), user));
+		// 결과 리턴
+		List<Ticket> ticketList = ticketRepository.findWithTaskId(task.getTaskId());
+		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
+		return ok(ListWithTicketStatus);
 	}
 
 	private void validateExistMember(Task task, TaskUser taskUser) {
@@ -210,5 +229,4 @@ public class TaskService {
 			() -> new CustomException(TASK_NOT_FOUND)
 		);
 	}
-
 }
