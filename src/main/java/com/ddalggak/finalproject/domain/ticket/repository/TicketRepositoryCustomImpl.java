@@ -93,7 +93,6 @@ public class TicketRepositoryCustomImpl implements TicketRepositoryCustom {
 				ticket.expiredAt,
 				ticket.completedAt,
 				ticket.label.labelTitle.as("label")
-				//commentList 제외
 			))
 			.from(ticket)
 			.where(ticket.user.userId.eq(userId),
