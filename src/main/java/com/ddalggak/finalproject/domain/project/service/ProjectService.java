@@ -133,7 +133,7 @@ public class ProjectService {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		// 기존 이미지 삭제 후 새로운 이미지 업로드
-		String imageUrl = null;
+		String imageUrl = project.getThumbnail() == null ? null : project.getThumbnail();
 		if (!(image == null)) {
 			fileCheck(image);
 			imageUrl = s3Uploader.upload(image, "project");
