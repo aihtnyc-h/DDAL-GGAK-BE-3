@@ -6,12 +6,12 @@ import static com.ddalggak.finalproject.domain.task.entity.QTask.*;
 import static com.ddalggak.finalproject.domain.ticket.entity.QTicket.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
 import com.ddalggak.finalproject.domain.ticket.dto.QDateTicket;
@@ -77,11 +77,10 @@ public class TicketRepositoryCustomImpl implements TicketRepositoryCustom {
 			.fetch();
 	}
 
-	@Override // todo 무한스크롤 이용
-	public Slice<DateTicket> getSlicedCompletedTicketCountByDate(TicketSearchCondition condition, Pageable pageable,
+	@Override
+	public Slice<TicketResponseDto> getSlicedTicketCountByDate(TicketSearchCondition condition, Pageable pageable,
 		Long userId) {
-		List<TicketResponseDto> content = new ArrayList<>();
-		queryFactory
+		List<TicketResponseDto> content = queryFactory
 			.select(Projections.constructor(
 				TicketResponseDto.class,
 				ticket.ticketId,
@@ -90,11 +89,10 @@ public class TicketRepositoryCustomImpl implements TicketRepositoryCustom {
 				ticket.status,
 				ticket.priority,
 				ticket.difficulty,
-				ticket.user.nickname.as("assigned"),
+				ticket.user.email.as("assigned"),
 				ticket.expiredAt,
 				ticket.completedAt,
 				ticket.label.labelTitle.as("label")
-				//commentList 제외함
 			))
 			.from(ticket)
 			.where(ticket.user.userId.eq(userId),
@@ -103,15 +101,14 @@ public class TicketRepositoryCustomImpl implements TicketRepositoryCustom {
 			.orderBy(ticket.createdAt.asc())
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize() + 1)
-			.fetch()
+			.fetch();
 		;
 		boolean hasNext = false;
 		if (content.size() > pageable.getPageSize()) {
 			content.remove(pageable.getPageSize());
 			hasNext = true;
 		}
-		// return new SliceImpl<>(content, pageable, hasNext);
-		return null;
+		return new SliceImpl<>(content, pageable, hasNext);
 	}
 
 	@Override

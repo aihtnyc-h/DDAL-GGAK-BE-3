@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
 import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
+import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 
@@ -22,7 +23,7 @@ public interface TicketRepositoryCustom {
 
 	List<Ticket> getTicketByUserId(TicketSearchCondition condition, Long userId);
 
-	Slice<DateTicket> getSlicedCompletedTicketCountByDate(TicketSearchCondition condition, Pageable pageable,
+	Slice<TicketResponseDto> getSlicedTicketCountByDate(TicketSearchCondition condition, Pageable pageable,
 		Long userId);
 
 }
