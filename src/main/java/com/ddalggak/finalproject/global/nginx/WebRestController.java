@@ -26,3 +26,32 @@ public class WebRestController {
 		return str[idx];
 	}
 }
+
+// @RestController
+// @RequiredArgsConstructor
+// public class WebRestController {
+//
+// 	private final Environment env;
+//
+// 	@GetMapping("/profile")
+// 	public String getProfile() {
+// 		String[] str = env.getActiveProfiles();
+// 		if (str.length == 0) {
+// 			return "No active profiles found";
+// 		}
+//
+// 		int idx = -1;
+// 		for(int i = 0; i < str.length; i++){
+// 			if(str[i].contains("set")){
+// 				idx = i;
+// 				break;
+// 			}
+// 		}
+//
+// 		if (idx >= 0) {
+// 			return str[idx];
+// 		} else {
+// 			return "No active profile containing 'set' found";
+// 		}
+// 	}
+// }
