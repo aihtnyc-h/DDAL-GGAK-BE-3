@@ -1,18 +1,23 @@
 package com.ddalggak.finalproject.domain.ticket.dto;
 
+import static com.ddalggak.finalproject.domain.ticket.entity.TicketStatus.*;
+
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
 
 import com.ddalggak.finalproject.domain.comment.dto.CommentMapper;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
+import com.ddalggak.finalproject.domain.user.entity.User;
 
 @Mapper(componentModel = "spring", uses = {CommentMapper.class})
 public interface TicketMapper {
@@ -32,11 +37,12 @@ public interface TicketMapper {
 	TicketResponseDto toDto(Ticket entity);
 
 	default Map<TicketStatus, List<TicketResponseDto>> toDtoMapWithStatus(List<Ticket> tickets) {
-		Map<TicketStatus, List<TicketResponseDto>> ticketList = new HashMap<>() {
+		Map<TicketStatus, List<TicketResponseDto>> ticketList = new LinkedHashMap<>() {
 			{
-				put(TicketStatus.TODO, new ArrayList<>());
-				put(TicketStatus.IN_PROGRESS, new ArrayList<>());
-				put(TicketStatus.DONE, new ArrayList<>());
+				put(TODO, new ArrayList<>());
+				put(IN_PROGRESS, new ArrayList<>());
+				put(REVIEW, new ArrayList<>());
+				put(DONE, new ArrayList<>());
 			}
 		};
 		tickets.stream()
@@ -45,6 +51,11 @@ public interface TicketMapper {
 				ticketList.get(ticket.getStatus()).add(ticket);
 			});
 		return ticketList;
+	}
+
+	@AfterMapping
+	default void isMyTicket(Ticket entity, User user, @MappingTarget TicketResponseDto ticketResponseDto) {
+		// ticketResponseDto.setMyTicket(entity.getUser() != null && entity.getUser().getEmail().equals(user.getEmail()));
 	}
 
 	@Named("checkAssigned")

@@ -1,7 +1,7 @@
 package com.ddalggak.finalproject.domain.project.service;
 
-import static com.ddalggak.finalproject.global.dto.SuccessCode.*;
 import static com.ddalggak.finalproject.global.error.ErrorCode.*;
+import static org.springframework.http.ResponseEntity.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -10,7 +10,6 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +29,6 @@ import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
-import com.ddalggak.finalproject.global.dto.GlobalResponseDto;
 import com.ddalggak.finalproject.global.error.CustomException;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.mail.MailService;
@@ -52,7 +50,7 @@ public class ProjectService {
 	private final MailService mailService;
 
 	@Transactional
-	public ResponseEntity<?> createProject(User user, MultipartFile image,
+	public ResponseEntity<List<ProjectBriefResponseDto>> createProject(User user, MultipartFile image,
 		ProjectRequestDto projectRequestDto) throws
 		IOException {
 		//todo 로직 수정
@@ -75,15 +73,14 @@ public class ProjectService {
 		projectRepository.save(project);
 		//5. projectResponseDto로 반환
 		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(existUser.getUserId());
-		return GlobalResponseDto.of(CREATED_SUCCESSFULLY, result, null);
+		return ResponseEntity.status(201)
+			.body(result);
 	}
 
 	@Transactional(readOnly = true)
 	public ResponseEntity<List<ProjectBriefResponseDto>> viewProjectAll(User user) {
 		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(user.getUserId());
-		return ResponseEntity
-			.status(HttpStatus.OK)
-			.body(result);
+		return ok(result);
 	}
 
 	//프로젝트 확인
@@ -96,32 +93,34 @@ public class ProjectService {
 		// 리턴
 		ProjectResponseDto projectResponseDto = projectMapper.toDto(project);
 
-		return ResponseEntity
-			.status(HttpStatus.OK)
-			.body(projectResponseDto);
+		return ok(projectResponseDto);
 	}
 
 	@Transactional
-	public ResponseEntity<?> deleteProject(User user, Long projectId) {
+	public ResponseEntity<List<ProjectBriefResponseDto>> deleteProject(User user, Long projectId) {
 		Project project = validateProject(projectId);
 		if (project.getProjectLeader().equals(user.getEmail())) {
 			if (project.getThumbnail() != null) {
 				s3Uploader.delete(project.getThumbnail());
 			}
 			projectRepository.delete(project);
-			return ResponseEntity.ok(projectRepository.findProjectAllByUserId(user.getUserId()));
+			List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(
+				user.getUserId());
+			return ok(result);
 		} else {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 	}
 
 	@Transactional
-	public ResponseEntity<?> joinProject(User user, Long projectId) {
+	public ResponseEntity<List<ProjectBriefResponseDto>> joinProject(User user, Long projectId) {
 		Project project = validateProject(projectId);
 		ProjectUser projectUser = ProjectUser.create(project, user);
 		validateDuplicateMember(project, projectUser);
 		project.addProjectUser(projectUser);
-		return ResponseEntity.ok(projectRepository.findProjectAllByUserId(user.getUserId()));
+		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(
+			user.getUserId());
+		return ok(result);
 	}
 
 	// 프로젝트 정보 변경
@@ -134,21 +133,21 @@ public class ProjectService {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		// 기존 이미지 삭제 후 새로운 이미지 업로드
-		String imageUrl = null;
+		String imageUrl = project.getThumbnail() == null ? null : project.getThumbnail();
 		if (!(image == null)) {
 			fileCheck(image);
 			imageUrl = s3Uploader.upload(image, "project");
 		}
-		// 업로드한 이미지의 url을 바탕으로 update 쿼리
+		// 업로드한 이미지의 url을 바탕으로 update 쿼리, dynamic update 기준 업데이트
 		projectRequestDto.setThumbnail(imageUrl);
-		projectRepository.update(projectId, projectRequestDto);
+		project.update(projectRequestDto);
 
 		// 새로운 프로젝트 다시 받아옴 , todo 무엇을 반환해야 할까?
 		ProjectResponseDto projectResponseDto = projectMapper.toDto(projectRepository.findById(projectId).get());
-		return ResponseEntity.ok(projectResponseDto);
+		return ok(projectResponseDto);
 	}
 
-	public ResponseEntity<?> deleteProjectUser(User user, Long projectId, Long userId) {
+	public ResponseEntity<List<UserResponseDto>> deleteProjectUser(User user, Long projectId, Long userId) {
 		// 유효성 검사
 		Project project = validateProject(projectId);
 		User projectUser = userRepository.findById(userId).orElseThrow(
@@ -164,12 +163,12 @@ public class ProjectService {
 			.stream()
 			.map(userMapper::toUserResponseDtoWithProjectUser)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(userList);
+		return ok(userList);
 	}
 
 	// 프로젝트에 참여중인 유저 목록 조회
 	@Transactional(readOnly = true)
-	public ResponseEntity<?> viewProjectUsers(User user, Long projectId) {
+	public ResponseEntity<List<UserResponseDto>> viewProjectUsers(User user, Long projectId) {
 		// 유효성 검증
 		Project project = validateProject(projectId);
 		validateExistMember(project, ProjectUser.create(project, user));
@@ -180,7 +179,7 @@ public class ProjectService {
 			.stream()
 			.map(userMapper::toUserResponseDtoWithProjectUser)
 			.collect(Collectors.toList());
-		return ResponseEntity.ok(userList);
+		return ok(userList);
 	}
 
 	public ResponseEntity<?> inviteProjectUser(User user, Long projectId, List<String> emails) {
@@ -212,7 +211,7 @@ public class ProjectService {
 		Map<String, Object> response = mailService.sendProjectCode(uuid, emails);
 		response.put("userResponseDtoList", userList);
 
-		return ResponseEntity.ok(response);
+		return ok(userList);
 	}
 
 	private void validateDuplicateMember(Project project, ProjectUser projectUser) {
