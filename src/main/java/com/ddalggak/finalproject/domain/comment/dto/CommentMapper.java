@@ -7,12 +7,10 @@ import org.mapstruct.Mappings;
 import com.ddalggak.finalproject.domain.comment.entity.Comment;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.user.entity.User;
-import com.ddalggak.finalproject.global.mapper.GenericMapper;
 
 @Mapper(componentModel = "spring")
-public interface CommentMapper extends GenericMapper<CommentResponseDto, Comment> {
+public interface CommentMapper {
 
-	@Override
 	@Mappings({
 		@Mapping(target = "commentId", source = "entity.commentId"),
 		@Mapping(target = "email", source = "entity.user.email"),

@@ -1,39 +1,59 @@
 # #!/bin/bash
 
-# REPOSITORY=/home/ubuntu/app
-# PROJECT_NAME=ddalggak
+# sudo chmod +x /home/ubuntu/app/switch.sh
 
-# echo "> Build 파일 복사"
+# echo "> 현재 구동중인 profile 확인"
+# CURRENT_PROFILE=$(curl -s ${{ secrets.INSTANCE_URL }}/profile)
+# echo "> $CURRENT_PROFILE"
 
-# cp $REPOSITORY/zip/*.jar $REPOSITORY/
-
-# echo "> 현재 구동중인 애플리케이션 pid 확인"
-
-# CURRENT_PID=$(pgrep -fl DDAL-GGAK-BE | grep jar | awk '{print $1}')
-
-# echo "현재 구동중인 어플리케이션 pid: $CURRENT_PID"
-
-# if [ -z "$CURRENT_PID" ]; then
-#     echo "> 현재 구동중인 애플리케이션이 없으므로 종료하지 않습니다."
+# if [ $CURRENT_PROFILE == set1 ]
+# then
+#  IDLE_PROFILE=set2
+#  IDLE_PORT=8082
+# elif [ $CURRENT_PROFILE == set2 ]
+# then
+#  IDLE_PROFILE=set1
+#  IDLE_PORT=8081
 # else
-#     echo "> kill -15 $CURRENT_PID"
-#     kill -15 $CURRENT_PID
-#     sleep 5
+#  echo "> 일치하는 Profile이 없습니다. Profile: $CURRENT_PROFILE"
+#  echo "> set1을 할당합니다. IDLE_PROFILE: set1"
+#  IDLE_PROFILE=set1
+#  IDLE_PORT=8081
 # fi
 
-# echo "> 새 어플리케이션 배포"
+# echo "> $IDLE_PROFILE 배포"
+# sudo fuser -k -n tcp $IDLE_PORT
+# sudo nohup java -jar /home/ubuntu/app/DDAL-GGAK-BE-0.0.1-SNAPSHOT.jar --spring.config.location=file:/home/ubuntu/app/config/prod-application.yaml --spring.profiles.active=$IDLE_PROFILE --server.port=$IDLE_PORT &
+# echo "> $IDLE_PROFILE 10초 후 Health check 시작"
+# echo "> curl -s ${{ secrets.INSTANCE_URL }}:$IDLE_PORT/api/health"
+# sleep 10
 
-# JAR_NAME=$(ls -tr $REPOSITORY/*.jar | tail -n 1)
+# for retry_count in {1..10}
+# do
+# response=$(curl -s ${{ secrets.INSTANCE_URL }}:$IDLE_PORT/actuator/health)
+#  up_count=$(echo $response | grep 'UP' | wc -l)
 
-# echo "> JAR Name: $JAR_NAME"
+#  if [ $up_count -ge 1 ]
+#  then
+#    echo "> Health check 성공"
+#    break
+#  else
+#    echo "> Health check의 응답을 알 수 없거나 혹은 status가 UP이 아닙니다."
+#    echo "> Health check: ${response}"
+#  fi
 
-# echo "> $JAR_NAME 에 실행권한 추가"
+#  if [ $retry_count -eq 10 ]
+#  then
+#    echo "> Health check 실패. "
+#    echo "> Nginx에 연결하지 않고 배포를 종료합니다."
+#    exit 1
+#  fi
 
-# chmod +x $JAR_NAME
+#  echo "> Health check 연결 실패. 재시도..."
+#  sleep 10
+# done
 
-# echo "> $JAR_NAME 실행"
+# echo "> 스위칭을 시도합니다..."
+# sleep 10
 
-# nohup java -jar \
-#     -Dspring.config.location=classpath:/application.yml,classpath:/application.yml,/home/ubuntu/app/application.yml,/home/ec2-user/app/application.yml \
-#     -Dspring.profiles.active=real \
-#     $JAR_NAME > $REPOSITORY/nohup.out 2>&1 &
+# /home/ubuntu/app/switch.sh
