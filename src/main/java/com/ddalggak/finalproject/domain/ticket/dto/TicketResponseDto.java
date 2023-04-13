@@ -2,15 +2,11 @@ package com.ddalggak.finalproject.domain.ticket.dto;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.ddalggak.finalproject.domain.comment.dto.CommentResponseDto;
-import com.ddalggak.finalproject.domain.comment.entity.Comment;
-import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
 import com.ddalggak.finalproject.global.view.Views;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.querydsl.core.annotations.QueryProjection;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -57,31 +53,4 @@ public class TicketResponseDto {
 	@JsonView(Views.Ticket.class)
 	private List<CommentResponseDto> commentList;
 
-	@QueryProjection
-	public TicketResponseDto(Ticket ticket, List<Comment> comments) {
-		ticketId = ticket.getTicketId();
-		title = ticket.getTicketTitle();
-		description = ticket.getTicketDescription();
-		status = ticket.getStatus();
-		priority = ticket.getPriority();
-		difficulty = ticket.getDifficulty();
-		assigned = ticket.getUser() == null ? null : ticket.getUser().getEmail();
-		expiredAt = ticket.getExpiredAt();
-		label = ticket.getLabel() == null ? null : ticket.getLabel().getLabelTitle();
-		commentList = comments.stream().map(CommentResponseDto::new).collect(Collectors.toList());
-	}
-
-	@Builder
-	public TicketResponseDto(Ticket ticket) {
-		ticketId = ticket.getTicketId();
-		title = ticket.getTicketTitle();
-		description = ticket.getTicketDescription();
-		status = ticket.getStatus();
-		priority = ticket.getPriority();
-		difficulty = ticket.getDifficulty();
-		assigned = ticket.getUser() == null ? null : ticket.getUser().getEmail();
-		expiredAt = ticket.getExpiredAt();
-		label = ticket.getLabel() == null ? null : ticket.getLabel().getLabelTitle();
-		commentList = ticket.getComment().stream().map(CommentResponseDto::new).collect(Collectors.toList());
-	}
 }

@@ -1,0 +1,66 @@
+package com.ddalggak.finalproject.domain.user.dto;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
+
+import com.ddalggak.finalproject.domain.label.entity.LabelUser;
+import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
+import com.ddalggak.finalproject.domain.task.entity.TaskUser;
+import com.ddalggak.finalproject.domain.user.entity.User;
+import com.mysql.cj.util.StringUtils;
+
+@Mapper(componentModel = "spring")
+public interface UserMapper {
+
+	@Mappings({
+		@Mapping(target = "id", source = "entity.user.userId"),
+		@Mapping(target = "email", source = "entity.user.email"),
+		@Mapping(target = "nickname", source = "entity.user.nickname"),
+		@Mapping(target = "thumbnail", source = "entity.user.profile"),
+		@Mapping(target = "role", expression = "java(isLeaderOfTask(entity))")
+	})
+	UserResponseDto toUserResponseDtoWithTaskUser(TaskUser entity);
+
+	@Mappings({
+		@Mapping(target = "id", source = "entity.user.userId"),
+		@Mapping(target = "email", source = "entity.user.email"),
+		@Mapping(target = "nickname", source = "entity.user.nickname"),
+		@Mapping(target = "thumbnail", source = "entity.user.profile"),
+		@Mapping(target = "role", expression = "java(isLeaderOfProject(entity))")
+	})
+	UserResponseDto toUserResponseDtoWithProjectUser(ProjectUser entity);
+
+	@Mappings({
+		@Mapping(target = "userId", source = "entity.userId"),
+		@Mapping(target = "email", source = "entity.email"),
+		@Mapping(target = "nickname", source = "entity.nickname"),
+		@Mapping(target = "profile", source = "entity.profile"),
+		@Mapping(target = "projects", source = "entity.projectUserList")
+	})
+	UserPageDto toUserPageDto(User entity);
+
+	@Mappings({
+		@Mapping(target = "id", source = "entity.user.userId"),
+		@Mapping(target = "email", source = "entity.user.email"),
+		@Mapping(target = "nickname", source = "entity.user.nickname"),
+		@Mapping(target = "thumbnail", source = "entity.user.profile"),
+		@Mapping(target = "role", expression = "java(isLeaderOfLabel(entity))")
+	})
+	UserResponseDto toUserResponseDtoWithLabel(LabelUser entity);
+
+	default String isLeaderOfTask(TaskUser taskUser) {
+		return StringUtils.isNullOrEmpty(taskUser.getTask().getTaskLeader()) ? "MEMBER" :
+			taskUser.getTask().getTaskLeader().equals(taskUser.getUser().getEmail()) ? "LEADER" : "MEMBER";
+	}
+
+	default String isLeaderOfProject(ProjectUser projectUser) {
+		return projectUser.getProject().getProjectLeader().equals(projectUser.getUser().getEmail()) ? "LEADER" :
+			"MEMBER";
+	}
+
+	default String isLeaderOfLabel(LabelUser labelUser) {
+		return StringUtils.isNullOrEmpty(labelUser.getLabel().getLabelLeader()) ? "MEMBER" :
+			labelUser.getLabel().getLabelLeader().equals(labelUser.getUser().getEmail()) ? "LEADER" : "MEMBER";
+	}
+}

@@ -1,13 +1,19 @@
 package com.ddalggak.finalproject.global.mail;
 
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
@@ -21,13 +27,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MailService {
 
-	@Autowired
-	private JavaMailSender javaMailSender;
 	private final UserRepository userRepository;
 	private final RandomCodeRepository randomCodeRepository;
+	@Autowired
+	private JavaMailSender javaMailSender;
 
-	public void sendMail(String email) {
+	@Transactional
+	public void sendRandomCode(String email) {
 		Optional<User> optionalUser = userRepository.findByEmail(email);
+		String randomCode = randomCode();
 
 		if (optionalUser.isPresent()) {
 			throw new UserException(ErrorCode.DUPLICATE_MEMBER);
@@ -36,25 +44,59 @@ public class MailService {
 		SimpleMailMessage simpleMessage = new SimpleMailMessage();
 		simpleMessage.setTo(email);
 		simpleMessage.setSubject("Welcome To DDAL-KKAK");
-		simpleMessage.setText(randomCode());
+		simpleMessage.setText(randomCode);
 		javaMailSender.send(simpleMessage);
-		String randomCode = randomCode();
 
 		RandomCode auth = new RandomCode(email, randomCode);
 		randomCodeRepository.save(auth);
 	}
 
-	private String randomCode() {
-		int leftLimit = 48;
-		int rightLimit = 122;
-		int targetStringLength = 6;
-		Random random = new Random();
-		String randomCode = random.ints(leftLimit, rightLimit + 1)
-			.filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
-			.limit(targetStringLength)
-			.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-			.toString();
-		return randomCode;
+	@Transactional
+	public Map<String, Object> sendProjectCode(String uuid, List<String> emails) {
+		List<UserResponseDto> userResponseDtoList = new ArrayList<>();
+		List<String> readyToInviteEmails = new ArrayList<>();
+		for (String email : emails) {
+			User user = userRepository.findByEmail(email)
+				.orElse(null);
+			if (user == null) {
+				readyToInviteEmails.add(email);
+
+				SimpleMailMessage loginMessage = new SimpleMailMessage();
+				loginMessage.setTo(email);
+				loginMessage.setSubject("DDAL-KKAK Login Link");
+				loginMessage.setText("localhost:8080/login");             //회원가입 페이지 발송 url 변경 필요
+				javaMailSender.send(loginMessage);
+			} else {
+				UserResponseDto savedUser = UserResponseDto.builder()
+					.id(user.getUserId())
+					.email(user.getEmail())
+					.nickname(user.getNickname())
+					.thumbnail(user.getProfile())
+					.role(user.getRole().toString())
+					.build();
+				userResponseDtoList.add(savedUser);
+
+				SimpleMailMessage simpleMessage = new SimpleMailMessage();
+				simpleMessage.setTo(email);
+				simpleMessage.setSubject("Welcome To DDAL-KKAK");
+				simpleMessage.setText(uuid);
+				javaMailSender.send(simpleMessage);
+			}
+		}
+		Map<String, Object> response = new HashMap<>();
+		response.put("invitedUsers", userResponseDtoList);
+		response.put("invitedNonUsers", readyToInviteEmails);
+		return response;
 	}
 
+	private String randomCode() {
+		int length = 6;
+		String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		SecureRandom random = new SecureRandom();
+		StringBuilder sb = new StringBuilder(length);
+		for (int i = 0; i < length; i++) {
+			sb.append(chars.charAt(random.nextInt(chars.length())));
+		}
+		return sb.toString();
+	}
 }

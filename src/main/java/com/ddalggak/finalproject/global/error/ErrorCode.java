@@ -20,6 +20,7 @@ public enum ErrorCode {
 	INVALID_EMAIL(BAD_REQUEST, "A-006", "Please enter valid email."),
 	INVALID_REDIRECT_URI(BAD_REQUEST, "A-007", "redirect URIs are not matched"),
 	INVALID_PROVIDER_TYPE(BAD_REQUEST, "A-008", "Invalid Provider Type."),
+	INVALID_EMAIL_PASSWORD(BAD_REQUEST, "A-009", "Invalid email or password"),
 
 	/* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
 	INVALID_AUTH_TOKEN(UNAUTHORIZED, "B-001", "Please enter an authorized token. "),
@@ -53,7 +54,7 @@ public enum ErrorCode {
 	TYPE_MISMATCH(UNSUPPORTED_MEDIA_TYPE, "F-001", "Unsupported media type."),
 
 	/* 500 INTERNAL_SERVER_ERROR : 서버에서 문제 일어남 */
-	SERVER_ERROR(INTERNAL_SERVER_ERROR, "F-001", "Please check your input value.");
+	SERVER_ERROR(INTERNAL_SERVER_ERROR, "G-001", "Please check your input value.");
 
 	private final HttpStatus httpStatus;
 	private final String errorCode;

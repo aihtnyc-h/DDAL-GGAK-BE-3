@@ -64,6 +64,7 @@ public class Project extends BaseEntity {
 	public Project(ProjectRequestDto projectRequestDto, ProjectUser projectUser) {
 		projectTitle = projectRequestDto.getProjectTitle();
 		thumbnail = projectRequestDto.getThumbnail();
+		projectLeader = projectUser.getUser().getEmail();
 		addProjectUser(projectUser);
 	}
 
@@ -82,6 +83,10 @@ public class Project extends BaseEntity {
 
 	public void addTask(Task task) {
 		taskList.add(task);
+	}
+
+	public void createUuid(String uuid) {
+		this.uuid = uuid;
 	}
 
 }

@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.ddalggak.finalproject.global.error.ErrorCode;
+import com.ddalggak.finalproject.global.jwt.token.service.TokenService;
 import com.ddalggak.finalproject.global.security.exception.SecurityExceptionDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
 	private final JwtUtil jwtUtil;
+	private final TokenService tokenService;
 
 	@SneakyThrows
 	@Override
@@ -43,9 +45,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 				setResponse(response, errorCode, httpStatus, message);
 				return;
 			}
-			if (!jwtUtil.validateToken(token)) {
+			if (!jwtUtil.tokenExist(request)) {
+				jwtExceptionHandler(response, ErrorCode.UNAUTHORIZED_MEMBER);
+				return;
+			}
+			if (!jwtUtil.validateToken(token) || !tokenService.checkAccessToken(request)) {
 				jwtExceptionHandler(response, ErrorCode.INVALID_AUTH_TOKEN);
 				return;
+			}
+			if (jwtUtil.isAccessTokenAboutToExpire(token)) {
+				tokenService.getAccessToken(request, response);
 			}
 			Claims info = jwtUtil.getUserInfo(token);
 			setAuthentication(info.getSubject());

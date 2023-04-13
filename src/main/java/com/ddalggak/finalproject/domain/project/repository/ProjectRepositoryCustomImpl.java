@@ -9,8 +9,8 @@ import java.util.Optional;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
-import com.ddalggak.finalproject.domain.project.dto.QProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.entity.Project;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -20,10 +20,10 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 
 	private final JPAQueryFactory queryFactory;
 
-	//@Query("select new com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto(p.projectId, p.projectTitle, p.thumbnail) from Project p join p.projectUserList pu where pu.user.userId = :userId")
 	@Override
 	public List<ProjectBriefResponseDto> findProjectAllByUserId(Long userId) {
-		return queryFactory.select(new QProjectBriefResponseDto(
+		return queryFactory.select(Projections.constructor(
+				ProjectBriefResponseDto.class,
 				project.projectId,
 				project.thumbnail,
 				project.projectTitle
@@ -51,5 +51,5 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 			.set(project.thumbnail, projectRequestDto.thumbnail)
 			.where(project.projectId.eq(projectId))
 			.execute();
-	}
+	} //todo 할일 projectTitle, thumbnail 비교해서 다른 점 있으면 update set 하고
 }

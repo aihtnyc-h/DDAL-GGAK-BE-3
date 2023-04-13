@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class TicketController {
 	private final TicketService ticketService;
 
+
 	// 티켓 등록
 	@Operation(summary = "ticket 생성", description = "Ticket 등록 post 메서드 체크")
 	@PostMapping("/ticket")
@@ -50,9 +52,8 @@ public class TicketController {
 		@PathVariable Long ticketId,
 		@RequestParam Long taskId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
-		return ticketService.getTicket(ticketId, userDetails.getUser());
+		return ticketService.getTicket(ticketId, taskId, userDetails.getUser());
 	}
-
 	// 티켓 수정
 	@Operation(summary = "patch ticket", description = "Ticket 수정 patch 메서드 체크")
 	@PatchMapping("/ticket/{ticketId}")
@@ -93,5 +94,11 @@ public class TicketController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody TicketLabelRequestDto ticketLabelRequestDto) {
 		return ticketService.getLabelForTicket(userDetails.getUser(), ticketId, ticketLabelRequestDto);
+	}
+	// 티켓 이동하기
+	@PostMapping("/ticket/{ticketId}/movement")
+	public ResponseEntity<?> movementTicket(@PathVariable Long ticketId,
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		return ticketService.movementTicket(userDetails.getUser(), ticketId);
 	}
 }

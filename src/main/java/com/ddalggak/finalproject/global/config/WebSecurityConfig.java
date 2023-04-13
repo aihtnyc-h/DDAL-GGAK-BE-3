@@ -3,7 +3,6 @@ package com.ddalggak.finalproject.global.config;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,7 +22,11 @@ import com.ddalggak.finalproject.domain.oauth.repository.CookieAuthorizationRequ
 import com.ddalggak.finalproject.domain.oauth.service.CustomOAuth2UserService;
 import com.ddalggak.finalproject.global.jwt.JwtAuthFilter;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
-import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
+import com.ddalggak.finalproject.global.jwt.token.repository.AccessTokenRepository;
+import com.ddalggak.finalproject.global.jwt.token.repository.RefreshTokenRepository;
+import com.ddalggak.finalproject.global.jwt.token.service.TokenService;
+import com.ddalggak.finalproject.global.security.CustomAccessDeniedHandler;
+import com.ddalggak.finalproject.global.security.CustomAuthenticationEntryPoint;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,7 +37,11 @@ import lombok.RequiredArgsConstructor;
 public class WebSecurityConfig {
 	private final JwtUtil jwtUtil;
 	private final CustomOAuth2UserService customOAuth2UserService;
-	private final TokenRepository tokenRepository;
+	private final AccessTokenRepository accessTokenRepository;
+	private final RefreshTokenRepository refreshTokenRepository;
+	private final CustomAccessDeniedHandler customAccessDeniedHandler;
+	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+	private final TokenService tokenService;
 
 	//
 	@Bean
@@ -60,29 +67,15 @@ public class WebSecurityConfig {
 		http.authorizeRequests()
 			.antMatchers("/api/auth/email", "/api/auth/signup", "/api/auth/login")
 			.permitAll()
-			.antMatchers("/api/auth/**")
+			.antMatchers("/api/auth/**", "/api/user/**", "/api/project/**", "/api/task/**", "/api/ticket/**",
+				"/oauth2/**")
 			.fullyAuthenticated()
-			.antMatchers("/api/user/**")
-			.fullyAuthenticated()
-			.antMatchers(HttpMethod.GET, "/api/project/**")
-			.permitAll()
-			.antMatchers(HttpMethod.GET, "/api/task/**")
-			.permitAll()
-			.antMatchers(HttpMethod.GET, "/api/ticket/**")
-			.permitAll()
-			.antMatchers("/oauth2/**")
-			.permitAll()
 			.antMatchers("/ddal-ggak/docs")
 			.permitAll()
 			.antMatchers("/ddal-ggak.html")
 			.permitAll()
 			.antMatchers("/?accessToken=*")
 			.permitAll()
-			//nginx관련
-			.antMatchers("/nginx").permitAll()
-			.antMatchers("/actuator/**").permitAll()
-			.antMatchers("/health").permitAll()
-			.antMatchers("/version").permitAll()
 			.and()
 			.oauth2Login()
 			.authorizationEndpoint()
@@ -98,12 +91,14 @@ public class WebSecurityConfig {
 			.successHandler(oAuth2AuthenticationSuccessHandler())
 			.failureHandler(oAuth2AuthenticationFailureHandler())
 
-
 			//                .antMatchers(HttpMethod.POST, "/api/logout").permitAll()
 			// JWT 인증/인가를 사용하기 위한 설정
 			.and()
-			.addFilterBefore(new JwtAuthFilter(jwtUtil),
-				UsernamePasswordAuthenticationFilter.class); //    private final JwtUtil jwtUtil; 추가하기!
+			.addFilterBefore(new JwtAuthFilter(jwtUtil, tokenService),
+				UsernamePasswordAuthenticationFilter.class)
+			.exceptionHandling()
+			.accessDeniedHandler(customAccessDeniedHandler)
+			.authenticationEntryPoint(customAuthenticationEntryPoint); //    private final JwtUtil jwtUtil; 추가하기!
 		http.cors();
 		// 로그인 사용
 		http.formLogin().permitAll();// 로그인 페이지가 있을 경우 넣기!.loginPage(".api/user/login-page").permitAll();
@@ -144,6 +139,7 @@ public class WebSecurityConfig {
 		// 사전에 약속된 출처를 명시
 		config.addAllowedOrigin("http://localhost:3000");
 		config.addAllowedOrigin("https://ddal-ggak-fe.vercel.app");
+
 		//config.addAllowedOrigin("http://charleybucket.s3-website.ap-northeast-2.amazonaws.com");
 
 		// 특정 헤더를 클라이언트 측에서 사용할 수 있게 지정
@@ -187,7 +183,8 @@ public class WebSecurityConfig {
 	public OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler() {
 		return new OAuth2AuthenticationSuccessHandler(
 			jwtUtil,
-			tokenRepository,
+			accessTokenRepository,
+			refreshTokenRepository,
 			cookieAuthorizationRequestRepository()
 		);
 	}

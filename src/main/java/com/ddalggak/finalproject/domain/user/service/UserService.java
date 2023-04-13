@@ -1,15 +1,12 @@
 package com.ddalggak.finalproject.domain.user.service;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -17,16 +14,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
+import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
 import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
 import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
+import com.ddalggak.finalproject.domain.user.dto.UserMapper;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
-import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.global.error.ErrorCode;
-import com.ddalggak.finalproject.global.jwt.JwtUtil;
-import com.ddalggak.finalproject.global.jwt.token.entity.Token;
 import com.ddalggak.finalproject.infra.aws.S3Uploader;
 
 import lombok.RequiredArgsConstructor;
@@ -34,65 +30,20 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
+	private final UserMapper userMapper;
 	private final UserRepository userRepository;
-	private final PasswordEncoder passwordEncoder;
-	private final JwtUtil jwtUtil;
+	private final TicketRepository ticketRepository;
 	private final S3Uploader s3Uploader;
 
 	@Value("${file.size.limit}")
 	private Long fileSizeLimit;//10메가바이트/킬로바이트/바이트
 
 	@Transactional
-	public void signup(UserRequestDto userRequestDto) {
-		String email = userRequestDto.getEmail();
-
-		Optional<User> foundUser = userRepository.findByEmail(email);
-
-		if (foundUser.isPresent()) {
-			throw new UserException(ErrorCode.DUPLICATE_MEMBER);
-		}
-		String[] parts = email.split("@");
-		String nickname = parts[0];
-		String password = passwordEncoder.encode(userRequestDto.getPassword());
-
-		User user = User.builder()
-			.email(email)
-			.nickname(nickname)
-			.password(password)
-			.build();
-
-		userRepository.save(user);
-
-	}
-
-	@Transactional
-	public ResponseEntity<UserPageDto> login(UserRequestDto userRequestDto, HttpServletResponse response) {
-		String email = userRequestDto.getEmail();
-		User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new RuntimeException("Invalid email or password"));
-		String password = userRequestDto.getPassword();
-		String dbPassword = user.getPassword();
-
-		if (!passwordEncoder.matches(password, dbPassword)) {
-			throw new RuntimeException("Invalid email or password");
-		}
-
-		Token token = jwtUtil.login(email, user.getRole());
-		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token.getAccessToken());
-		response.addHeader(JwtUtil.REFRESH_TOKEN_HEADER, token.getRefreshToken());
-
-		UserPageDto userPage = new UserPageDto(user);
-
-		return ResponseEntity
-			.status(HttpStatus.OK)
-			.body(userPage);
-	}
-
-	@Transactional
 	public NicknameDto updateNickname(String nickname, String email) {
 		User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
 
-		User.updateNickname(user, nickname);
+		user.updateNickname(nickname);
 		return new NicknameDto(user.getNickname());
 	}
 
@@ -105,7 +56,7 @@ public class UserService {
 
 		String storedFileName = s3Uploader.upload(image, "profile");
 
-		User.updateProfile(user, storedFileName);
+		user.updateProfile(storedFileName);
 
 		return new ProfileDto(storedFileName);
 	}
@@ -131,21 +82,23 @@ public class UserService {
 	}
 
 	@Transactional(readOnly = true)
-	public ResponseEntity<?> getMyPage(String email) {
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
+	public ResponseEntity<UserPageDto> getMyPage(String email) {
+		User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
 
-		UserPageDto userPage = new UserPageDto(user);
+		UserPageDto userPageDto = userMapper.toUserPageDto(user);
 
 		return ResponseEntity
 			.status(HttpStatus.OK)
-			.body(userPage);
+			.body(userPageDto);
 	}
 
-	public ResponseEntity<?> getMyTickets(Long userId, TicketSearchCondition condition) {
+	public ResponseEntity<?> getMyTickets(Long userId, Pageable pageable, TicketSearchCondition condition) {
 		User user = userRepository.findById(userId).orElseThrow(
 			() -> new UserException(ErrorCode.MEMBER_NOT_FOUND)
 		);
-		List<DateTicket> completedTicketCountByDate = userRepository.getCompletedTicketCountByDate(condition, userId);
+		Slice<DateTicket> completedTicketCountByDate = ticketRepository.getSlicedCompletedTicketCountByDate(condition,
+			pageable, user.getUserId());
 		return ResponseEntity.ok(completedTicketCountByDate);
 	}
 }

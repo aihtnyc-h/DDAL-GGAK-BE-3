@@ -23,8 +23,10 @@ import com.ddalggak.finalproject.domain.oauth.entity.ProviderType;
 import com.ddalggak.finalproject.domain.oauth.repository.CookieAuthorizationRequestRepository;
 import com.ddalggak.finalproject.global.cookie.CookieUtil;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
-import com.ddalggak.finalproject.global.jwt.token.entity.Token;
-import com.ddalggak.finalproject.global.jwt.token.repository.TokenRepository;
+import com.ddalggak.finalproject.global.jwt.token.entity.AccessToken;
+import com.ddalggak.finalproject.global.jwt.token.entity.RefreshToken;
+import com.ddalggak.finalproject.global.jwt.token.repository.AccessTokenRepository;
+import com.ddalggak.finalproject.global.jwt.token.repository.RefreshTokenRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +39,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 	@Value("${app.oauth2.authorizedRedirectUri}")
 	private String redirectUri;
 	private final JwtUtil jwtUtil;
-	private final TokenRepository tokenRepository;
+	private final AccessTokenRepository accessTokenRepository;
+	private final RefreshTokenRepository refreshTokenRepository;
 	private final CookieAuthorizationRequestRepository authorizationRequestRepository;
 
 	@Override
@@ -75,23 +78,41 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 		String accessToken = jwtUtil.createAccessToken(authentication);
 		String refreshToken = jwtUtil.createRefreshToken(authentication);
 
-		// 토큰 저장
-		Token token = tokenRepository.findById(userInfo.getId())
-			.orElseGet(() -> Token.builder()
+		Optional<AccessToken> existingAccessToken = accessTokenRepository.findById(userInfo.getEmail());
+		if (existingAccessToken.isPresent()) {
+			accessTokenRepository.delete(existingAccessToken.get());
+			AccessToken token = AccessToken.builder()
+				.email(userInfo.getEmail())
 				.accessToken(accessToken)
+				.build();
+			accessTokenRepository.save(token);
+		} else {
+			AccessToken token = AccessToken.builder()
+				.email(userInfo.getEmail())
+				.accessToken(accessToken)
+				.build();
+			accessTokenRepository.save(token);
+		}
+
+		Optional<RefreshToken> existingRefreshToken = refreshTokenRepository.findById(userInfo.getEmail());
+		if (existingRefreshToken.isPresent()) {
+			refreshTokenRepository.delete(existingRefreshToken.get());
+			RefreshToken token = RefreshToken.builder()
+				.email(userInfo.getEmail())
 				.refreshToken(refreshToken)
-				.build());
-		Token.update(token, accessToken, refreshToken);
-		tokenRepository.save(token);
+				.build();
+			refreshTokenRepository.save(token);
+		} else {
+			RefreshToken token = RefreshToken.builder()
+				.email(userInfo.getEmail())
+				.refreshToken(refreshToken)
+				.build();
+			refreshTokenRepository.save(token);
+		}
 
-		// CookieUtil.deleteCookie(request, response, "REFRESH_TOKEN");
-		// CookieUtil.addCookie(response, "REFRESH_TOKEN", refreshToken, cookieMaxAge);
-
-		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token.getAccessToken());
-		response.addHeader(JwtUtil.REFRESH_TOKEN_HEADER, token.getRefreshToken());
+		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, accessToken);
 
 		return UriComponentsBuilder.fromUriString(targetUrl)
-			// .queryParam("token", accessToken)
 			.path("/login")            //프론트와 redirect url 정하기!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			.build().toUriString();
 	}
