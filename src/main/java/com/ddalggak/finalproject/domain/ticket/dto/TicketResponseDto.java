@@ -42,4 +42,18 @@ public class TicketResponseDto {
 	@Schema(name = "total comments")
 	private List<CommentResponseDto> commentList;
 
+	public TicketResponseDto(Long ticketId, String title, String description, TicketStatus status, int priority,
+		int difficulty, String assigned, LocalDate expiredAt, LocalDate completedAt, String label) {
+		this.ticketId = ticketId;
+		this.title = title;
+		this.description = description;
+		this.status = status;
+		this.priority = priority;
+		this.difficulty = difficulty;
+		this.assigned = assigned;
+		this.expiredAt = expiredAt;
+		this.completedAt = completedAt;
+		this.label = label;
+	}
+
 }
