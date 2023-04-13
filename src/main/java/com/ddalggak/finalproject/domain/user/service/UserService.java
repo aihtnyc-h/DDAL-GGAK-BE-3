@@ -1,6 +1,9 @@
 package com.ddalggak.finalproject.domain.user.service;
 
+import static org.springframework.http.ResponseEntity.*;
+
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +16,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
+import com.ddalggak.finalproject.domain.ticket.dto.TicketMapper;
+import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
 import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
 import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
@@ -32,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
 	private final UserMapper userMapper;
+	private final TicketMapper ticketMapper;
 	private final UserRepository userRepository;
 	private final TicketRepository ticketRepository;
 	private final S3Uploader s3Uploader;
@@ -93,12 +99,25 @@ public class UserService {
 			.body(userPageDto);
 	}
 
-	public ResponseEntity<?> getMyTickets(Long userId, Pageable pageable, TicketSearchCondition condition) {
-		User user = userRepository.findById(userId).orElseThrow(
+	@Transactional(readOnly = true)
+	public ResponseEntity<Slice<TicketResponseDto>> getMyTickets(Long userId, Pageable pageable,
+		TicketSearchCondition condition) {
+		validateUser(userId);
+		Slice<TicketResponseDto> result = ticketRepository.getSlicedTicketCountByDate(condition,
+			pageable, userId);
+		return ok(result);
+	}
+
+	@Transactional(readOnly = true)
+	public ResponseEntity<List<DateTicket>> getMyCompletedTickets(Long userId, TicketSearchCondition condition) {
+		validateUser(userId);
+		List<DateTicket> result = ticketRepository.getCompletedTicketCountByDate(condition, userId);
+		return ok(result);
+	}
+
+	private User validateUser(Long userId) {
+		return userRepository.findById(userId).orElseThrow(
 			() -> new UserException(ErrorCode.MEMBER_NOT_FOUND)
 		);
-		Slice<DateTicket> completedTicketCountByDate = ticketRepository.getSlicedCompletedTicketCountByDate(condition,
-			pageable, user.getUserId());
-		return ResponseEntity.ok(completedTicketCountByDate);
 	}
 }
