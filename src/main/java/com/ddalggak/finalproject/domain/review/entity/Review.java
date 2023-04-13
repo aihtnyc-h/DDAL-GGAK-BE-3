@@ -29,9 +29,7 @@ public class Review extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long reviewId;
-	private String reviewTitle;
-	// 티켓 완료 내용
-	private String reviewDescription;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_Id")
 	private User user;
