@@ -26,6 +26,7 @@ import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
+import com.ddalggak.finalproject.global.error.CustomException;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.infra.aws.S3Uploader;
 
@@ -45,7 +46,7 @@ public class UserService {
 
 	@Transactional
 	public NicknameDto updateNickname(String nickname, String email) {
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
+		User user = validateUserByEmail(email);
 
 		user.updateNickname(nickname);
 		return new NicknameDto(user.getNickname());
@@ -56,7 +57,7 @@ public class UserService {
 		fileSizeCheck(image);
 		fileCheck(image);
 
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
+		User user = validateUserByEmail(email);
 
 		String storedFileName = s3Uploader.upload(image, "profile");
 
@@ -65,30 +66,9 @@ public class UserService {
 		return new ProfileDto(storedFileName);
 	}
 
-	private boolean fileCheck(MultipartFile file) {
-		String fileName = StringUtils.getFilenameExtension(file.getOriginalFilename());
-
-		if (fileName != null) {
-			String exe = fileName.toLowerCase();
-			if (exe.equals("jpg") || exe.equals("png") || exe.equals("jpeg") || exe.equals("webp")) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private void fileSizeCheck(MultipartFile image) {
-		long fileSize = image.getSize();
-
-		if (fileSize > fileSizeLimit) {
-			throw new IllegalArgumentException("총 용량 10MB이하만 업로드 가능합니다");
-		}
-	}
-
 	@Transactional(readOnly = true)
 	public ResponseEntity<UserPageDto> getMyPage(String email) {
-		User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new UserException(ErrorCode.MEMBER_NOT_FOUND));
+		User user = validateUserByEmail(email);
 
 		UserPageDto userPageDto = userMapper.toUserPageDto(user);
 
@@ -118,4 +98,31 @@ public class UserService {
 			() -> new UserException(ErrorCode.MEMBER_NOT_FOUND)
 		);
 	}
+
+	private User validateUserByEmail(String email) {
+		return userRepository.findByEmail(email).orElseThrow(
+			() -> new UserException(ErrorCode.MEMBER_NOT_FOUND)
+		);
+	}
+
+	private boolean fileCheck(MultipartFile file) {
+		// 파일 타입 검사
+		String fileName = StringUtils.getFilenameExtension(file.getOriginalFilename());
+		if (fileName != null) {
+			String exe = fileName.toLowerCase();
+			if (!(exe.equals("jpg") || exe.equals("png") || exe.equals("jpeg") || exe.equals("webp"))) {
+				throw new CustomException(ErrorCode.TYPE_MISMATCH);
+			}
+		}
+		return true;
+	}
+
+	private void fileSizeCheck(MultipartFile image) {
+		// 파일 용량 확인
+		long fileSize = image.getSize();
+		if (fileSize > fileSizeLimit) {
+			throw new IllegalArgumentException("총 용량 10MB이하만 업로드 가능합니다");
+		}
+	}
+
 }

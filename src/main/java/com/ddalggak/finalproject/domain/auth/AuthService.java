@@ -19,9 +19,9 @@ import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.domain.user.role.UserRole;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
-import com.ddalggak.finalproject.global.mail.randomCode.RandomCode;
-import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeDto;
-import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeRepository;
+import com.ddalggak.finalproject.global.mail.emailAuthCode.EmailAuthCode;
+import com.ddalggak.finalproject.global.mail.emailAuthCode.EmailAuthCodeDto;
+import com.ddalggak.finalproject.global.mail.emailAuthCode.EmailAuthCodeRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,28 +32,43 @@ public class AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 	private final UserMapper userMapper;
-	private final RandomCodeRepository randomCodeRepository;
+	private final EmailAuthCodeRepository emailAuthCodeRepository;
+
+	@Transactional
+	public void emailAuthenticationWithRandomCode(EmailAuthCodeDto emailAuthCodeDto) {
+		String email = emailAuthCodeDto.getEmail();
+		String emailAuthCode = emailAuthCodeDto.getEmailAuthCode();
+		// 인증 코드 확인
+		EmailAuthCode savedCode = emailAuthCodeRepository.findById(email)
+			.orElseThrow(() -> new UserException(ErrorCode.INVALID_RANDOM_CODE));
+		String savedEmail = savedCode.getEmail();
+		String savedEmailAuthCode = savedCode.getEmailAuthCode();
+		// 인증 코드 데이터 삭제
+		if (emailAuthCode.equals(savedEmail) && email.equals(savedEmailAuthCode)) {
+			emailAuthCodeRepository.delete(savedCode);
+		}
+	}
 
 	@Transactional
 	public void signup(UserRequestDto userRequestDto) {
 		String email = userRequestDto.getEmail();
-
+		// 이메일 중복 확인
 		Optional<User> foundUser = userRepository.findByEmail(email);
-
 		if (foundUser.isPresent()) {
 			throw new UserException(ErrorCode.DUPLICATE_MEMBER);
 		}
+		// 닉네임 임의 등록
 		String[] parts = email.split("@");
 		String nickname = parts[0];
+		// 비밀번호 암호화
 		String password = passwordEncoder.encode(userRequestDto.getPassword());
-
+		// 유저 정보 저장
 		User user = User.builder()
 			.email(email)
 			.nickname(nickname)
 			.password(password)
 			.role(UserRole.USER)
 			.build();
-
 		userRepository.save(user);
 
 	}
@@ -61,35 +76,22 @@ public class AuthService {
 	@Transactional
 	public ResponseEntity<UserPageDto> login(UserRequestDto userRequestDto, HttpServletResponse response) {
 		String email = userRequestDto.getEmail();
+		// email 확인
 		User user = userRepository.findByEmail(email)
 			.orElseThrow(() -> new UserException(ErrorCode.INVALID_EMAIL_PASSWORD));
 		String password = userRequestDto.getPassword();
 		String dbPassword = user.getPassword();
-
+		// 비밀번호 확인
 		if (!passwordEncoder.matches(password, dbPassword)) {
 			throw new UserException(ErrorCode.INVALID_EMAIL_PASSWORD);
 		}
-
-		String accessToken = jwtUtil.login(email, user.getRole());
-		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, accessToken);
-
+		// 로그인 처리 (토큰 발급)
+		jwtUtil.login(email, user.getRole(), response);
+		// 프론트 요청 데이터 (기본 유저 정보)
 		UserPageDto userPageDto = userMapper.toUserPageDto(user);
 
 		return ResponseEntity
 			.status(HttpStatus.OK)
 			.body(userPageDto);
-	}
-
-	@Transactional
-	public void emailAuthenticationWithRandomCode(RandomCodeDto randomCodeDto) {
-		String email = randomCodeDto.getEmail();
-		String randomCode = randomCodeDto.getRandomCode();
-
-		RandomCode user = randomCodeRepository.findById(email)
-			.orElseThrow(() -> new UserException(ErrorCode.INVALID_RANDOM_CODE));
-
-		if (randomCode.equals(user.getRandomCode()) && email.equals(user.getEmail())) {
-			randomCodeRepository.delete(user);
-		}
 	}
 }
