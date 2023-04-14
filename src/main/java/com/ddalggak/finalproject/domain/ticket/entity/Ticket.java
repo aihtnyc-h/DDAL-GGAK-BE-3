@@ -1,6 +1,7 @@
 package com.ddalggak.finalproject.domain.ticket.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,13 +50,13 @@ public class Ticket extends BaseEntity {
 	private int difficulty;
 	// 태그(이름 변경 해야함)  null 허용
 	private LocalDate expiredAt;
-	private LocalDate completedAt;
+	private LocalDateTime completedAt;
 	// task 연관관계
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "task_Id")
 	private Task task;
 
-	// user 연관관계 // FE에서 user -> onwer 로 변경요청
+	// user 연관관계
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_Id")
 	private User user;
@@ -98,7 +99,7 @@ public class Ticket extends BaseEntity {
 
 	public void completeTicket() {
 		status = TicketStatus.DONE;
-		completedAt = LocalDate.now();
+		completedAt = LocalDateTime.now();
 	}
 
 	public void assignTicket(User user) {
@@ -112,6 +113,10 @@ public class Ticket extends BaseEntity {
 	public void addLabel(Label label) {
 		label.addTicket(this);
 		this.label = label;
+	}
+
+	public void deleteLabel() {
+		this.label = null;
 	}
 
 	public void addTask(Task task) {

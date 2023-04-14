@@ -1,6 +1,7 @@
 package com.ddalggak.finalproject.domain.ticket.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.ddalggak.finalproject.domain.comment.dto.CommentResponseDto;
@@ -36,14 +37,18 @@ public class TicketResponseDto {
 	@Schema(name = "ticket expired at", example = "ticket expired at")
 	private LocalDate expiredAt;
 	@Schema(name = "when did ticket completed", example = "2020-03-11")
-	private LocalDate completedAt;
+	private LocalDateTime completedAt;
 	@Schema(name = "label", example = "label leader")
 	private String label;
+	@Schema(name = "ticket Progress", example = "10")
+	private Double progress;
+	@Schema(name = "score of ticket", example = "10")
+	private Double score;
 	@Schema(name = "total comments")
 	private List<CommentResponseDto> commentList;
 
 	public TicketResponseDto(Long ticketId, String title, String description, TicketStatus status, int priority,
-		int difficulty, String assigned, LocalDate expiredAt, LocalDate completedAt, String label) {
+		int difficulty, String assigned, LocalDate expiredAt, LocalDateTime completedAt, String label) {
 		this.ticketId = ticketId;
 		this.title = title;
 		this.description = description;

@@ -23,6 +23,7 @@ import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
 import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.user.dto.UserMapper;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
+import com.ddalggak.finalproject.domain.user.dto.UserStatsDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
@@ -90,6 +91,12 @@ public class UserService {
 	public ResponseEntity<List<DateTicket>> getMyCompletedTickets(Long userId, TicketSearchCondition condition) {
 		validateUser(userId);
 		List<DateTicket> result = ticketRepository.getCompletedTicketCountByDate(condition, userId);
+		return ok(result);
+	}
+
+	@Transactional(readOnly = true)
+	public ResponseEntity<UserStatsDto> getUserStats(Long userId) {
+		UserStatsDto result = userRepository.getUserStats(userId);
 		return ok(result);
 	}
 

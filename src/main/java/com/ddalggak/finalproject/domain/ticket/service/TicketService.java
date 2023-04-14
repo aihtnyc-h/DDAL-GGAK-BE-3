@@ -176,7 +176,7 @@ public class TicketService {
 		return ok(ListWithTicketStatus);
 	}
 
-	// ticket에 라벨 부여
+	// ticket에 라벨 부여 todo 라벨값 0들어오면 라벨삭제
 	@Transactional
 	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> getLabelForTicket(User user, Long ticketId,
 		TicketLabelRequestDto ticketLabelRequestDto) {
@@ -186,8 +186,12 @@ public class TicketService {
 		)) {
 			throw new CustomException(UNAUTHORIZED_MEMBER);
 		}
-		Label label = validateLabel(ticketLabelRequestDto.labelId);
-		ticket.addLabel(label);
+		if (ticketLabelRequestDto.labelId == 0) {
+			ticket.deleteLabel();
+		} else {
+			Label label = validateLabel(ticketLabelRequestDto.labelId);
+			ticket.addLabel(label);
+		}
 		List<Ticket> ticketList = ticketRepository.findWithTaskId(ticket.getTask().getTaskId());
 		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
 		return ok(ListWithTicketStatus);

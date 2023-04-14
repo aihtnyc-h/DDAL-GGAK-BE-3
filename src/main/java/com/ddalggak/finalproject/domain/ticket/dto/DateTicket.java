@@ -11,11 +11,16 @@ import lombok.NoArgsConstructor;
 @Getter
 public class DateTicket {
 	private LocalDate date;
-	private long completedTicket;
+	private Long completedTicket;
 
 	@QueryProjection
-	public DateTicket(LocalDate date, long completedTicket) {
+	public DateTicket(LocalDate date, Long completedTicket) {
 		this.date = date;
+		this.completedTicket = completedTicket;
+	}
+
+	public DateTicket(String date, Long completedTicket) {
+		this.date = LocalDate.parse(date);
 		this.completedTicket = completedTicket;
 	}
 }
