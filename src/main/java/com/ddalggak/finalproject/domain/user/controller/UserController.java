@@ -27,6 +27,7 @@ import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
 import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
 import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
+import com.ddalggak.finalproject.domain.user.dto.UserStatsDto;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.service.UserService;
 import com.ddalggak.finalproject.global.error.ErrorCode;
@@ -92,5 +93,11 @@ public class UserController {
 		TicketSearchCondition condition,
 		@PageableDefault(size = 100) Pageable pageable) {
 		return userService.getMyTickets(userId, pageable, condition);
+	}
+
+	@Operation(summary = "get user stats", description = "api for view user stats")
+	@GetMapping("/{userId}/stats")
+	public ResponseEntity<UserStatsDto> getUserStats(@PathVariable Long userId) {
+		return userService.getUserStats(userId);
 	}
 }
