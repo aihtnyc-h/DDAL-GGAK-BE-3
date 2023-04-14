@@ -16,15 +16,15 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.ddalggak.finalproject.domain.oauth.handler.OAuth2AuthenticationFailureHandler;
-import com.ddalggak.finalproject.domain.oauth.handler.OAuth2AuthenticationSuccessHandler;
-import com.ddalggak.finalproject.domain.oauth.repository.CookieAuthorizationRequestRepository;
-import com.ddalggak.finalproject.domain.oauth.service.CustomOAuth2UserService;
 import com.ddalggak.finalproject.global.jwt.JwtAuthFilter;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
 import com.ddalggak.finalproject.global.jwt.token.repository.AccessTokenRepository;
 import com.ddalggak.finalproject.global.jwt.token.repository.RefreshTokenRepository;
 import com.ddalggak.finalproject.global.jwt.token.service.TokenService;
+import com.ddalggak.finalproject.global.oauth.handler.OAuth2AuthenticationFailureHandler;
+import com.ddalggak.finalproject.global.oauth.handler.OAuth2AuthenticationSuccessHandler;
+import com.ddalggak.finalproject.global.oauth.repository.CookieAuthorizationRequestRepository;
+import com.ddalggak.finalproject.global.oauth.service.CustomOAuth2UserService;
 import com.ddalggak.finalproject.global.security.CustomAccessDeniedHandler;
 import com.ddalggak.finalproject.global.security.CustomAuthenticationEntryPoint;
 
@@ -198,10 +198,6 @@ public class WebSecurityConfig {
 	}
 
 }
-
-
-
-
 
 
 /*

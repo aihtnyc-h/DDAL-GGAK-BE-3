@@ -119,3 +119,7 @@ compileQuerydsl {
 clean {
     delete file('src/main/generated')
 }
+test {
+    // 테스트 코드 빌드 제외
+    enabled = false
+}

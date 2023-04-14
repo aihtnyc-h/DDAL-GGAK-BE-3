@@ -6,14 +6,13 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import net.bytebuddy.utility.RandomString;
 
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -42,7 +41,8 @@ public class S3Uploader {
 	}
 
 	private String upload(File uploadFile, String dirName) {
-		String fileName = dirName + "/" + uploadFile.getName() + new RandomString(10).nextString();
+		String uuid = UUID.randomUUID().toString();
+		String fileName = dirName + "/" + uuid;
 		String uploadImageUrl = putS3(uploadFile, fileName);
 		removeNewFile(uploadFile);
 		return uploadImageUrl;

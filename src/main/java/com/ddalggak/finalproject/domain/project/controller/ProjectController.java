@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectResponseDto;
+import com.ddalggak.finalproject.domain.project.projectInviteCode.ProjectInviteCodeDto;
 import com.ddalggak.finalproject.domain.project.service.ProjectService;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
@@ -84,8 +85,10 @@ public class ProjectController {
 	@PostMapping("/project/{projectId}/join")
 	public ResponseEntity<List<ProjectBriefResponseDto>> joinProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@PathVariable Long projectId) {
-		return projectService.joinProject(userDetails.getUser(), projectId);
+		@PathVariable Long projectId,
+		@RequestBody ProjectInviteCodeDto projectInviteCodeRequestDto) {
+		return projectService.joinProject(userDetails.getUser(), projectId,
+			projectInviteCodeRequestDto.getProjectInviteCode());
 	}
 
 	@Operation(summary = "프로젝트 수정", description = "api for update project")
@@ -129,6 +132,14 @@ public class ProjectController {
 		@PathVariable Long projectId,
 		@PathVariable Long userId) {
 		return projectService.deleteProjectUser(userDetails.getUser(), projectId, userId);
+	}
+
+	@Operation(summary = "프로젝트 초대 코드 생성", description = "api for inviting a user to a project")
+	@PostMapping("/project/{projectId}/inviteCode")
+	public ResponseEntity<?> createInviteCode(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
+		@PathVariable Long projectId) {
+		return projectService.createInviteCode(userDetails.getUser(), projectId);
 	}
 
 	@Operation(summary = "프로젝트 사용자 초대", description = "api for inviting a user to a project")

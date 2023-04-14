@@ -6,6 +6,7 @@ import static org.springframework.http.ResponseEntity.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -23,6 +24,8 @@ import com.ddalggak.finalproject.domain.project.dto.ProjectResponseDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectUserRequestDto;
 import com.ddalggak.finalproject.domain.project.entity.Project;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
+import com.ddalggak.finalproject.domain.project.projectInviteCode.ProjectInviteCode;
+import com.ddalggak.finalproject.domain.project.projectInviteCode.ProjectInviteCodeRepository;
 import com.ddalggak.finalproject.domain.project.repository.ProjectRepository;
 import com.ddalggak.finalproject.domain.user.dto.UserMapper;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
@@ -41,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
+	private final ProjectInviteCodeRepository projectInviteCodeRepository;
 
 	private final ProjectMapper projectMapper;
 	private final UserMapper userMapper;
@@ -113,9 +117,12 @@ public class ProjectService {
 	}
 
 	@Transactional
-	public ResponseEntity<List<ProjectBriefResponseDto>> joinProject(User user, Long projectId) {
+	public ResponseEntity<List<ProjectBriefResponseDto>> joinProject(User user, Long projectId,
+		String projectInviteCode) {
 		Project project = validateProject(projectId);
 		ProjectUser projectUser = ProjectUser.create(project, user);
+		projectInviteCodeRepository.findById(projectInviteCode).orElseThrow(() -> new CustomException(
+			INVALID_INVITE_CODE));
 		validateDuplicateMember(project, projectUser);
 		project.addProjectUser(projectUser);
 		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(
@@ -182,11 +189,27 @@ public class ProjectService {
 		return ok(userList);
 	}
 
+	//초대 코드 생성
+	@Transactional
+	public ResponseEntity<String> createInviteCode(User user, Long projectId) {
+		// 유효성 검증
+		Project project = validateProject(projectId);
+		validateExistMember(project, ProjectUser.create(project, user));
+		if (!project.getProjectLeader().equals(user.getEmail())) {
+			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
+		}
+		// projectInviteCode 확인 및 생성
+		String projectInviteCode = createInviteCode(projectId);
+
+		return ok(projectInviteCode);
+	}
+
+	// 프로젝트 사용자 초대
+	@Transactional
 	public ResponseEntity<?> inviteProjectUser(User user, Long projectId, List<String> emails) {
 		// 유효성 검증
 		Project project = validateProject(projectId);
 		validateExistMember(project, ProjectUser.create(project, user));
-
 		// email 유효성 검증
 		Pattern pattern = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
 		for (String email : emails) {
@@ -194,12 +217,8 @@ public class ProjectService {
 				return ResponseEntity.badRequest().body("Invalid email format: " + email);
 			}
 		}
-
-		if (project.getUuid() == null) {
-			String uuid = UUID.randomUUID().toString().replaceAll("-", "");
-			project.createUuid(uuid);
-		}
-		String uuid = project.getUuid();
+		// projectInviteCode 확인 및 생성
+		String projectInviteCode = createInviteCode(projectId);
 
 		// 참여중인 유저 목록 리턴
 		List<UserResponseDto> userList = userRepository
@@ -207,8 +226,8 @@ public class ProjectService {
 			.stream()
 			.map(userMapper::toUserResponseDtoWithProjectUser)
 			.collect(Collectors.toList());
-
-		Map<String, Object> response = mailService.sendProjectCode(uuid, emails);
+		// 초대 코드 발송 및 회원, 비회원 정보 가져오기
+		Map<String, Object> response = mailService.sendProjectInviteCode(projectInviteCode, emails);
 		response.put("userResponseDtoList", userList);
 
 		return ok(userList);
@@ -241,6 +260,21 @@ public class ProjectService {
 				throw new CustomException(ErrorCode.TYPE_MISMATCH);
 			}
 		}
+	}
+
+	// InviteCode 생성
+	private String createInviteCode(Long projectId) {
+		// projectInviteCode 확인
+		Optional<ProjectInviteCode> savedProjectInviteCode = projectInviteCodeRepository.findById(projectId.toString());
+		// projectInviteCode 가 있을 경우 return
+		return savedProjectInviteCode.map(ProjectInviteCode::getProjectInviteCode)
+			// projectInviteCode 가 없을 경우 생성 및 저장
+			.orElseGet(() -> {
+				String newProjectInviteCode = UUID.randomUUID().toString();
+				ProjectInviteCode code = new ProjectInviteCode(projectId.toString(), newProjectInviteCode);
+				projectInviteCodeRepository.save(code);
+				return newProjectInviteCode;
+			});
 	}
 }
 
