@@ -25,7 +25,7 @@ fi
 
 echo "> $IDLE_PROFILE 배포"
 sudo fuser -k -n tcp $IDLE_PORT
-sudo nohup java -jar /home/ubuntu/app/DDAL-GGAK-BE-0.0.1-SNAPSHOT.jar --spring.config.location=file:/home/ubuntu/app/config/prod-application.yaml --spring.profiles.active=$IDLE_PROFILE --server.port=$IDLE_PORT &
+sudo nohup java -jar /home/ubuntu/app/DDAL-GGAK-BE-0.0.1-SNAPSHOT.jar --spring.config.location=file:/home/ubuntu/app/config/prod-application.yaml --spring.profiles.active=$IDLE_PROFILE --server.port=$IDLE_PORT > /home/ubuntu/app/logs/app.log 2>&1 &
 
 
 echo "> $IDLE_PROFILE 10초 후 Health check 시작"
