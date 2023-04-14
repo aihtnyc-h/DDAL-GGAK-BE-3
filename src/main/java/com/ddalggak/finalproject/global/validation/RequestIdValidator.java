@@ -12,6 +12,12 @@ public class RequestIdValidator implements ConstraintValidator<RequestId, Long> 
 
 	@Override
 	public boolean isValid(Long value, ConstraintValidatorContext context) {
-		return value != null && value >= 0;
+		if (value == null || value < 0) {
+			context.disableDefaultConstraintViolation();
+			context.buildConstraintViolationWithTemplate("Invalid RequestId")
+				.addConstraintViolation();
+			return false;
+		}
+		return true;
 	}
 }
