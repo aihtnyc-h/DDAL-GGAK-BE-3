@@ -6,10 +6,12 @@ import java.io.IOException;
 
 import javax.validation.ConstraintViolationException;
 
+import org.hibernate.TransientPropertyValueException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -27,8 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(value = {ConstraintViolationException.class, DataIntegrityViolationException.class})
 	protected ResponseEntity<ErrorResponse> handleDataException() {
-		log.error("handleDataException throw Exception : {}", DUPLICATE_RESOURCE);
-		return ErrorResponse.of(DUPLICATE_RESOURCE);
+		log.error("handleDataException throw Exception : {}", UNPROCESSABLE_CONTENT);
+		return ErrorResponse.of(UNPROCESSABLE_CONTENT);
 	}
 
 	/**
@@ -49,7 +51,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(value = {IOException.class})
 	protected ResponseEntity<?> handleIOException(IOException e) {
 		log.error("handleIOException throws IOException : {}", e.getMessage());
-		return ErrorResponse.of(ErrorCode.SERVER_ERROR);
+		return ErrorResponse.of(SERVER_ERROR);
 	}
 
 	@ExceptionHandler(value = {UserException.class})
@@ -91,8 +93,26 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * 이외의 예외처리
 	 */
 
+	@ExceptionHandler(value = {JpaSystemException.class})
+	protected ResponseEntity<ErrorResponse> handleJpaSystemException(JpaSystemException e) {
+		log.error("handleJpaSystemException throws JpaSystemException : {}", e.getMessage());
+		return ErrorResponse.from(UNPROCESSABLE_CONTENT, e.getMessage());
+	}
+
+	@ExceptionHandler(value = {TransientPropertyValueException.class})
+	protected ResponseEntity<ErrorResponse> handleTransientPropertyValueException(TransientPropertyValueException e) {
+		log.error("handleTransientPropertyValueException throws TransientPropertyValueException : {}", e.getMessage());
+		return ErrorResponse.from(UNPROCESSABLE_CONTENT, e.getMessage());
+	}
+
+	@ExceptionHandler(value = {NullPointerException.class})
+	protected ResponseEntity<ErrorResponse> handleNullPointerException(NullPointerException e) {
+		log.error("handleNullPointerException throws NullPointerException : {}", e.getMessage());
+		return ErrorResponse.from(UNPROCESSABLE_CONTENT, e.getMessage());
+	}
+
 	@ExceptionHandler(Exception.class)
-	private ResponseEntity<ErrorResponse> handleExceptionInternal(ErrorCode errorCode, String message) {
+	protected ResponseEntity<ErrorResponse> handleExceptionInternal(ErrorCode errorCode, String message) {
 		return ResponseEntity.status(errorCode.getHttpStatus())
 			.body(makeErrorResponse(errorCode, message));
 	}
