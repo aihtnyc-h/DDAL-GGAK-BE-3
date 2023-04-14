@@ -2,7 +2,7 @@
 sudo chmod +x /home/ubuntu/app/switch.sh
 
 echo "> 현재 구동중인 profile 확인"
-CURRENT_PROFILE=$(curl -s https://43.201.195.87/profile)
+CURRENT_PROFILE=$(curl -s -L https://43.201.195.87/profile)
 CURRENT_PROFILE=$(echo $CURRENT_PROFILE | tr -d '\r')
 
 if [ $CURRENT_PROFILE == set1 ]
