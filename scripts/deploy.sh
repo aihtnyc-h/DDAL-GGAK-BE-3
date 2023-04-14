@@ -29,7 +29,7 @@ sudo nohup java -jar /home/ubuntu/app/deploy/build/libs/DDAL-GGAK-BE-0.0.1-SNAPS
 
 
 echo "> $IDLE_PROFILE 10초 후 Health check 시작"
-echo "> curl -s http://43.201.195.87:$IDLE_PORT/api/health "
+echo "> curl -s -L http://43.201.195.87:$IDLE_PORT/api/health "
 sleep 10
 
 for retry_count in {1..10}
