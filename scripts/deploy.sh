@@ -9,12 +9,12 @@ CURRENT_PROFILE=$(echo $CURRENT_PROFILE | tr -d '\r')
 
 if [ $CURRENT_PROFILE == set1 ]
 then
-#   IDLE_PROFILE=set2
+   IDLE_PROFILE=set2
   IDLE_PORT=8082
   CURRENT_PORT=8081
 elif [ $CURRENT_PROFILE == set2 ]
 then
-#   IDLE_PROFILE=set1
+  IDLE_PROFILE=set1
   IDLE_PORT=8081
   CURRENT_PORT=8082
 else
@@ -27,8 +27,8 @@ fi
 
 echo "> $IDLE_PROFILE 배포"
 sudo fuser -k -n tcp $IDLE_PORT
-#sudo nohup java -jar /home/ubuntu/app/deploy/build/libs/DDAL-GGAK-BE-0.0.1-SNAPSHOT.jar --spring.config.location=file:/home/ubuntu/app/config/prod-application.yaml --spring.profiles.active=$IDLE_PROFILE --server.port=$IDLE_PORT > /dev/null 2>&1 &
-sudo nohup java -jar /home/ubuntu/app/deploy/build/libs/DDAL-GGAK-BE-0.0.1-SNAPSHOT.jar --spring.config.location=file:/home/ubuntu/app/config/application$IDLE_PORT.properties --spring.profiles.active=$IDLE_PROFILE --server.port=$IDLE_PORT > /dev/null 2>&1 &
+sudo nohup java -jar /home/ubuntu/app/deploy/build/libs/DDAL-GGAK-BE-0.0.1-SNAPSHOT.jar --spring.config.location=file:/home/ubuntu/app/config/prod-application.yaml --spring.profiles.active=$IDLE_PROFILE --server.port=$IDLE_PORT > /dev/null 2>&1 &
+#sudo nohup java -jar /home/ubuntu/app/deploy/build/libs/DDAL-GGAK-BE-0.0.1-SNAPSHOT.jar --spring.config.location=file:/home/ubuntu/app/config/application$IDLE_PORT.properties --spring.profiles.active=$IDLE_PROFILE --server.port=$IDLE_PORT > /dev/null 2>&1 &
 
 
 echo "> $IDLE_PROFILE 10초 후 Health check 시작"
