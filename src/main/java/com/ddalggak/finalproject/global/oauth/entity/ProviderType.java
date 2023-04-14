@@ -1,4 +1,4 @@
-package com.ddalggak.finalproject.domain.oauth.entity;
+package com.ddalggak.finalproject.global.oauth.entity;
 
 import lombok.Getter;
 

@@ -1,4 +1,4 @@
-package com.ddalggak.finalproject.domain.oauth.exception;
+package com.ddalggak.finalproject.global.oauth.exception;
 
 import com.ddalggak.finalproject.global.error.ErrorCode;
 

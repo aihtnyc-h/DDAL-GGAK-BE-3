@@ -1,4 +1,4 @@
-package com.ddalggak.finalproject.domain.oauth.handler;
+package com.ddalggak.finalproject.global.oauth.handler;
 
 import java.io.IOException;
 
@@ -12,8 +12,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.ddalggak.finalproject.domain.oauth.repository.CookieAuthorizationRequestRepository;
 import com.ddalggak.finalproject.global.cookie.CookieUtil;
+import com.ddalggak.finalproject.global.oauth.repository.CookieAuthorizationRequestRepository;
 
 import lombok.RequiredArgsConstructor;
 

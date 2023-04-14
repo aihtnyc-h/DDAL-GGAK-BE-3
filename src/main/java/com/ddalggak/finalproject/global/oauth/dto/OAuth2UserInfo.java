@@ -1,4 +1,4 @@
-package com.ddalggak.finalproject.domain.oauth.dto;
+package com.ddalggak.finalproject.global.oauth.dto;
 
 import java.util.Map;
 

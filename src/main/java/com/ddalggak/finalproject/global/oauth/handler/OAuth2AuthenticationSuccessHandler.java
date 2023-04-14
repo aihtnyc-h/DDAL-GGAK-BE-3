@@ -1,4 +1,4 @@
-package com.ddalggak.finalproject.domain.oauth.handler;
+package com.ddalggak.finalproject.global.oauth.handler;
 
 import java.io.IOException;
 import java.net.URI;
@@ -17,16 +17,16 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.ddalggak.finalproject.domain.oauth.OAuth2UserInfoFactory;
-import com.ddalggak.finalproject.domain.oauth.dto.OAuth2UserInfo;
-import com.ddalggak.finalproject.domain.oauth.entity.ProviderType;
-import com.ddalggak.finalproject.domain.oauth.repository.CookieAuthorizationRequestRepository;
 import com.ddalggak.finalproject.global.cookie.CookieUtil;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
 import com.ddalggak.finalproject.global.jwt.token.entity.AccessToken;
 import com.ddalggak.finalproject.global.jwt.token.entity.RefreshToken;
 import com.ddalggak.finalproject.global.jwt.token.repository.AccessTokenRepository;
 import com.ddalggak.finalproject.global.jwt.token.repository.RefreshTokenRepository;
+import com.ddalggak.finalproject.global.oauth.OAuth2UserInfoFactory;
+import com.ddalggak.finalproject.global.oauth.dto.OAuth2UserInfo;
+import com.ddalggak.finalproject.global.oauth.entity.ProviderType;
+import com.ddalggak.finalproject.global.oauth.repository.CookieAuthorizationRequestRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
