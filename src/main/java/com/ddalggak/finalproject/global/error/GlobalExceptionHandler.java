@@ -8,15 +8,19 @@ import javax.validation.ConstraintViolationException;
 
 import org.hibernate.TransientPropertyValueException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.ddalggak.finalproject.domain.user.exception.UserException;
@@ -108,7 +112,41 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(value = {NullPointerException.class})
 	protected ResponseEntity<ErrorResponse> handleNullPointerException(NullPointerException e) {
 		log.error("handleNullPointerException throws NullPointerException : {}", e.getMessage());
+		return ErrorResponse.from(UNPROCESSABLE_CONTENT);
+	}
+
+	@ExceptionHandler(RequestRejectedException.class)
+	protected ResponseEntity<ErrorResponse> handleRequestRejectedException(RequestRejectedException e) {
+		log.error("handleRequestRejectedException throws RequestRejectedException : {}", e.getMessage());
+		return ErrorResponse.from(INVALID_URL);
+	}
+
+	@ExceptionHandler(ClassCastException.class)
+	protected ResponseEntity<ErrorResponse> handleClassCastException(ClassCastException e) {
+		log.error("handleClassCastException throws ClassCastException : {}", e.getMessage());
+		return ErrorResponse.from(INVALID_REQUEST);
+	}
+
+	@ExceptionHandler(InvalidDataAccessApiUsageException.class)
+	protected ResponseEntity<ErrorResponse> handleInvalidDataAccessApiUsageException(
+		InvalidDataAccessApiUsageException e) {
+		log.error("handleInvalidDataAccessApiUsageException throws InvalidDataAccessApiUsageException : {}",
+			e.getMessage());
+		return ErrorResponse.from(UNPROCESSABLE_CONTENT);
+	}
+
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	protected ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(
+		MaxUploadSizeExceededException e) {
+		log.error("handleMaxUploadSizeExceededException throws MaxUploadSizeExceededException : {}",
+			e.getMessage());
 		return ErrorResponse.from(UNPROCESSABLE_CONTENT, e.getMessage());
+	}
+
+	@ExceptionHandler(UsernameNotFoundException.class)
+	protected ResponseEntity<ErrorResponse> handleUsernameNotFoundException(UsernameNotFoundException e) {
+		log.error("handleUsernameNotFoundException throws UsernameNotFoundException : {}", e.getMessage());
+		return ErrorResponse.from(MEMBER_NOT_FOUND, e.getMessage());
 	}
 
 	@ExceptionHandler(Exception.class)
