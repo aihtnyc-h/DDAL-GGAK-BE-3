@@ -1,4 +1,7 @@
 #!/bin/bash
+sudo chmod +x /home/ubuntu/app/deploy/scripts/deploy.sh
+sudo chmod +x /home/ubuntu/app/deploy/scripts/switch.sh
+
 
 echo "> 현재 구동중인 profile 확인"
 CURRENT_PROFILE=$(curl -s -L http://43.201.195.87/profile)
@@ -24,7 +27,8 @@ fi
 
 echo "> $IDLE_PROFILE 배포"
 sudo fuser -k -n tcp $IDLE_PORT
-sudo nohup java -jar /home/ubuntu/app/deploy/build/libs/DDAL-GGAK-BE-0.0.1-SNAPSHOT.jar --spring.config.location=file:/home/ubuntu/app/config/prod-application.yaml --spring.profiles.active=$IDLE_PROFILE --server.port=$IDLE_PORT > /dev/null 2>&1 &
+#sudo nohup java -jar /home/ubuntu/app/deploy/build/libs/DDAL-GGAK-BE-0.0.1-SNAPSHOT.jar --spring.config.location=file:/home/ubuntu/app/config/prod-application.yaml --spring.profiles.active=$IDLE_PROFILE --server.port=$IDLE_PORT > /dev/null 2>&1 &
+sudo nohup java -jar /home/ubuntu/app/deploy/build/libs/DDAL-GGAK-BE-0.0.1-SNAPSHOT.jar --spring.config.location=file:/home/ubuntu/app/config/application$IDLE_PORT.properties --spring.profiles.active=$IDLE_PROFILE --server.port=$IDLE_PORT > /dev/null 2>&1 &
 
 
 echo "> $IDLE_PROFILE 10초 후 Health check 시작"
@@ -58,5 +62,4 @@ done
 
 echo "> 스위칭을 시도합니다..."
 sleep 10
-
 /home/ubuntu/app/deploy/scripts/switch.sh
