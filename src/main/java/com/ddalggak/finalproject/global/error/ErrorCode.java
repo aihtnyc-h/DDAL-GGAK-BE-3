@@ -23,6 +23,8 @@ public enum ErrorCode {
 	INVALID_EMAIL_PASSWORD(BAD_REQUEST, "A-009", "Invalid email or password"),
 	INVALID_TICKET_STATUS(BAD_REQUEST, "A-010", "Invalid ticket status"),
 	INVALID_INVITE_CODE(BAD_REQUEST, "A-011", "Invalid invite code"),
+	INVALID_URL(BAD_REQUEST, "A-012", "Please check request URL"),
+	INVALID_FILE_SIZE(BAD_REQUEST, "A-013", "File size is too large"),
 
 	/* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
 	INVALID_AUTH_TOKEN(UNAUTHORIZED, "B-001", "Please enter an authorized token. "),
