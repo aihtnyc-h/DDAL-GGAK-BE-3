@@ -8,19 +8,21 @@ import static com.ddalggak.finalproject.domain.ticket.entity.QTicket.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
 import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
-import com.ddalggak.finalproject.domain.ticket.dto.QDateTicket;
+import com.ddalggak.finalproject.domain.ticket.dto.TicketMapper;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.DateTemplate;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,8 @@ import lombok.RequiredArgsConstructor;
 public class TicketRepositoryCustomImpl implements TicketRepositoryCustom {
 
 	private final JPAQueryFactory queryFactory;
+
+	private final TicketMapper ticketMapper;
 
 	@Override
 	public Optional<Ticket> findWithOrderedComments(Long ticketId) {
@@ -63,45 +67,38 @@ public class TicketRepositoryCustomImpl implements TicketRepositoryCustom {
 
 	@Override
 	public List<DateTicket> getCompletedTicketCountByDate(TicketSearchCondition condition, Long userId) {
+		DateTemplate<LocalDate> formattedDate = Expressions.dateTemplate(LocalDate.class,
+			"DATE_FORMAT({0},'%Y-%m-%d')", ticket.completedAt);
 		return queryFactory
-			.select(new QDateTicket(
-				ticket.completedAt.as("date"),
-				ticket.count().as("completedTicket")
-			))
+			.select(formattedDate, ticket.count())
 			.from(ticket)
 			.where(ticket.user.userId.eq(userId),
 				getWithOneYear(condition.getDate())
 			)
-			.groupBy(ticket.completedAt)
+			.groupBy(formattedDate)
 			.orderBy(ticket.completedAt.asc())
-			.fetch();
+			.limit(365)
+			.fetch()
+			.stream()
+			.map(tuple -> new DateTicket(tuple.get(0, String.class), tuple.get(1, Long.class)))
+			.collect(Collectors.toList());
 	}
 
 	@Override
 	public Slice<TicketResponseDto> getSlicedTicketCountByDate(TicketSearchCondition condition, Pageable pageable,
 		Long userId) {
 		List<TicketResponseDto> content = queryFactory
-			.select(Projections.constructor(
-				TicketResponseDto.class,
-				ticket.ticketId,
-				ticket.ticketTitle.as("title"),
-				ticket.ticketDescription.as("description"),
-				ticket.status,
-				ticket.priority,
-				ticket.difficulty,
-				ticket.user.email.as("assigned"),
-				ticket.expiredAt,
-				ticket.completedAt,
-				ticket.label.labelTitle.as("label")
-			))
-			.from(ticket)
+			.selectFrom(ticket)
 			.where(ticket.user.userId.eq(userId),
 				statusEq(condition.getStatus())
 			)
 			.orderBy(ticket.createdAt.asc())
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize() + 1)
-			.fetch();
+			.fetch()
+			.stream()
+			.map(ticketMapper::toDto)
+			.collect(Collectors.toList());
 		;
 		boolean hasNext = false;
 		if (content.size() > pageable.getPageSize()) {
@@ -124,7 +121,10 @@ public class TicketRepositoryCustomImpl implements TicketRepositoryCustom {
 	}
 
 	private BooleanExpression getWithOneYear(LocalDate localDate) {
-		return localDate != null ? ticket.completedAt.between(localDate.minusYears(1), localDate) : null;
+		return localDate != null ?
+			ticket.completedAt.between(localDate.minusYears(1).atStartOfDay(), localDate.plusDays(1).atStartOfDay()) :
+			ticket.completedAt.between(LocalDate.now().minusYears(1).atStartOfDay(),
+				LocalDate.now().plusDays(1).atStartOfDay());
 	}
 
 	private BooleanExpression statusEq(TicketStatus status) {
