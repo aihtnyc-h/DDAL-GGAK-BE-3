@@ -15,6 +15,6 @@ import lombok.ToString;
 @RedisHash(value = "projectInviteCode", timeToLive = 60 * 60 * 24 * 1000L)
 public class ProjectInviteCode {
 	@Id
-	private String projectInviteCode;
 	private String projectId;
+	private String projectInviteCode;
 }
