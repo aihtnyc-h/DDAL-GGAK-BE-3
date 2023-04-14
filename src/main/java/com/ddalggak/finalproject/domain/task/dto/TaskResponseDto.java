@@ -1,6 +1,7 @@
 package com.ddalggak.finalproject.domain.task.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class TaskResponseDto {
 	public String taskLeader;
 
 	@Schema(name = "when does this task created at", example = "2023-03-22")
-	public LocalDate createdAt;
+	public LocalDateTime createdAt;
 
 	@Schema(name = "when does this task expired at", example = "2023-03-22")
 	public LocalDate expiredAt;
@@ -42,6 +43,9 @@ public class TaskResponseDto {
 
 	@Schema(name = "progress", example = "88.44")
 	public double progress;
+
+	@Schema(name = "how much this task is completed", example = "88.442266")
+	public double completed;
 
 	@Schema(name = "labels", example = "front-end", defaultValue = "null")
 	@Setter
