@@ -1,5 +1,4 @@
 #!/bin/bash
-
 sudo chmod +x /home/ubuntu/app/switch.sh
 
 echo "> 현재 구동중인 profile 확인"
@@ -10,20 +9,25 @@ if [ $CURRENT_PROFILE == set1 ]
 then
   IDLE_PROFILE=set2
   IDLE_PORT=8082
+  CURRENT_PORT=8081
 elif [ $CURRENT_PROFILE == set2 ]
 then
   IDLE_PROFILE=set1
   IDLE_PORT=8081
+  CURRENT_PORT=8082
 else
   echo "> 일치하는 Profile이 없습니다. Profile: $CURRENT_PROFILE"
   echo "> set1을 할당합니다. IDLE_PROFILE: set1"
   IDLE_PROFILE=set1
   IDLE_PORT=8081
+  CURRENT_PORT=8082
 fi
 
 echo "> $IDLE_PROFILE 배포"
 sudo fuser -k -n tcp $IDLE_PORT
-sudo nohup java -jar /home/ubuntu/app/DDAL-GGAK-BE-server-0.0.1-SNAPSHOT.jar --spring.config.location=file:/home/ubuntu/app/config/prod-application.yaml --spring.profiles.active=$IDLE_PROFILE --server.port=$IDLE_PORT &
+sudo nohup java -jar /home/ubuntu/app/deploy/DDAL-GGAK-BE-0.0.1-SNAPSHOT.jar --spring.config.location=file:/home/ubuntu/app/config/prod-application.yaml --spring.profiles.active=$IDLE_PROFILE --server.port=$IDLE_PORT &
+
+
 echo "> $IDLE_PROFILE 10초 후 Health check 시작"
 echo "> curl -s http://43.201.195.87:$IDLE_PORT/api/health "
 sleep 10
