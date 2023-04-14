@@ -1,5 +1,4 @@
 #!/bin/bash
-sudo chmod +x deploy.sh switch.sh
 
 echo "> 현재 구동중인 profile 확인"
 CURRENT_PROFILE=$(curl -s -L http://43.201.195.87/profile)
