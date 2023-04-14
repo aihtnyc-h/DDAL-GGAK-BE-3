@@ -1,5 +1,5 @@
 #!/bin/bash
-sudo chmod +x /home/ubuntu/app/deploy/switch.sh
+sudo chmod +x deploy.sh switch.sh
 
 echo "> 현재 구동중인 profile 확인"
 CURRENT_PROFILE=$(curl -s -L http://43.201.195.87/profile)
@@ -60,4 +60,4 @@ done
 echo "> 스위칭을 시도합니다..."
 sleep 10
 
-/home/ubuntu/app/deploy/switch.sh
+/home/ubuntu/app/deploy/scripts/switch.sh
