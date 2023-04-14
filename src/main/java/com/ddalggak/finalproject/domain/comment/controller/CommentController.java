@@ -1,5 +1,7 @@
 package com.ddalggak.finalproject.domain.comment.controller;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -13,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ddalggak.finalproject.domain.comment.dto.CommentRequestDto;
+import com.ddalggak.finalproject.domain.comment.dto.CommentResponseDto;
 import com.ddalggak.finalproject.domain.comment.service.CommentService;
+import com.ddalggak.finalproject.global.aop.ExecutionTimer;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,18 +32,20 @@ public class CommentController {
 	private final CommentService commentService;
 
 	// 댓글 등록
+	@ExecutionTimer
 	@Operation(summary = "ticket comment", description = "comment 등록 post 메서드 체크")
 	@PostMapping("/comment")
-	public ResponseEntity<?> createComment(
+	public ResponseEntity<List<CommentResponseDto>> createComment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody CommentRequestDto commentRequestDto) {
 		return commentService.createComment(userDetails.getUser(), commentRequestDto);
 	}
 
 	// 댓글 수정
+	@ExecutionTimer
 	@Operation(summary = "patch ticket comment", description = "comment 수정 get 메서드 체크")
 	@PatchMapping("/comment/{commentId}")
-	public ResponseEntity<?> updateComment(
+	public ResponseEntity<List<CommentResponseDto>> updateComment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable("commentId") Long commentId,
 		@Valid @RequestBody CommentRequestDto commentRequestDto) {
@@ -47,9 +53,10 @@ public class CommentController {
 	}
 
 	// 댓글 삭제
+	@ExecutionTimer
 	@Operation(summary = "delete ticket comment", description = "comment 삭제 delete 메서드 체크")
 	@DeleteMapping("/comment/{commentId}")
-	public ResponseEntity<?> deleteComment(
+	public ResponseEntity<List<CommentResponseDto>> deleteComment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable("commentId") Long commentId) {
 		return commentService.deleteComment(userDetails, commentId);

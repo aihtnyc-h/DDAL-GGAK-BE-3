@@ -24,6 +24,7 @@ import com.ddalggak.finalproject.domain.task.service.TaskService;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
+import com.ddalggak.finalproject.global.aop.ExecutionTimer;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,6 +40,7 @@ public class TaskController {
 
 	@Operation(summary = "Task 생성", description = "api for creating task")
 	@PostMapping("/task")
+	@ExecutionTimer
 	public ResponseEntity<List<TaskBriefResponseDto>> createTask(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody TaskRequestDto taskRequestDto) {
@@ -47,6 +49,7 @@ public class TaskController {
 
 	@Operation(summary = "Task 조회", description = "api for view one task")
 	@GetMapping("/task/{taskId}")
+	@ExecutionTimer
 	public ResponseEntity<TaskResponseDto> viewTask(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestParam Long projectId,
@@ -56,6 +59,7 @@ public class TaskController {
 
 	@Operation(summary = "Task 삭제", description = "api for delete one task")
 	@DeleteMapping("/task/{taskId}")
+	@ExecutionTimer
 	public ResponseEntity<List<TaskBriefResponseDto>> deleteTask(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@PathVariable Long taskId) {
@@ -64,6 +68,7 @@ public class TaskController {
 
 	@Operation(summary = "Task 리더 부여", description = "api for assign admin to task")
 	@PostMapping("/task/{taskId}/leader")
+	@ExecutionTimer
 	public ResponseEntity<List<UserResponseDto>> assignLeader(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@PathVariable Long taskId,
@@ -73,6 +78,7 @@ public class TaskController {
 
 	@Operation(summary = "Task 초대", description = "api for invite user to task")
 	@PostMapping("/task/{taskId}/invite")
+	@ExecutionTimer
 	public ResponseEntity<List<UserResponseDto>> inviteTask(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@Valid @RequestBody TaskRequestDto taskRequestDto,
@@ -82,6 +88,7 @@ public class TaskController {
 
 	@Operation(summary = "Task의 label 전체조회", description = "api for view all labels of task")
 	@GetMapping("/task/{taskId}/labels")
+	@ExecutionTimer
 	public ResponseEntity<List<LabelResponseDto>> viewLabels(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@PathVariable Long taskId) {
@@ -90,6 +97,7 @@ public class TaskController {
 
 	@Operation(summary = "Task의 ticket 전체조회", description = "api for view all tickets of task")
 	@GetMapping("/task/{taskId}/tickets")
+	@ExecutionTimer
 	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> viewTickets(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@PathVariable Long taskId) {
