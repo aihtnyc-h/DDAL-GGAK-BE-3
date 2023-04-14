@@ -19,6 +19,7 @@ import com.ddalggak.finalproject.domain.label.service.LabelService;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
+import com.ddalggak.finalproject.global.aop.ExecutionTimer;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +35,7 @@ public class LabelController {
 
 	@Operation(summary = "Label 생성", description = "api for creating label")
 	@PostMapping("/label")
+	@ExecutionTimer
 	public ResponseEntity<List<LabelResponseDto>> createLabel(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody LabelRequestDto labelRequestDto) {
@@ -42,6 +44,7 @@ public class LabelController {
 
 	@Operation(summary = "Label 삭제", description = "api for delete label")
 	@DeleteMapping("/label/{labelId}")
+	@ExecutionTimer
 	public ResponseEntity<List<LabelResponseDto>> deleteLabel(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long labelId) {
@@ -50,6 +53,7 @@ public class LabelController {
 
 	@Operation(summary = "Label 강제입성", description = "api for invite label")
 	@PostMapping("/label/{labelId}/invite")
+	@ExecutionTimer
 	public ResponseEntity<List<UserResponseDto>> inviteLabel(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody LabelRequestDto labelRequestDto,
@@ -59,6 +63,7 @@ public class LabelController {
 
 	@Operation(summary = "Label 리더 부여", description = "api for assign admin to label")
 	@PostMapping("/label/{labelId}/leader")
+	@ExecutionTimer
 	public ResponseEntity<List<UserResponseDto>> assignLeader(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody LabelRequestDto labelRequestDto,
@@ -68,6 +73,7 @@ public class LabelController {
 
 	@Operation(summary = "Label별 티켓 조회", description = "api for get ticketList by label")
 	@GetMapping("/label/{labelId}")
+	@ExecutionTimer
 	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> getTicketListByLabel(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long labelId) {
