@@ -3,16 +3,16 @@ sudo chmod +x /home/ubuntu/app/switch.sh
 
 echo "> 현재 구동중인 profile 확인"
 CURRENT_PROFILE=$(curl -s http://43.201.195.87/profile)
-echo "> $CURRENT_PROFILE"
+CURRENT_PROFILE=$(echo $CURRENT_PROFILE | tr -d '\r')
 
 if [ $CURRENT_PROFILE == set1 ]
 then
-  IDLE_PROFILE=set2
+#   IDLE_PROFILE=set2
   IDLE_PORT=8082
   CURRENT_PORT=8081
 elif [ $CURRENT_PROFILE == set2 ]
 then
-  IDLE_PROFILE=set1
+#   IDLE_PROFILE=set1
   IDLE_PORT=8081
   CURRENT_PORT=8082
 else
