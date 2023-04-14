@@ -42,3 +42,5 @@ echo "> kill -15 $IDLE_PID"
 sudo kill -15 $IDLE_PID
 sleep 5
 fi
+
+exit 0
