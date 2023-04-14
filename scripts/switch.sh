@@ -22,7 +22,7 @@ echo "> Port 전환"
 echo "set \$service_url http://43.201.195.87:$IDLE_PORT;" |sudo tee /etc/nginx/conf.d/service-url.inc
 cat /etc/nginx/conf.d/service-url.inc
 
-PROXY_PORT=$(curl -s http://43.201.195.87/profile)
+PROXY_PORT=$(curl -s -L http://43.201.195.87/profile)
 echo "> Nginx Current Proxy Port: $PROXY_PORT"
 
 echo "> Nginx Reload"
