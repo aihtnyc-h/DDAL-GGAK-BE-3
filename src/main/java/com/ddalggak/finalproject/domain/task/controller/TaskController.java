@@ -7,6 +7,7 @@ import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +27,7 @@ import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.global.aop.ExecutionTimer;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
+import com.ddalggak.finalproject.global.validation.RequestId;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Validated
 public class TaskController {
 	private final TaskService taskService;
 
@@ -52,8 +55,8 @@ public class TaskController {
 	@ExecutionTimer
 	public ResponseEntity<TaskResponseDto> viewTask(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestParam Long projectId,
-		@PathVariable Long taskId) {
+		@RequestId @RequestParam Long projectId,
+		@RequestId @PathVariable Long taskId) {
 		return taskService.viewTask(userDetails.getUser(), projectId, taskId);
 	}
 
@@ -62,7 +65,7 @@ public class TaskController {
 	@ExecutionTimer
 	public ResponseEntity<List<TaskBriefResponseDto>> deleteTask(
 		@AuthenticationPrincipal UserDetailsImpl user,
-		@PathVariable Long taskId) {
+		@RequestId @PathVariable Long taskId) {
 		return taskService.deleteTask(user.getUser(), taskId);
 	}
 
@@ -71,7 +74,7 @@ public class TaskController {
 	@ExecutionTimer
 	public ResponseEntity<List<UserResponseDto>> assignLeader(
 		@AuthenticationPrincipal UserDetailsImpl user,
-		@PathVariable Long taskId,
+		@RequestId @PathVariable Long taskId,
 		@Valid @RequestBody TaskRequestDto taskRequestDto) {
 		return taskService.assignLeader(user.getUser(), taskRequestDto, taskId);
 	}
@@ -82,7 +85,7 @@ public class TaskController {
 	public ResponseEntity<List<UserResponseDto>> inviteTask(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@Valid @RequestBody TaskRequestDto taskRequestDto,
-		@PathVariable Long taskId) {
+		@RequestId @PathVariable Long taskId) {
 		return taskService.inviteTask(user.getUser(), taskRequestDto, taskId);
 	}
 
@@ -91,7 +94,7 @@ public class TaskController {
 	@ExecutionTimer
 	public ResponseEntity<List<LabelResponseDto>> viewLabels(
 		@AuthenticationPrincipal UserDetailsImpl user,
-		@PathVariable Long taskId) {
+		@RequestId @PathVariable Long taskId) {
 		return taskService.viewLabels(user.getUser(), taskId);
 	}
 
@@ -100,7 +103,7 @@ public class TaskController {
 	@ExecutionTimer
 	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> viewTickets(
 		@AuthenticationPrincipal UserDetailsImpl user,
-		@PathVariable Long taskId) {
+		@RequestId @PathVariable Long taskId) {
 		return taskService.viewTickets(user.getUser(), taskId);
 	}
 }
