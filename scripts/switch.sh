@@ -19,7 +19,7 @@ fi
 
 echo "> 전환할 Port: $IDLE_PORT"
 echo "> Port 전환"
-echo "set \$service_url http://43.201.195.87:${IDLE_PORT};" |sudo tee /etc/nginx/conf.d/service-url.inc
+echo "set \$service_url http://43.201.195.87:$IDLE_PORT;" |sudo tee /etc/nginx/conf.d/service-url.inc
 cat /etc/nginx/conf.d/service-url.inc
 
 PROXY_PORT=$(curl -s http://43.201.195.87/profile)
