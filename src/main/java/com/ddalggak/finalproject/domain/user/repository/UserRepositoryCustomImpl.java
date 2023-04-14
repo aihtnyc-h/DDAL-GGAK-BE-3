@@ -6,14 +6,20 @@ import static com.ddalggak.finalproject.domain.project.entity.QProject.*;
 import static com.ddalggak.finalproject.domain.project.entity.QProjectUser.*;
 import static com.ddalggak.finalproject.domain.task.entity.QTask.*;
 import static com.ddalggak.finalproject.domain.task.entity.QTaskUser.*;
+import static com.ddalggak.finalproject.domain.ticket.entity.QTicket.*;
 import static com.ddalggak.finalproject.domain.user.entity.QUser.*;
+import static com.ddalggak.finalproject.global.error.ErrorCode.*;
 
 import java.util.List;
 
 import com.ddalggak.finalproject.domain.label.entity.LabelUser;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
+import com.ddalggak.finalproject.domain.user.dto.QUserStatsDto;
+import com.ddalggak.finalproject.domain.user.dto.UserStatsDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
+import com.ddalggak.finalproject.global.error.CustomException;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -84,6 +90,33 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 			.where(project.projectId.eq(projectId))
 			.orderBy(rankPath.asc())
 			.fetch();
+	}
+
+	@Override
+	public UserStatsDto getUserStats(Long userId) {
+		UserStatsDto userStatsDto = queryFactory
+			.select(new QUserStatsDto(
+				user.userId,
+				user.email,
+				user.nickname,
+				user.profile.as("thumbnail")))
+			.from(user)
+			.where(user.userId.eq(userId))
+			.fetchOne();
+
+		if (userStatsDto == null) {
+			throw new CustomException(MEMBER_NOT_FOUND);
+		}
+
+		List<Tuple> stats = queryFactory
+			.select(ticket.difficulty.sum(), ticket.priority.sum())
+			.from(ticket)
+			.where(ticket.user.userId.eq(userId))
+			.fetch();
+		userStatsDto.setTotalDifficulty(stats.get(0).get(ticket.difficulty.sum()));
+		userStatsDto.setTotalPriority(stats.get(0).get(ticket.priority.sum()));
+		return userStatsDto;
+
 	}
 
 }
