@@ -22,13 +22,14 @@ import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
+import com.ddalggak.finalproject.global.aop.ExecutionTimer;
 import com.ddalggak.finalproject.global.dto.SuccessCode;
 import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.error.ErrorResponse;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
 import com.ddalggak.finalproject.global.mail.MailService;
-import com.ddalggak.finalproject.global.mail.randomCode.RandomCodeDto;
+import com.ddalggak.finalproject.global.mail.emailAuthCode.EmailAuthCodeDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import io.jsonwebtoken.Claims;
@@ -48,6 +49,7 @@ public class AuthController {
 
 	@Operation(summary = "email authentication", description = "email 인증 코드 발송 post 메서드 체크")
 	@PostMapping("/email")
+	@ExecutionTimer
 	public ResponseEntity<?> emailAuthentication(
 		@Valid @RequestBody EmailRequestDto emailRequestDto,
 		BindingResult bindingResult) {
@@ -65,15 +67,17 @@ public class AuthController {
 
 	@Operation(summary = "email authentication check", description = "email 인증 코드 일치 확인 get 메서드 체크")
 	@GetMapping("/email")
-	public ResponseEntity<?> emailAuthenticationWithRandomCode(
-		@RequestBody RandomCodeDto randomCodeDto) {
+	@ExecutionTimer
+	public ResponseEntity<SuccessResponseDto> emailAuthenticationWithRandomCode(
+		@RequestBody EmailAuthCodeDto emailAuthCodeDto) {
 
-		authService.emailAuthenticationWithRandomCode(randomCodeDto);
+		authService.emailAuthenticationWithRandomCode(emailAuthCodeDto);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_AUTH);
 	}
 
 	@Operation(summary = "signup", description = "회원가입 post 메서드 체크")
 	@PostMapping("/signup")
+	@ExecutionTimer
 	public ResponseEntity<?> signup(
 		@Valid @RequestBody UserRequestDto userRequestDto,
 		BindingResult bindingResult) {
@@ -94,6 +98,7 @@ public class AuthController {
 
 	@Operation(summary = "login", description = "로그인 post 메서드 체크")
 	@PostMapping("/login")
+	@ExecutionTimer
 	public ResponseEntity<UserPageDto> login(
 		@RequestBody UserRequestDto userRequestDto,
 		HttpServletResponse response) {
@@ -103,10 +108,12 @@ public class AuthController {
 
 	@Operation(summary = "logout", description = "로그아웃 post 메서드 체크")
 	@PostMapping("/logout")
+	@ExecutionTimer
 	public ResponseEntity<SuccessResponseDto> logout(
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 
 		String email = userDetails.getEmail();
+		// 시큐리티 정보 지우기
 		SecurityContextHolder.clearContext();
 		jwtUtil.logout(email);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_LOGOUT);
@@ -114,12 +121,14 @@ public class AuthController {
 
 	@Operation(summary = "validate token", description = "권한 확인 get 메서드 체크")
 	@GetMapping("/validToken")
+	@ExecutionTimer
 	public ResponseEntity<?> validateToken(
 		HttpServletRequest request) {
-
+		// 토큰 가져오기
 		String token = jwtUtil.resolveToken(request);
 		Claims claims;
 		if (token != null) {
+			// 토큰 유효성 검사
 			if (jwtUtil.validateToken(token)) {
 				claims = jwtUtil.getUserInfo(token);
 			} else {

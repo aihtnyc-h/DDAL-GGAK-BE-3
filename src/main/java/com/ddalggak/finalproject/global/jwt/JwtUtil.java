@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -67,7 +68,7 @@ public class JwtUtil {
 		key = Keys.hmacShaKeyFor(bytes);
 	}
 
-	public String login(String email, UserRole role) {
+	public void login(String email, UserRole role, HttpServletResponse response) {
 		if (accessTokenRepository.existsById(email)) {
 			log.info("기존의 존재하는 액세스 토큰 삭제");
 			accessTokenRepository.deleteById(email);
@@ -76,10 +77,10 @@ public class JwtUtil {
 			log.info("기존의 존재하는 리프레시 토큰 삭제");
 			refreshTokenRepository.deleteById(email);
 		}
-
+		// accessToken, refreshToken 생성
 		String accessToken = createAccessToken(email, role);
 		String refreshToken = createRefreshToken(email, role).getRefreshToken();
-
+		// redis 에 refreshToken 과 accessToken 저장
 		AccessToken newAccessToken = AccessToken.builder()
 			.email(email)
 			.accessToken(accessToken)
@@ -91,8 +92,8 @@ public class JwtUtil {
 			.refreshToken(refreshToken)
 			.build();
 		refreshTokenRepository.save(newRefreshToken);
-
-		return accessToken;
+		// header 에 accessToken 값 담아주기
+		response.addHeader(AUTHORIZATION_HEADER, accessToken);
 	}
 
 	public String resolveToken(HttpServletRequest request) {
@@ -195,12 +196,21 @@ public class JwtUtil {
 	}
 
 	public void logout(String email) {
-		RefreshToken token = refreshTokenRepository.findById(email)
+		AccessToken accessToken = accessTokenRepository.findById(email)
 			.orElseThrow(() -> new UserException(ErrorCode.INVALID_REQUEST));
-		String refreshToken = token.getRefreshToken();
+		String savedAccessToken = accessToken.getAccessToken();
 
-		if (refreshToken != null) {
-			log.info("기존의 존재하는 토큰 모두 삭제");
+		RefreshToken refreshToken = refreshTokenRepository.findById(email)
+			.orElseThrow(() -> new UserException(ErrorCode.INVALID_REQUEST));
+		String savedRefreshToken = refreshToken.getRefreshToken();
+
+		if (savedAccessToken != null) {
+			log.info("기존의 존재하는 액세스 토큰 삭제");
+			accessTokenRepository.deleteById(email);
+		}
+
+		if (savedRefreshToken != null) {
+			log.info("기존의 존재하는 리프레시 토큰 삭제");
 			refreshTokenRepository.deleteById(email);
 		}
 	}

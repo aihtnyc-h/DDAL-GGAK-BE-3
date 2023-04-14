@@ -1,4 +1,4 @@
-package com.ddalggak.finalproject.domain.oauth.service;
+package com.ddalggak.finalproject.global.oauth.service;
 
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -8,12 +8,12 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import com.ddalggak.finalproject.domain.oauth.OAuth2UserInfoFactory;
-import com.ddalggak.finalproject.domain.oauth.dto.OAuth2UserInfo;
-import com.ddalggak.finalproject.domain.oauth.entity.ProviderType;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.domain.user.role.UserRole;
+import com.ddalggak.finalproject.global.oauth.OAuth2UserInfoFactory;
+import com.ddalggak.finalproject.global.oauth.dto.OAuth2UserInfo;
+import com.ddalggak.finalproject.global.oauth.entity.ProviderType;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import lombok.RequiredArgsConstructor;

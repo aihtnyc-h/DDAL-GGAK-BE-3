@@ -29,6 +29,7 @@ import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.service.UserService;
+import com.ddalggak.finalproject.global.aop.ExecutionTimer;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
@@ -45,6 +46,7 @@ public class UserController {
 
 	@Operation(summary = "update nickname", description = "nickname 수정 put 메서드 체크")
 	@PutMapping("/nickname")
+	@ExecutionTimer
 	public NicknameDto updateNickname(
 		@Valid @RequestBody NicknameDto nicknameDto,
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -62,6 +64,7 @@ public class UserController {
 
 	@Operation(summary = "update profile", description = "profile 수정 put 메서드 체크")
 	@PutMapping("/profile")
+	@ExecutionTimer
 	public ProfileDto updateProfile(
 		@RequestPart(value = "image") MultipartFile image,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
@@ -71,6 +74,7 @@ public class UserController {
 
 	@Operation(summary = "get user page", description = "user page 찾기 get 메서드 체크")
 	@GetMapping
+	@ExecutionTimer
 	public ResponseEntity<UserPageDto> getMyPage(
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 
@@ -79,6 +83,7 @@ public class UserController {
 
 	@Operation(summary = "get user's completed ticket All", description = "유저의 모든 티켓 확인")
 	@GetMapping("/{userId}/completedTickets")
+	@ExecutionTimer
 	public ResponseEntity<List<DateTicket>> getMyCompletedTickets(
 		@PathVariable Long userId,
 		TicketSearchCondition condition) {
@@ -87,6 +92,7 @@ public class UserController {
 
 	@Operation(summary = "get user ticket page", description = "user ticket page 찾기 get 메서드 체크")
 	@GetMapping("/{userId}/Tickets")
+	@ExecutionTimer
 	public ResponseEntity<Slice<TicketResponseDto>> getMyTickets(
 		@PathVariable Long userId,
 		TicketSearchCondition condition,

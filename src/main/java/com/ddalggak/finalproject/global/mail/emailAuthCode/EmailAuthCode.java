@@ -1,4 +1,4 @@
-package com.ddalggak.finalproject.global.mail.randomCode;
+package com.ddalggak.finalproject.global.mail.emailAuthCode;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
@@ -12,9 +12,9 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@RedisHash(value = "refreshToken", timeToLive = 60 * 5 * 1000L)
-public class RandomCode {
+@RedisHash(value = "emailAuthCode", timeToLive = 60 * 5 * 1000L)
+public class EmailAuthCode {
 	@Id
 	private String email;
-	private String randomCode;
+	private String emailAuthCode;
 }

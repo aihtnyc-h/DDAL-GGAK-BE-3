@@ -12,9 +12,9 @@ import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import com.ddalggak.finalproject.domain.oauth.entity.ProviderType;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.role.UserRole;
+import com.ddalggak.finalproject.global.oauth.entity.ProviderType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
