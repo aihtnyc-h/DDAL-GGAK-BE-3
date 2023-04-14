@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "> 현재 구동중인 Port 확인"
-CURRENT_PROFILE=$(curl -s https://43.201.195.87/profile | grep -Eo 'set[12]')
+CURRENT_PROFILE=$(curl -s -L http://43.201.195.87/profile | grep -Eo 'set[12]')
 
 # Idle Profile 찾기: s1이 사용중이면 s2가 Idle
 if [ $CURRENT_PROFILE == set1 ]
