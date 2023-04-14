@@ -1,4 +1,4 @@
-package com.ddalggak.finalproject.domain.oauth.repository;
+package com.ddalggak.finalproject.global.oauth.repository;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

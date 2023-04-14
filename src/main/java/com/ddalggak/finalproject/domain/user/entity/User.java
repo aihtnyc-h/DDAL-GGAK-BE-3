@@ -15,11 +15,11 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
 import com.ddalggak.finalproject.domain.label.entity.LabelUser;
-import com.ddalggak.finalproject.domain.oauth.entity.ProviderType;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
 import com.ddalggak.finalproject.domain.user.role.UserRole;
 import com.ddalggak.finalproject.global.entity.BaseTimeEntity;
+import com.ddalggak.finalproject.global.oauth.entity.ProviderType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

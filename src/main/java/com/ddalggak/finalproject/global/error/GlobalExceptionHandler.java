@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.ddalggak.finalproject.domain.oauth.exception.OAuthException;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
+import com.ddalggak.finalproject.global.oauth.exception.OAuthException;
 
 import lombok.extern.slf4j.Slf4j;
 
