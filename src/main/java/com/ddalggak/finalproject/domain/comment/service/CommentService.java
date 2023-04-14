@@ -36,7 +36,7 @@ public class CommentService {
 
 	// 댓글 작성
 	@Transactional
-	public ResponseEntity<?> createComment(User user, CommentRequestDto commentRequestDto) {
+	public ResponseEntity<List<CommentResponseDto>> createComment(User user, CommentRequestDto commentRequestDto) {
 		// 유효성 검증
 		user = validateUserByEmail(user.getEmail());
 		Ticket ticket = TicketValidation(commentRequestDto.getTicketId());
@@ -53,7 +53,7 @@ public class CommentService {
 
 	// 댓글 수정
 	@Transactional
-	public ResponseEntity<?> updateComment(User user, Long commentId, CommentRequestDto commentRequestDto) {
+	public ResponseEntity<List<CommentResponseDto>>  updateComment(User user, Long commentId, CommentRequestDto commentRequestDto) {
 		// 유효성 검증
 		validateUserByEmail(user.getEmail());
 		Ticket ticket = TicketValidation(commentRequestDto.getTicketId());
@@ -70,7 +70,7 @@ public class CommentService {
 
 	// 댓글 삭제
 	@Transactional
-	public ResponseEntity<?> deleteComment(UserDetailsImpl userDetails, Long commentId) {
+	public ResponseEntity<List<CommentResponseDto>> deleteComment(UserDetailsImpl userDetails, Long commentId) {
 		Comment comment = CommentValidation(commentId);
 		Ticket ticket = TicketValidation(comment.getTicket().getTicketId());
 		// checkValidation(ticket, comment, userDetails);
