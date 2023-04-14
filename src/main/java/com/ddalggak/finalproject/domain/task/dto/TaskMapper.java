@@ -29,6 +29,7 @@ public interface TaskMapper {
 		@Mapping(target = "totalDifficulty", expression = "java(sumOfDifficulty(entity))"),
 		@Mapping(target = "totalPriority", expression = "java(sumOfPriority(entity))"),
 		@Mapping(target = "progress", expression = "java(calculateProgress(entity))"),
+		@Mapping(target = "completed", expression = "java(calculateCompleted(entity))"),
 		@Mapping(target = "labels", source = "entity.labelList"),
 		@Mapping(target = "tickets", source = "entity.ticketList")
 	})
@@ -54,6 +55,7 @@ public interface TaskMapper {
 		@Mapping(target = "totalDifficulty", expression = "java(sumOfDifficulty(entity))"),
 		@Mapping(target = "totalPriority", expression = "java(sumOfPriority(entity))"),
 		@Mapping(target = "progress", expression = "java(calculateProgress(entity))"),
+		@Mapping(target = "completed", expression = "java(calculateCompleted(entity))"),
 		@Mapping(target = "labels", source = "entity.labelList"),
 		@Mapping(target = "tickets", source = "entity.ticketList")
 	})
@@ -92,7 +94,9 @@ public interface TaskMapper {
 	@Named("calculateProgress")
 	default double calculateProgress(Task task) {
 		LocalDateTime currentDate = LocalDateTime.now();
-		if (currentDate.isAfter(task.getExpiredAt().plusDays(1).atStartOfDay())) {
+		if (task.getExpiredAt() == null) {
+			return 0.0d;
+		} else if (currentDate.isAfter(task.getExpiredAt().plusDays(1).atStartOfDay())) {
 			return 100.0d;
 		} else {
 			long now = ChronoUnit.HOURS.between(task.getCreatedAt(), currentDate);
@@ -101,17 +105,25 @@ public interface TaskMapper {
 		}
 	}
 
-	/* todo
-	 * 완료 현황은 (완료된 티켓의 난이도 / 전체 티켓 난이도) * (완료된 티켓의 우선순위 / 전체 티켓 우선순위) * (calculateProgress) * 100을 반환한다.
+	/*
+	 * 진행률은 Task의 total difficulty + total priority 대비 완료된 ticket의 difficulty + priority의 합으로 계산한다.
 	 */
-	// @Named("calculateCompletion")
-	// default double calculateCompletion(Task task) {
-	// 	double a = 0;
-	// 	double b = 0;
-	// 	double c = 0;
-	// 	task.getTicketList().stream().filter(ticket -> ticket.getStatus() == DONE).forEach(ticket -> {
-	// 		a += ticket.getDifficulty();
-	// 		b += ticket.getPriority();
-	// 	});
-	// }
+	@Named("calculateCompleted")
+	default double calculateCompleted(Task task) {
+		if (task.getTicketList().isEmpty()) {
+			return 0.0d;
+		}
+		int total = task.getTotalDifficulty() + task.getTotalPriority();
+		int completed =
+			task.getTicketList()
+				.stream()
+				.filter(ticket -> ticket.getStatus() == DONE)
+				.mapToInt(Ticket::getDifficulty).sum()
+				+
+				task.getTicketList()
+					.stream()
+					.filter(ticket -> ticket.getStatus() == DONE)
+					.mapToInt(Ticket::getPriority).sum();
+		return (100 * completed / (double)total);
+	}
 }
