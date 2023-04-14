@@ -34,7 +34,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(value = {ConstraintViolationException.class, DataIntegrityViolationException.class})
 	protected ResponseEntity<ErrorResponse> handleDataException() {
 		log.error("handleDataException throw Exception : {}", UNPROCESSABLE_CONTENT);
-		return ErrorResponse.of(UNPROCESSABLE_CONTENT);
+		return ErrorResponse.from(UNPROCESSABLE_CONTENT);
 	}
 
 	/**
