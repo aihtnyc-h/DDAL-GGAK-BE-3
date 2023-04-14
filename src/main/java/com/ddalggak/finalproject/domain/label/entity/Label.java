@@ -47,7 +47,7 @@ public class Label extends BaseEntity {
 	@BatchSize(size = 100)
 	private List<LabelUser> labelUserList = new ArrayList<>();
 
-	@OneToMany(mappedBy = "label", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "label", orphanRemoval = true)
 	private List<Ticket> tickets = new ArrayList<>();
 
 	@Builder
