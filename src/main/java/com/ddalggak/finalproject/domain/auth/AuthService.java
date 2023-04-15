@@ -44,7 +44,7 @@ public class AuthService {
 		String savedEmail = savedCode.getEmail();
 		String savedEmailAuthCode = savedCode.getEmailAuthCode();
 		// 인증 코드 데이터 삭제
-		if (emailAuthCode.equals(savedEmail) && email.equals(savedEmailAuthCode)) {
+		if (emailAuthCode.equals(savedEmailAuthCode) && email.equals(savedEmail)) {
 			emailAuthCodeRepository.delete(savedCode);
 		}
 	}

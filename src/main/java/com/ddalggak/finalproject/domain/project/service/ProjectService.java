@@ -121,7 +121,7 @@ public class ProjectService {
 		String projectInviteCode) {
 		Project project = validateProject(projectId);
 		ProjectUser projectUser = ProjectUser.create(project, user);
-		projectInviteCodeRepository.findById(projectInviteCode).orElseThrow(() -> new CustomException(
+		projectInviteCodeRepository.findById(projectId.toString()).orElseThrow(() -> new CustomException(
 			INVALID_INVITE_CODE));
 		validateDuplicateMember(project, projectUser);
 		project.addProjectUser(projectUser);
