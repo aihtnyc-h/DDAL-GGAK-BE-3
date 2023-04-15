@@ -225,13 +225,13 @@ public class TicketService {
 	@Transactional
 	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> moveTicketToReview(User user, Long ticketId) {
 		Ticket ticket = validateTicket(ticketId);
-		if (ticket.getStatus().equals(DONE)) {
+		if (!ticket.getUser().getEmail().equals(user.getEmail())) {
+			throw new CustomException(UNAUTHENTICATED_USER);
+		} else if (ticket.getStatus().equals(DONE)) {
 			throw new CustomException(INVALID_TICKET_STATUS);
 		} else if (ticket.getStatus().equals(REVIEW)) {
 			//다른 팀원의 로직상 TODO로 status 줘야 status가 in-progress로 들어간다.
 			ticket.movementTicket(TODO);
-		} else if (!ticket.getUser().getEmail().equals(user.getEmail())) {
-			throw new CustomException(UNAUTHENTICATED_USER);
 		} else {
 			ticket.moveStatusToReview();
 		}
