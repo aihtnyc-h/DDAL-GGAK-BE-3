@@ -59,7 +59,9 @@ public class UserService {
 		fileCheck(image);
 
 		User user = validateUserByEmail(email);
-
+		if (user.getProfile() != null) {
+			s3Uploader.delete(user.getProfile());
+		}
 		String storedFileName = s3Uploader.upload(image, "profile");
 
 		user.updateProfile(storedFileName);
@@ -112,7 +114,7 @@ public class UserService {
 		);
 	}
 
-	private boolean fileCheck(MultipartFile file) {
+	private void fileCheck(MultipartFile file) {
 		// 파일 타입 검사
 		String fileName = StringUtils.getFilenameExtension(file.getOriginalFilename());
 		if (fileName != null) {
@@ -121,7 +123,6 @@ public class UserService {
 				throw new CustomException(ErrorCode.TYPE_MISMATCH);
 			}
 		}
-		return true;
 	}
 
 	private void fileSizeCheck(MultipartFile image) {
