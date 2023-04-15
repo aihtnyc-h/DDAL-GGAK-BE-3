@@ -2,6 +2,7 @@ package com.ddalggak.finalproject.domain.task.dto;
 
 import static com.ddalggak.finalproject.domain.ticket.entity.TicketStatus.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -39,6 +40,7 @@ public interface TaskMapper {
 		@Mapping(target = "id", source = "entity.taskId"),
 		@Mapping(target = "taskTitle", source = "entity.taskTitle"),
 		@Mapping(target = "expiredAt", source = "entity.expiredAt"),
+		@Mapping(target = "dueDate", expression = "java(dueDate(entity))"),
 		@Mapping(target = "completedTickets", expression = "java(countOfCompletedTickets(entity))"),
 		@Mapping(target = "totalTickets", expression = "java(countOfTotalTicket(entity))"),
 		@Mapping(target = "participantsCount", expression = "java(countOfParticipants(entity))"),
@@ -125,5 +127,12 @@ public interface TaskMapper {
 					.filter(ticket -> ticket.getStatus() == DONE)
 					.mapToInt(Ticket::getPriority).sum();
 		return (100 * completed / (double)total);
+	}
+
+	@Named("dueDate")
+	default int dueDate(Task task) {
+		LocalDate currentDate = LocalDate.now();
+		return task.getExpiredAt().isBefore(currentDate) ? 0 :
+			(int)ChronoUnit.DAYS.between(currentDate, task.getExpiredAt());
 	}
 }
