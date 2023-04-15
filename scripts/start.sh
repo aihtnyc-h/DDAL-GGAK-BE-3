@@ -1,4 +1,4 @@
-##!/usr/bin/env bash
+#!/usr/bin/env bash
 #
 #PROJECT_ROOT="/home/ubuntu/app"
 ##JAR_FILE="$PROJECT_ROOT/DDAL-GGAK-BE.jar"
