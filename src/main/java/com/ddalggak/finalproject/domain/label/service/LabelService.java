@@ -92,6 +92,7 @@ public class LabelService {
 		Label label = validateLabel(labelId);
 		// 서비스 로직
 		if (task.getTaskLeader().equals(user.getEmail()) || label.getLabelLeader().equals(user.getEmail())) {
+			label.getTickets().forEach(Ticket::deleteLabel);
 			labelRepository.delete(label);
 		} else {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
