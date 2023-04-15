@@ -28,7 +28,7 @@ public interface UserMapper {
 		@Mapping(target = "email", source = "entity.user.email"),
 		@Mapping(target = "nickname", source = "entity.user.nickname"),
 		@Mapping(target = "thumbnail", source = "entity.user.profile"),
-		@Mapping(target = "role", expression = "java(isLeaderOfProject(entity))")
+		@Mapping(target = "role", expression = "java(isLeaderOfProject(entity))"),
 	})
 	UserResponseDto toUserResponseDtoWithProjectUser(ProjectUser entity);
 
@@ -37,6 +37,7 @@ public interface UserMapper {
 		@Mapping(target = "email", source = "entity.email"),
 		@Mapping(target = "nickname", source = "entity.nickname"),
 		@Mapping(target = "profile", source = "entity.profile"),
+		@Mapping(target = "projects", source = "entity.projectUserList")
 	})
 	UserPageDto toUserPageDto(User entity);
 
