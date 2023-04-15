@@ -19,8 +19,6 @@ import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
 import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
-import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
-import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.user.dto.UserMapper;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserStatsDto;
@@ -46,15 +44,16 @@ public class UserService {
 	private Long fileSizeLimit;//10메가바이트/킬로바이트/바이트
 
 	@Transactional
-	public NicknameDto updateNickname(String nickname, String email) {
+	public ResponseEntity<UserPageDto> updateNickname(String nickname, String email) {
 		User user = validateUserByEmail(email);
 
 		user.updateNickname(nickname);
-		return new NicknameDto(user.getNickname());
+		UserPageDto result = userMapper.toUserPageDto(user);
+		return ok(result);
 	}
 
 	@Transactional
-	public ProfileDto updateProfile(MultipartFile image, String email) throws IOException {
+	public ResponseEntity<UserPageDto> updateProfile(MultipartFile image, String email) throws IOException {
 		fileSizeCheck(image);
 		fileCheck(image);
 
@@ -64,7 +63,8 @@ public class UserService {
 
 		user.updateProfile(storedFileName);
 
-		return new ProfileDto(storedFileName);
+		UserPageDto result = userMapper.toUserPageDto(user);
+		return ok(result);
 	}
 
 	@Transactional(readOnly = true)
