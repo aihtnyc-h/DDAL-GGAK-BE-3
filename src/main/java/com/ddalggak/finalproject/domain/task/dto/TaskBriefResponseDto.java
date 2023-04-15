@@ -29,6 +29,9 @@ public class TaskBriefResponseDto { // task 간단 요약제공
 	@Schema(name = "when does this task created at", example = "2023-03-22")
 	public LocalDate createdAt;
 
+	@Schema(name = "due date for expire", example = "3")
+	public int dueDate;
+
 	@Schema(name = "number of completed tickets", example = "10", defaultValue = "0")
 	public int completedTickets;
 
