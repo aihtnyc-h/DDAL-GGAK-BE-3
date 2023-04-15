@@ -25,7 +25,6 @@ import com.ddalggak.finalproject.domain.ticket.dto.DateTicket;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
 import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
-import com.ddalggak.finalproject.domain.user.dto.ProfileDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserStatsDto;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
@@ -48,7 +47,7 @@ public class UserController {
 	@Operation(summary = "update nickname", description = "nickname 수정 put 메서드 체크")
 	@PutMapping("/nickname")
 	@ExecutionTimer
-	public NicknameDto updateNickname(
+	public ResponseEntity<UserPageDto> updateNickname(
 		@Valid @RequestBody NicknameDto nicknameDto,
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		BindingResult bindingResult) {
@@ -66,7 +65,7 @@ public class UserController {
 	@Operation(summary = "update profile", description = "profile 수정 put 메서드 체크")
 	@PutMapping("/profile")
 	@ExecutionTimer
-	public ProfileDto updateProfile(
+	public ResponseEntity<UserPageDto> updateProfile(
 		@RequestPart(value = "image") MultipartFile image,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
 
