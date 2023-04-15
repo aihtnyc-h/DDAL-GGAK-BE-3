@@ -52,8 +52,8 @@ public class TicketService {
 		//1.5 ticket expiredAt의 유효성 검증
 		if (ticketRequestDto.getTicketExpiredAt() != null &&
 			task.getExpiredAt() != null &&
-			ticketRequestDto.getTicketExpiredAt().isBefore(task.getExpiredAt())) {
-			throw new IllegalArgumentException("티켓의 만료일은 task의 만료일보다 빠를 수 없습니다.");
+			ticketRequestDto.getTicketExpiredAt().isAfter(task.getExpiredAt())) {
+			throw new IllegalArgumentException("티켓의 만료일은 태스크의 만료일보다 늦을 수 없습니다.");
 		}
 		//2. 유효성 검증
 		if (!(task.getProject().getProjectLeader().equals(user.getEmail()) ||
@@ -182,7 +182,7 @@ public class TicketService {
 		return ok(ListWithTicketStatus);
 	}
 
-	// ticket에 라벨 부여 todo 라벨값 0들어오면 라벨삭제
+	// ticket에 라벨 부여
 	@Transactional
 	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> getLabelForTicket(User user, Long ticketId,
 		TicketLabelRequestDto ticketLabelRequestDto) {
