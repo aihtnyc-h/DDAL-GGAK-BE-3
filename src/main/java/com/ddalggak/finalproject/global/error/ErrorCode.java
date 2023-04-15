@@ -23,6 +23,8 @@ public enum ErrorCode {
 	INVALID_EMAIL_PASSWORD(BAD_REQUEST, "A-009", "Invalid email or password"),
 	INVALID_TICKET_STATUS(BAD_REQUEST, "A-010", "Invalid ticket status"),
 	INVALID_INVITE_CODE(BAD_REQUEST, "A-011", "Invalid invite code"),
+	INVALID_URL(BAD_REQUEST, "A-012", "Please check request URL"),
+	INVALID_FILE_SIZE(BAD_REQUEST, "A-013", "File size is too large"),
 
 	/* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
 	INVALID_AUTH_TOKEN(UNAUTHORIZED, "B-001", "Please enter an authorized token. "),
@@ -53,8 +55,11 @@ public enum ErrorCode {
 	/* 415 UNSUPPORTED_MEDIA_TYPE : 지원하지 않는 미디어 타입 */
 	TYPE_MISMATCH(UNSUPPORTED_MEDIA_TYPE, "F-001", "Unsupported media type."),
 
+	/* 422 UNPROCESSABLE_ENTITY : 요청은 유효하지만, 처리할 수 없는 상태 */
+	UNPROCESSABLE_CONTENT(UNPROCESSABLE_ENTITY, "G-001", "Unprocessable content."),
+
 	/* 500 INTERNAL_SERVER_ERROR : 서버에서 문제 일어남 */
-	SERVER_ERROR(INTERNAL_SERVER_ERROR, "G-001", "Please check your input value.");
+	SERVER_ERROR(INTERNAL_SERVER_ERROR, "H-001", "Please check your input value.");
 
 	private final HttpStatus httpStatus;
 	private final String errorCode;

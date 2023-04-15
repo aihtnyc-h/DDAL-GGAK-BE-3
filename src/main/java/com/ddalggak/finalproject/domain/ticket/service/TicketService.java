@@ -49,6 +49,12 @@ public class TicketService {
 		TicketRequestDto ticketRequestDto) {
 		//1. task가 존재하는지 확인
 		Task task = validateTask(ticketRequestDto.getTaskId());
+		//1.5 ticket expiredAt의 유효성 검증
+		if (ticketRequestDto.getTicketExpiredAt() != null &&
+			task.getExpiredAt() != null &&
+			ticketRequestDto.getTicketExpiredAt().isBefore(task.getExpiredAt())) {
+			throw new IllegalArgumentException("티켓의 만료일은 task의 만료일보다 빠를 수 없습니다.");
+		}
 		//2. 유효성 검증
 		if (!(task.getProject().getProjectLeader().equals(user.getEmail()) ||
 			task.getTaskLeader().equals(user.getEmail()) ||
