@@ -139,12 +139,12 @@ public class ProjectService {
 		if (!project.getProjectLeader().equals(user.getEmail())) {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
+		fileCheck(image);
 		// 기존 이미지 삭제 후 새로운 이미지 업로드
-		String imageUrl = project.getThumbnail() == null ? null : project.getThumbnail();
-		if (!(image == null)) {
-			fileCheck(image);
-			imageUrl = s3Uploader.upload(image, "project");
+		if (project.getThumbnail() != null) {
+			s3Uploader.delete(project.getThumbnail());
 		}
+		String imageUrl = s3Uploader.upload(image, "project");
 		// 업로드한 이미지의 url을 바탕으로 update 쿼리, dynamic update 기준 업데이트
 		projectRequestDto.setThumbnail(imageUrl);
 		project.update(projectRequestDto);
