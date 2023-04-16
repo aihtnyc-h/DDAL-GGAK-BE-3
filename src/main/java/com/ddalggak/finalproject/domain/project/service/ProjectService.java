@@ -147,6 +147,7 @@ public class ProjectService {
 		return ok(projectResponseDto);
 	}
 
+	@Transactional
 	public ResponseEntity<List<UserResponseDto>> deleteProjectUser(User user, Long projectId, Long userId) {
 		// 유효성 검사
 		Project project = validateProject(projectId);
