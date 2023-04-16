@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ddalggak.finalproject.domain.project.entity.Project;
 import com.ddalggak.finalproject.domain.project.repository.ProjectRepository;
@@ -19,6 +20,7 @@ public class ProjectAspect {
 	private final ProjectRepository projectRepository;
 
 	@Scheduled(fixedRate = 86400000) // 현재는 10초마다 수행
+	@Transactional
 	public void generateNewProjectInviteCode() {
 		List<Project> projects = projectRepository.findAll();
 		for (Project project : projects) {
