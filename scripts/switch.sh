@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "> 현재 구동중인 Port 확인"
-CURRENT_PROFILE=$(curl -s -L http://43.201.195.87/profile | grep -Eo 'set[12]')
+CURRENT_PROFILE=$(curl -s -L ${INSTANCE_URL}/profile | grep -Eo 'set[12]')
 
 # Idle Profile 찾기: s1이 사용중이면 s2가 Idle
 if [ $CURRENT_PROFILE == set1 ]
@@ -19,10 +19,10 @@ fi
 
 echo "> 전환할 Port: $IDLE_PORT"
 echo "> Port 전환"
-echo "set \$service_url http://43.201.195.87:$IDLE_PORT;" |sudo tee /etc/nginx/conf.d/service-url.inc
+echo "set \$service_url ${INSTANCE_URL}:$IDLE_PORT;" |sudo tee /etc/nginx/conf.d/service-url.inc
 cat /etc/nginx/conf.d/service-url.inc
 
-PROXY_PORT=$(curl -s -L http://43.201.195.87/profile)
+PROXY_PORT=$(curl -s -L ${INSTANCE_URL}/profile)
 echo "> Nginx Current Proxy Port: $PROXY_PORT"
 
 echo "> Nginx Reload"
@@ -33,8 +33,8 @@ if [ -z $CURRENT_PORT ]
 then
 echo "> 현재 구동중인 포트가 없습니다. 종료할 애플리케이션 없음."
 else
-IDLE_PID=$(sudo lsof -t -i:$CURRENT_PORT) 
-echo "> lsof 결과: $(sudo lsof -i:$CURRENT_PORT)" 
+IDLE_PID=$(sudo lsof -t -i:$CURRENT_PORT)
+echo "> lsof 결과: $(sudo lsof -i:$CURRENT_PORT)"
 if [ -z $IDLE_PID ]
 then
 echo "> 현재 구동중인 애플리케이션이 없으므로 종료하지 않습니다."
