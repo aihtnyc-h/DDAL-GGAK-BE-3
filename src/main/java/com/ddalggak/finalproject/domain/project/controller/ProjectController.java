@@ -153,7 +153,7 @@ public class ProjectController {
 	}
 
 	@Operation(summary = "프로젝트 사용자 초대", description = "api for inviting a user to a project")
-	@PostMapping("/project/{projectId}")
+	@PostMapping("/project/{projectId}/invite")
 	@ExecutionTimer
 	public ResponseEntity<?> inviteProjectUser(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
