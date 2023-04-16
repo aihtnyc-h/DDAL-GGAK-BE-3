@@ -125,7 +125,7 @@ public class ProjectService {
 
 	// 프로젝트 정보 변경
 	@Transactional
-	public ResponseEntity<ProjectResponseDto> updateProject(User user, Long projectId,
+	public ResponseEntity<List<ProjectBriefResponseDto>> updateProject(User user, Long projectId,
 		MultipartFile image, ProjectRequestDto projectRequestDto) throws IOException {
 		// 유효성 검사
 		Project project = validateProject(projectId);
@@ -142,9 +142,10 @@ public class ProjectService {
 		projectRequestDto.setThumbnail(imageUrl);
 		project.update(projectRequestDto);
 
-		// 새로운 프로젝트 다시 받아옴 , todo 무엇을 반환해야 할까?
-		ProjectResponseDto projectResponseDto = projectMapper.toDto(projectRepository.findById(projectId).get());
-		return ok(projectResponseDto);
+		// 새로운 프로젝트 다시 받아옴
+		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(
+			user.getUserId());
+		return ok(result);
 	}
 
 	@Transactional
@@ -154,7 +155,11 @@ public class ProjectService {
 		User projectUser = userRepository.findById(userId).orElseThrow(
 			() -> new UserException(ErrorCode.EMPTY_CLIENT)
 		);
-		if (!project.getProjectLeader().equals(user.getEmail())) {
+		if (projectUser.getEmail().equals(user.getEmail())) {
+			throw new IllegalArgumentException("자기 자신은 내보낼 수 없습니다.");
+		} else if (project.getProjectUserList().size() == 1) {
+			throw new IllegalArgumentException("빈 프로젝트를 만들 수 없습니다.");
+		} else if (!project.getProjectLeader().equals(user.getEmail())) {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		project.getProjectUserList().remove(ProjectUser.create(project, projectUser));
