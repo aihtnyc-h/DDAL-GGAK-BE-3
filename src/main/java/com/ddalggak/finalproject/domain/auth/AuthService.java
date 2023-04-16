@@ -17,6 +17,8 @@ import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
 import com.ddalggak.finalproject.domain.user.role.UserRole;
+import com.ddalggak.finalproject.global.dto.SuccessCode;
+import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
 import com.ddalggak.finalproject.global.mail.emailAuthCode.EmailAuthCode;
@@ -50,7 +52,7 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void signup(UserRequestDto userRequestDto) {
+	public ResponseEntity<SuccessResponseDto> signup(UserRequestDto userRequestDto) {
 		String email = userRequestDto.getEmail();
 		// 이메일 중복 확인
 		Optional<User> foundUser = userRepository.findByEmail(email);
@@ -70,7 +72,7 @@ public class AuthService {
 			.role(UserRole.USER)
 			.build();
 		userRepository.save(user);
-
+		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
 	}
 
 	@Transactional
