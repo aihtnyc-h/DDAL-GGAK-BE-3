@@ -85,8 +85,8 @@ public class Project extends BaseEntity {
 		taskList.add(task);
 	}
 
-	public void createUuid(String uuid) {
-		this.uuid = uuid;
+	public void setInviteCode(String inviteCode) {
+		this.uuid = inviteCode;
 	}
 
 	public void update(ProjectRequestDto projectRequestDto) {

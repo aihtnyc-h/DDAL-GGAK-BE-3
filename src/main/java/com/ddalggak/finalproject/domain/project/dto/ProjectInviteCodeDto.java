@@ -1,4 +1,4 @@
-package com.ddalggak.finalproject.domain.project.projectInviteCode;
+package com.ddalggak.finalproject.domain.project.dto;
 
 import lombok.Getter;
 
