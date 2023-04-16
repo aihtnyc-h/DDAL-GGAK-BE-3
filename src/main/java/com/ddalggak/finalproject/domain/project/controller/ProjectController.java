@@ -25,6 +25,7 @@ import com.ddalggak.finalproject.domain.project.service.ProjectService;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.global.aop.ExecutionTimer;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
+import com.ddalggak.finalproject.global.validation.RequestId;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -44,7 +45,7 @@ public class ProjectController {
 	@ApiResponses(
 		value = {
 			@ApiResponse(responseCode = "201", description = "프로젝트 생성 성공"),
-			@ApiResponse(responseCode = "401", description = "권한 없음")
+			@ApiResponse(responseCode = "403", description = "권한 없음")
 		})
 	@Operation(summary = "프로젝트 생성", description = "api for creating project", parameters = {
 		@Parameter(name = "projectRequestDto", description = "프로젝트 생성에 필요한 정보입니다.", required = true)
@@ -73,7 +74,7 @@ public class ProjectController {
 	@ExecutionTimer
 	public ResponseEntity<ProjectResponseDto> viewProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@PathVariable Long projectId) {
+		@RequestId @PathVariable Long projectId) {
 		return projectService.viewProject(userDetails.getUser(), projectId);
 	}
 
@@ -98,7 +99,7 @@ public class ProjectController {
 	@Operation(summary = "프로젝트 수정", description = "api for update project")
 	@PostMapping("/project/{projectId}/settings")
 	@ExecutionTimer
-	public ResponseEntity<ProjectResponseDto> updateProject(
+	public ResponseEntity<List<ProjectBriefResponseDto>> updateProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId,
 		@RequestPart(value = "thumbnail", required = false) MultipartFile image,
