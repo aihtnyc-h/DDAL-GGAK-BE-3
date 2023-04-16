@@ -2,7 +2,9 @@ package com.ddalggak.finalproject.domain.ticket.dto;
 
 import java.time.LocalDate;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Future;
+
+import com.ddalggak.finalproject.global.validation.RequestId;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -18,7 +20,7 @@ import lombok.Setter;
 @Setter
 public class TicketRequestDto {
 	@Schema(name = "task Id")
-	@NotNull(message = "task Id is required")
+	@RequestId
 	private Long taskId;
 	@Schema(name = "ticket title", example = "ticket title")
 	private String ticketTitle;
@@ -29,5 +31,6 @@ public class TicketRequestDto {
 	@Schema(name = "ticket difficulty", example = "ticket difficulty")
 	private int difficulty;
 	@Schema(name = "when does this project expired at", example = "2023-03-22")
+	@Future
 	private LocalDate ticketExpiredAt;
 }
