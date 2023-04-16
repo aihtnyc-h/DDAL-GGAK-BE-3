@@ -10,8 +10,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,10 +25,8 @@ import com.ddalggak.finalproject.domain.ticket.dto.TicketSearchCondition;
 import com.ddalggak.finalproject.domain.user.dto.NicknameDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserStatsDto;
-import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.service.UserService;
 import com.ddalggak.finalproject.global.aop.ExecutionTimer;
-import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,16 +45,7 @@ public class UserController {
 	@ExecutionTimer
 	public ResponseEntity<UserPageDto> updateNickname(
 		@Valid @RequestBody NicknameDto nicknameDto,
-		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		BindingResult bindingResult) {
-
-		if (bindingResult.hasErrors()) {
-			List<ObjectError> list = bindingResult.getAllErrors();
-			for (ObjectError e : list) {
-				System.out.println(e.getDefaultMessage());
-			}
-			throw new UserException(ErrorCode.INVALID_REQUEST);
-		}
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return userService.updateNickname(nicknameDto.getNickname(), userDetails.getEmail());
 	}
 
@@ -68,7 +55,6 @@ public class UserController {
 	public ResponseEntity<UserPageDto> updateProfile(
 		@RequestPart(value = "image") MultipartFile image,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-
 		return userService.updateProfile(image, userDetails.getEmail());
 	}
 
@@ -77,7 +63,6 @@ public class UserController {
 	@ExecutionTimer
 	public ResponseEntity<UserPageDto> getMyPage(
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
-
 		return userService.getMyPage(userDetails.getEmail());
 	}
 

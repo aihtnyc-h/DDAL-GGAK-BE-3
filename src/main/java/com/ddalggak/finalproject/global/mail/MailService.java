@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,8 @@ import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.domain.user.exception.UserException;
 import com.ddalggak.finalproject.domain.user.repository.UserRepository;
+import com.ddalggak.finalproject.global.dto.SuccessCode;
+import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.mail.emailAuthCode.EmailAuthCode;
 import com.ddalggak.finalproject.global.mail.emailAuthCode.EmailAuthCodeRepository;
@@ -34,7 +37,7 @@ public class MailService {
 
 	// 인증 코드 발송
 	@Transactional
-	public void sendRandomCode(String email) {
+	public ResponseEntity<SuccessResponseDto> sendRandomCode(String email) {
 		Optional<User> optionalUser = userRepository.findByEmail(email);
 		String emailAuthCode = randomCode();
 		// 회원 중복 확인
@@ -50,6 +53,7 @@ public class MailService {
 		// 인증할 정보 저장
 		EmailAuthCode saveCode = new EmailAuthCode(email, emailAuthCode);
 		emailAuthCodeRepository.save(saveCode);
+		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_SEND);
 	}
 
 	// 프로젝트 초대 코드 발송
