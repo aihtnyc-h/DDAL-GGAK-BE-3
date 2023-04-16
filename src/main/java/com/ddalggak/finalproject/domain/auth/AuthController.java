@@ -1,7 +1,5 @@
 package com.ddalggak.finalproject.domain.auth;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -9,8 +7,6 @@ import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,19 +46,9 @@ public class AuthController {
 	@Operation(summary = "email authentication", description = "email 인증 코드 발송 post 메서드 체크")
 	@PostMapping("/email")
 	@ExecutionTimer
-	public ResponseEntity<?> emailAuthentication(
-		@Valid @RequestBody EmailRequestDto emailRequestDto,
-		BindingResult bindingResult) {
-
-		if (bindingResult.hasErrors()) {
-			List<ObjectError> list = bindingResult.getAllErrors();
-			for (ObjectError e : list) {
-				System.out.println(e.getDefaultMessage());
-			}
-			return ErrorResponse.from(ErrorCode.INVALID_REQUEST);
-		}
-		mailService.sendRandomCode(emailRequestDto.getEmail());
-		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_SEND);
+	public ResponseEntity<SuccessResponseDto> emailAuthentication(
+		@Valid @RequestBody EmailRequestDto emailRequestDto) {
+		return mailService.sendRandomCode(emailRequestDto.getEmail());
 	}
 
 	@Operation(summary = "email authentication check", description = "email 인증 코드 일치 확인 get 메서드 체크")
@@ -70,7 +56,6 @@ public class AuthController {
 	@ExecutionTimer
 	public ResponseEntity<SuccessResponseDto> emailAuthenticationWithRandomCode(
 		@RequestBody EmailAuthCodeDto emailAuthCodeDto) {
-
 		authService.emailAuthenticationWithRandomCode(emailAuthCodeDto);
 		return SuccessResponseDto.toResponseEntity(SuccessCode.SUCCESS_AUTH);
 	}
@@ -78,22 +63,9 @@ public class AuthController {
 	@Operation(summary = "signup", description = "회원가입 post 메서드 체크")
 	@PostMapping("/signup")
 	@ExecutionTimer
-	public ResponseEntity<?> signup(
-		@Valid @RequestBody UserRequestDto userRequestDto,
-		BindingResult bindingResult) {
-
-		if (bindingResult.hasErrors()) {
-			List<ObjectError> list = bindingResult.getAllErrors();
-			for (ObjectError e : list) {
-				System.out.println(e.getDefaultMessage());
-			}
-			return ErrorResponse.from(ErrorCode.INVALID_REQUEST);
-		}
-
-		authService.signup(userRequestDto);
-
-		return SuccessResponseDto.toResponseEntity(SuccessCode.CREATED_SUCCESSFULLY);
-
+	public ResponseEntity<SuccessResponseDto> signup(
+		@Valid @RequestBody UserRequestDto userRequestDto) {
+		return authService.signup(userRequestDto);
 	}
 
 	@Operation(summary = "login", description = "로그인 post 메서드 체크")
@@ -102,7 +74,6 @@ public class AuthController {
 	public ResponseEntity<UserPageDto> login(
 		@RequestBody UserRequestDto userRequestDto,
 		HttpServletResponse response) {
-
 		return authService.login(userRequestDto, response);
 	}
 
