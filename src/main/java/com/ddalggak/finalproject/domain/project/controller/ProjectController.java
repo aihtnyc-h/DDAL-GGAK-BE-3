@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectBriefResponseDto;
+import com.ddalggak.finalproject.domain.project.dto.ProjectInviteCodeDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectResponseDto;
-import com.ddalggak.finalproject.domain.project.projectInviteCode.ProjectInviteCodeDto;
 import com.ddalggak.finalproject.domain.project.service.ProjectService;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.global.aop.ExecutionTimer;
@@ -87,13 +87,12 @@ public class ProjectController {
 		}
 	)
 	@Operation(summary = "프로젝트 참여", description = "api for join project")
-	@PostMapping("/project/{projectId}/join")
+	@PostMapping("/project/join")
 	@ExecutionTimer
 	public ResponseEntity<List<ProjectBriefResponseDto>> joinProject(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@PathVariable Long projectId,
 		@RequestBody ProjectInviteCodeDto projectInviteCodeRequestDto) {
-		return projectService.joinProject(userDetails.getUser(), projectId,
+		return projectService.joinProject(userDetails.getUser(),
 			projectInviteCodeRequestDto.getProjectInviteCode());
 	}
 
@@ -147,10 +146,10 @@ public class ProjectController {
 	@Operation(summary = "프로젝트 초대 코드 생성", description = "api for inviting a user to a project")
 	@PostMapping("/project/{projectId}/inviteCode")
 	@ExecutionTimer
-	public ResponseEntity<?> createInviteCode(
+	public ResponseEntity<?> getInviteCode(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long projectId) {
-		return projectService.createInviteCode(userDetails.getUser(), projectId);
+		return projectService.getInviteCode(userDetails.getUser(), projectId);
 	}
 
 	@Operation(summary = "프로젝트 사용자 초대", description = "api for inviting a user to a project")
