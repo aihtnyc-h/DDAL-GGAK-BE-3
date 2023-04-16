@@ -6,6 +6,7 @@ import static org.springframework.http.ResponseEntity.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -67,6 +68,7 @@ public class ProjectService {
 		projectRequestDto.setThumbnail(imageUrl);
 		//3. projectUser로 project생성
 		Project project = Project.create(projectRequestDto, projectUser);
+		project.setInviteCode(UUID.randomUUID().toString());
 		//4. projectRepository에 project 저장
 		projectRepository.save(project);
 		//5. projectResponseDto로 반환
