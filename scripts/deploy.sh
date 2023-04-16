@@ -2,9 +2,11 @@
 sudo chmod +x /home/ubuntu/app/deploy/scripts/deploy.sh
 sudo chmod +x /home/ubuntu/app/deploy/scripts/switch.sh
 
+#${INSTANCE_URL} = http://43.201.195.87
+INSTANCE_URL=${INSTANCE_URL}
 
 echo "> 현재 구동중인 profile 확인"
-CURRENT_PROFILE=$(curl -s -L http://43.201.195.87/profile)
+CURRENT_PROFILE=$(curl -s -L ${INSTANCE_URL}/profile)
 CURRENT_PROFILE=$(echo $CURRENT_PROFILE | tr -d '\r')
 
 if [ $CURRENT_PROFILE == set1 ]
@@ -32,12 +34,12 @@ sudo nohup java -jar /home/ubuntu/app/deploy/build/libs/DDAL-GGAK-BE-0.0.1-SNAPS
 
 
 echo "> $IDLE_PROFILE 10초 후 Health check 시작"
-echo "> curl -s -L http://43.201.195.87:$IDLE_PORT/api/health "
+echo "> curl -s -L ${INSTANCE_URL}:$IDLE_PORT/api/health "
 sleep 10
 
 for retry_count in {1..10}
 do
-  response=$(curl -s http://43.201.195.87:$IDLE_PORT/actuator/health)
+  response=$(curl -s ${INSTANCE_URL}:$IDLE_PORT/actuator/health)
   up_count=$(echo $response | grep 'UP' | wc -l)
 
   if [ $up_count -ge 1 ]
