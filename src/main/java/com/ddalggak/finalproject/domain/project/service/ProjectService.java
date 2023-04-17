@@ -10,7 +10,10 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.aspectj.lang.annotation.Aspect;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -40,6 +43,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Aspect
+@Component
 public class ProjectService {
 	private final ProjectMapper projectMapper;
 	private final UserMapper userMapper;
@@ -260,6 +265,17 @@ public class ProjectService {
 				"webp"))) {
 				throw new CustomException(ErrorCode.TYPE_MISMATCH);
 			}
+		}
+	}
+
+	@Scheduled(fixedRate = 86400000) // 1일마다 갱신
+	@Transactional
+	public void generateNewProjectInviteCode() {
+		List<Project> projects = projectRepository.findAll();
+		for (Project project : projects) {
+			String newProjectInviteCode = UUID.randomUUID().toString();
+			project.setInviteCode(newProjectInviteCode);
+			projectRepository.save(project);
 		}
 	}
 }
