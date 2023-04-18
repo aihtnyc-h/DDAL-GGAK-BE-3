@@ -57,7 +57,7 @@ public class User extends BaseTimeEntity implements Serializable {
 	@Enumerated(value = EnumType.STRING)
 	private ProviderType providerType;
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
 	List<ProjectUser> projectUserList = new ArrayList<>();
 
 	@OneToMany(mappedBy = "user")
