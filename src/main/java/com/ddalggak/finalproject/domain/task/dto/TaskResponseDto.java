@@ -41,8 +41,8 @@ public class TaskResponseDto {
 	@Schema(name = "total priority", example = "10", defaultValue = "0")
 	public int totalPriority;
 
-	@Schema(name = "progress", example = "88.44")
-	public double progress;
+	@Schema(name = "progress", example = "88")
+	public int progress;
 
 	@Schema(name = "how much this task is completed", example = "88.442266")
 	public double completed;
