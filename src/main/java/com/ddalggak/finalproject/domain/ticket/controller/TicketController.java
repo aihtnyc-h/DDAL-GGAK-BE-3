@@ -7,6 +7,7 @@ import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,6 +25,7 @@ import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
 import com.ddalggak.finalproject.domain.ticket.service.TicketService;
 import com.ddalggak.finalproject.global.aop.ExecutionTimer;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
+import com.ddalggak.finalproject.global.validation.RequestId;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
+@Validated
 public class TicketController {
 	private final TicketService ticketService;
 
@@ -51,8 +54,8 @@ public class TicketController {
 	@GetMapping("/ticket/{ticketId}")
 	@ExecutionTimer
 	public ResponseEntity<TicketResponseDto> getTicket(
-		@PathVariable Long ticketId,
-		@RequestParam Long taskId,
+		@Valid @RequestId @PathVariable Long ticketId,
+		@Valid @RequestId @RequestParam Long taskId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return ticketService.getTicket(ticketId, taskId, userDetails.getUser());
 	}
@@ -62,7 +65,7 @@ public class TicketController {
 	@PatchMapping("/ticket/{ticketId}")
 	@ExecutionTimer
 	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> updateTicket(
-		@PathVariable Long ticketId,
+		@Valid @RequestId @PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@Valid @RequestBody TicketRequestDto ticketRequestDto) {
 		return ticketService.updateTicket(ticketId, ticketRequestDto, userDetails.getUser());
@@ -72,7 +75,8 @@ public class TicketController {
 	@Operation(summary = "delete ticket", description = "Ticket 삭제 delete 메서드 체크")
 	@DeleteMapping("/ticket/{ticketId}")
 	@ExecutionTimer
-	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> deleteTicket(@PathVariable Long ticketId,
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> deleteTicket(
+		@Valid @RequestId @PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return ticketService.deleteTicket(userDetails.getUser(), ticketId);
 	}
@@ -81,7 +85,8 @@ public class TicketController {
 	@Operation(summary = "complete ticket", description = "Ticket 완료 complete 메서드 체크")
 	@PostMapping("/ticket/{ticketId}/complete")
 	@ExecutionTimer
-	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> completeTicket(@PathVariable Long ticketId,
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> completeTicket(
+		@Valid @RequestId @PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return ticketService.completeTicket(userDetails.getUser(), ticketId);
 	}
@@ -90,7 +95,8 @@ public class TicketController {
 	@Operation(summary = "assign ticket", description = "Ticket 가져가기 assign 메서드 체크")
 	@PostMapping("/ticket/{ticketId}/assign")
 	@ExecutionTimer
-	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> assignTicket(@PathVariable Long ticketId,
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> assignTicket(
+		@Valid @RequestId @PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return ticketService.assignTicket(userDetails.getUser(), ticketId);
 	}
@@ -108,7 +114,8 @@ public class TicketController {
 	@Operation(summary = "move ticketStatus", description = "ticket의 상태 todo와 inprogress 전환")
 	@PostMapping("/ticket/{ticketId}/movement")
 	@ExecutionTimer
-	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> movementTicket(@PathVariable Long ticketId,
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> movementTicket(
+		@Valid @RequestId @PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return ticketService.movementTicket(userDetails.getUser(), ticketId);
 	}
@@ -117,7 +124,8 @@ public class TicketController {
 	@Operation(summary = "move ticketStatus to review-enrollment", description = "검증이 끝난 ticket의 상태를 review로 전환")
 	@PostMapping("/ticket/{ticketId}/review")
 	@ExecutionTimer
-	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> moveTicketToReview(@PathVariable Long ticketId,
+	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> moveTicketToReview(
+		@Valid @RequestId @PathVariable Long ticketId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		return ticketService.moveTicketToReview(userDetails.getUser(), ticketId);
 	}
