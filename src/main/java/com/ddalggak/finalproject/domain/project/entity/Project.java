@@ -21,6 +21,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
 import com.ddalggak.finalproject.domain.task.entity.Task;
+import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.global.entity.BaseEntity;
 
 import lombok.AccessLevel;
@@ -92,5 +93,16 @@ public class Project extends BaseEntity {
 	public void update(ProjectRequestDto projectRequestDto) {
 		projectTitle = projectRequestDto.getProjectTitle();
 		thumbnail = projectRequestDto.getThumbnail();
+	}
+
+	public void deleteProjectUser(User user) {
+		ProjectUser targetUser = null;
+		for (ProjectUser projectUser : projectUserList) {
+			if (projectUser.getUser().getEmail().equals(user.getEmail())) {
+				targetUser = projectUser;
+				break;
+			}
+		}
+		projectUserList.remove(targetUser);
 	}
 }

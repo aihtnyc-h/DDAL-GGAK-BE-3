@@ -169,7 +169,8 @@ public class ProjectService {
 		} else if (!project.getProjectLeader().equals(user.getEmail())) {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
-		project.getProjectUserList().remove(ProjectUser.create(project, projectUser));
+		project.deleteProjectUser(projectUser);
+		projectRepository.save(project);
 		// 참여중인 유저 목록 리턴
 		List<UserResponseDto> userList = userRepository
 			.getProjectUserFromProjectId(projectId)
