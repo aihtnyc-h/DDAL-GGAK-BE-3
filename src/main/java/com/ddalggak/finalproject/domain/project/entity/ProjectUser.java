@@ -35,7 +35,7 @@ public class ProjectUser {
 	@JoinColumn(name = "UserId")
 	private User user;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "ProjectId")
 	private Project project;
 
