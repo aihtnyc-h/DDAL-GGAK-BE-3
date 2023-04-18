@@ -85,7 +85,7 @@ public class TaskController {
 	@ExecutionTimer
 	public ResponseEntity<List<UserResponseDto>> inviteTask(
 		@AuthenticationPrincipal UserDetailsImpl user,
-		@Valid @RequestBody TaskRequestDto taskRequestDto,
+		@RequestBody TaskRequestDto taskRequestDto,
 		@RequestId @PathVariable Long taskId) {
 		return taskService.inviteTask(user.getUser(), taskRequestDto, taskId);
 	}
