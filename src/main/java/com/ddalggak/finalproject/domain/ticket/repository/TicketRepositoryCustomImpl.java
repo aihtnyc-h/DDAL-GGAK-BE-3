@@ -116,6 +116,16 @@ public class TicketRepositoryCustomImpl implements TicketRepositoryCustom {
 			.fetch();
 	}
 
+	@Override
+	public List<Ticket> findByStatusAndTaskId(TicketStatus status, Long taskId) {
+		return queryFactory
+			.selectFrom(ticket)
+			.where(ticket.status.eq(status),
+				ticket.task.taskId.eq(taskId))
+			.orderBy(ticket.createdAt.asc())
+			.fetch();
+	}
+
 	private BooleanExpression getWithOneYear(LocalDate localDate) {
 		return localDate != null ?
 			ticket.completedAt.between(localDate.minusYears(1).atStartOfDay(), localDate.plusDays(1).atStartOfDay()) :

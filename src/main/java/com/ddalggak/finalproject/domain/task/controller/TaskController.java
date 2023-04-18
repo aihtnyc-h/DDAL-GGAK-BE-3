@@ -21,6 +21,7 @@ import com.ddalggak.finalproject.domain.label.dto.LabelResponseDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskBriefResponseDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskResponseDto;
+import com.ddalggak.finalproject.domain.task.dto.TaskReviewDto;
 import com.ddalggak.finalproject.domain.task.service.TaskService;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
@@ -56,8 +57,8 @@ public class TaskController {
 	@ExecutionTimer
 	public ResponseEntity<TaskResponseDto> viewTask(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestId @RequestParam Long projectId,
-		@RequestId @PathVariable Long taskId) {
+		@Valid @RequestId @RequestParam Long projectId,
+		@Valid @RequestId @PathVariable Long taskId) {
 		return taskService.viewTask(userDetails.getUser(), projectId, taskId);
 	}
 
@@ -66,7 +67,7 @@ public class TaskController {
 	@ExecutionTimer
 	public ResponseEntity<List<TaskBriefResponseDto>> deleteTask(
 		@AuthenticationPrincipal UserDetailsImpl user,
-		@RequestId @PathVariable Long taskId) {
+		@Valid @RequestId @PathVariable Long taskId) {
 		return taskService.deleteTask(user.getUser(), taskId);
 	}
 
@@ -75,7 +76,7 @@ public class TaskController {
 	@ExecutionTimer
 	public ResponseEntity<List<UserResponseDto>> assignLeader(
 		@AuthenticationPrincipal UserDetailsImpl user,
-		@RequestId @PathVariable Long taskId,
+		@Valid @RequestId @PathVariable Long taskId,
 		@RequestBody EmailRequestDto emailRequestDto) {
 		return taskService.assignLeader(user.getUser(), emailRequestDto, taskId);
 	}
@@ -86,7 +87,7 @@ public class TaskController {
 	public ResponseEntity<List<UserResponseDto>> inviteTask(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@RequestBody TaskRequestDto taskRequestDto,
-		@RequestId @PathVariable Long taskId) {
+		@Valid @RequestId @PathVariable Long taskId) {
 		return taskService.inviteTask(user.getUser(), taskRequestDto, taskId);
 	}
 
@@ -95,7 +96,7 @@ public class TaskController {
 	@ExecutionTimer
 	public ResponseEntity<List<LabelResponseDto>> viewLabels(
 		@AuthenticationPrincipal UserDetailsImpl user,
-		@RequestId @PathVariable Long taskId) {
+		@Valid @RequestId @PathVariable Long taskId) {
 		return taskService.viewLabels(user.getUser(), taskId);
 	}
 
@@ -104,7 +105,16 @@ public class TaskController {
 	@ExecutionTimer
 	public ResponseEntity<Map<TicketStatus, List<TicketResponseDto>>> viewTickets(
 		@AuthenticationPrincipal UserDetailsImpl user,
-		@RequestId @PathVariable Long taskId) {
+		@Valid @RequestId @PathVariable Long taskId) {
 		return taskService.viewTickets(user.getUser(), taskId);
+	}
+
+	@Operation(summary = "task의 review 상태 티켓 조회", description = "api for view tickets of review status")
+	@GetMapping("/task/{taskId}/tickets/review")
+	@ExecutionTimer
+	public ResponseEntity<TaskReviewDto> viewReviewTickets(
+		@AuthenticationPrincipal UserDetailsImpl user,
+		@Valid @RequestId @PathVariable Long taskId) {
+		return taskService.viewReviewTickets(user.getUser(), taskId);
 	}
 }

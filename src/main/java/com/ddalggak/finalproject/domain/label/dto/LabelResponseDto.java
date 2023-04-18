@@ -12,4 +12,6 @@ public class LabelResponseDto {
 	private Long labelId;
 
 	private String labelTitle;
+
+	private String labelLeader;
 }

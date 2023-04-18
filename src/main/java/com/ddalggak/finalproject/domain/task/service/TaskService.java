@@ -21,6 +21,7 @@ import com.ddalggak.finalproject.domain.task.dto.TaskBriefResponseDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskMapper;
 import com.ddalggak.finalproject.domain.task.dto.TaskRequestDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskResponseDto;
+import com.ddalggak.finalproject.domain.task.dto.TaskReviewDto;
 import com.ddalggak.finalproject.domain.task.dto.TaskUserRequestDto;
 import com.ddalggak.finalproject.domain.task.entity.Task;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
@@ -200,6 +201,25 @@ public class TaskService {
 		List<Ticket> ticketList = ticketRepository.findWithTaskId(task.getTaskId());
 		Map<TicketStatus, List<TicketResponseDto>> ListWithTicketStatus = ticketMapper.toDtoMapWithStatus(ticketList);
 		return ok(ListWithTicketStatus);
+	}
+
+	public ResponseEntity<TaskReviewDto> viewReviewTickets(User user, Long taskId) {
+		// 유효성 검증
+		Task task = validateTask(taskId);
+		validateExistMember(task.getProject(), ProjectUser.create(task.getProject(), user));
+		// 결과 리턴
+		TaskReviewDto result = new TaskReviewDto();
+		List<LabelResponseDto> labels = labelRepository.findByTaskId(taskId)
+			.stream()
+			.map(labelMapper::toDto)
+			.collect(Collectors.toList());
+		result.setLabelLeaders(labels);
+		List<TicketResponseDto> ticketsInReview = ticketRepository.findByStatusAndTaskId(TicketStatus.REVIEW, taskId)
+			.stream()
+			.map(ticketMapper::toDto)
+			.collect(Collectors.toList());
+		result.setTickets(ticketsInReview);
+		return ok(result);
 	}
 
 	private void validateExistMember(Task task, TaskUser taskUser) {
