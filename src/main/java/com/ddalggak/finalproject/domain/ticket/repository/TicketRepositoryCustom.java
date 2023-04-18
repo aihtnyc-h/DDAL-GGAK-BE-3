@@ -21,7 +21,7 @@ public interface TicketRepositoryCustom {
 
 	List<DateTicket> getCompletedTicketCountByDate(TicketSearchCondition condition, Long userId);
 
-	List<Ticket> getTicketByUserId(TicketSearchCondition condition, Long userId);
+	List<Ticket> getTicketByUserId(Long userId);
 
 	Slice<TicketResponseDto> getSlicedTicketCountByDate(TicketSearchCondition condition, Pageable pageable,
 		Long userId);

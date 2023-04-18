@@ -32,6 +32,9 @@ public class TaskBriefResponseDto { // task 간단 요약제공
 	@Schema(name = "due date for expire", example = "3")
 	public int dueDate;
 
+	@Schema(name = "progress", example = "88")
+	public int progress;
+
 	@Schema(name = "number of completed tickets", example = "10", defaultValue = "0")
 	public int completedTickets;
 

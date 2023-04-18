@@ -28,7 +28,7 @@ public interface TicketMapper {
 		@Mapping(target = "description", source = "entity.ticketDescription"),
 		@Mapping(target = "priority", source = "entity.priority"),
 		@Mapping(target = "difficulty", source = "entity.difficulty"),
-		@Mapping(target = "assigned", source = "entity.user.email"),
+		@Mapping(target = "assigned", source = "entity.user.nickname"),
 		@Mapping(target = "expiredAt", source = "entity.expiredAt"),
 		@Mapping(target = "label", source = "entity.label.labelTitle"),
 		@Mapping(target = "commentList", source = "entity.comment"),

@@ -41,6 +41,7 @@ public interface TaskMapper {
 		@Mapping(target = "taskTitle", source = "entity.taskTitle"),
 		@Mapping(target = "expiredAt", source = "entity.expiredAt"),
 		@Mapping(target = "dueDate", expression = "java(dueDate(entity))"),
+		@Mapping(target = "progress", expression = "java(calculateProgress(entity))"),
 		@Mapping(target = "completedTickets", expression = "java(countOfCompletedTickets(entity))"),
 		@Mapping(target = "totalTickets", expression = "java(countOfTotalTicket(entity))"),
 		@Mapping(target = "participantsCount", expression = "java(countOfParticipants(entity))"),
@@ -94,16 +95,16 @@ public interface TaskMapper {
 	 * 3. 진행률 같은 경우, DB에 쌓아놓고 벌크 쿼리 주기적으로 날려주는 것보다는, 가지고 와서 계산하는게 좋을 것 같다.
 	 */
 	@Named("calculateProgress")
-	default double calculateProgress(Task task) {
+	default int calculateProgress(Task task) {
 		LocalDateTime currentDate = LocalDateTime.now();
 		if (task.getExpiredAt() == null) {
-			return 0.0d;
+			return 0;
 		} else if (currentDate.isAfter(task.getExpiredAt().plusDays(1).atStartOfDay())) {
-			return 100.0d;
+			return 100;
 		} else {
 			long now = ChronoUnit.HOURS.between(task.getCreatedAt(), currentDate);
 			long total = ChronoUnit.HOURS.between(task.getCreatedAt(), task.getExpiredAt().plusDays(1).atStartOfDay());
-			return (100 * now / (double)total);
+			return (int)(100 * now / total);
 		}
 	}
 

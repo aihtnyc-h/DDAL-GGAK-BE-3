@@ -109,15 +109,11 @@ public class TicketRepositoryCustomImpl implements TicketRepositoryCustom {
 	}
 
 	@Override
-	public List<Ticket> getTicketByUserId(TicketSearchCondition condition, Long userId) {
+	public List<Ticket> getTicketByUserId(Long userId) {
 		return queryFactory
 			.selectFrom(ticket)
-			.where(ticket.user.userId.eq(userId),
-				statusEq(condition.getStatus())
-			)
-			.orderBy(ticket.createdAt.desc())
+			.where(ticket.user.userId.eq(userId))
 			.fetch();
-
 	}
 
 	private BooleanExpression getWithOneYear(LocalDate localDate) {
