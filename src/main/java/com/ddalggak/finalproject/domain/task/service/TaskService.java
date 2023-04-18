@@ -30,6 +30,7 @@ import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.entity.Ticket;
 import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
 import com.ddalggak.finalproject.domain.ticket.repository.TicketRepository;
+import com.ddalggak.finalproject.domain.user.dto.EmailRequestDto;
 import com.ddalggak.finalproject.domain.user.dto.UserMapper;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
@@ -156,15 +157,16 @@ public class TaskService {
 
 	// 태스크 리더 지정
 	@Transactional
-	public ResponseEntity<List<UserResponseDto>> assignLeader(User user, TaskRequestDto taskRequestDto, Long taskId) {
+	public ResponseEntity<List<UserResponseDto>> assignLeader(User user, EmailRequestDto emailRequestDto,
+		Long taskId) {
 		//유효성 검증
-		User userToLeader = validateUserByEmail(taskRequestDto.getEmail());
+		User userToLeader = validateUserByEmail(emailRequestDto.getEmail());
 		Task task = validateTask(taskId);
 		validateExistMember(task, TaskUser.create(task, userToLeader));
 		// 권한 검증 : 프로젝트 리더만 task Leader 지정 가능, 아니면 해당 프로젝트의 task Leader만 위임 가능
 		if (task.getProject().getProjectLeader().equals(user.getEmail()) ||
 			task.getTaskLeader().equals(user.getEmail())) {
-			task.setTaskLeader(taskRequestDto.getEmail());
+			task.setTaskLeader(emailRequestDto.getEmail());
 		} else {
 			throw new CustomException(UNAUTHENTICATED_USER);
 		}
