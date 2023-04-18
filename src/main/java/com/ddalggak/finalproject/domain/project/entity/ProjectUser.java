@@ -1,5 +1,6 @@
 package com.ddalggak.finalproject.domain.project.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -34,7 +35,7 @@ public class ProjectUser {
 	@JoinColumn(name = "UserId")
 	private User user;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "ProjectId")
 	private Project project;
 
