@@ -1,5 +1,6 @@
 package com.ddalggak.finalproject.domain.user.dto;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
 import lombok.AllArgsConstructor;
@@ -11,5 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class NicknameDto {
 	@Pattern(regexp = "^(?=.*[A-Za-z가-힣].*[A-Za-z가-힣])[A-Za-zㄱ-ㅎㅏ-ㅣ가-힣]*$")
+	@NotBlank
 	private String nickname;
 }
