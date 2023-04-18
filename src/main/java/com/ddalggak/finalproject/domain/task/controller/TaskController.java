@@ -24,6 +24,7 @@ import com.ddalggak.finalproject.domain.task.dto.TaskResponseDto;
 import com.ddalggak.finalproject.domain.task.service.TaskService;
 import com.ddalggak.finalproject.domain.ticket.dto.TicketResponseDto;
 import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
+import com.ddalggak.finalproject.domain.user.dto.EmailRequestDto;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.global.aop.ExecutionTimer;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
@@ -75,8 +76,8 @@ public class TaskController {
 	public ResponseEntity<List<UserResponseDto>> assignLeader(
 		@AuthenticationPrincipal UserDetailsImpl user,
 		@RequestId @PathVariable Long taskId,
-		@Valid @RequestBody TaskRequestDto taskRequestDto) {
-		return taskService.assignLeader(user.getUser(), taskRequestDto, taskId);
+		@RequestBody EmailRequestDto emailRequestDto) {
+		return taskService.assignLeader(user.getUser(), emailRequestDto, taskId);
 	}
 
 	@Operation(summary = "Task 초대", description = "api for invite user to task")
@@ -84,7 +85,7 @@ public class TaskController {
 	@ExecutionTimer
 	public ResponseEntity<List<UserResponseDto>> inviteTask(
 		@AuthenticationPrincipal UserDetailsImpl user,
-		@Valid @RequestBody TaskRequestDto taskRequestDto,
+		@RequestBody TaskRequestDto taskRequestDto,
 		@RequestId @PathVariable Long taskId) {
 		return taskService.inviteTask(user.getUser(), taskRequestDto, taskId);
 	}
