@@ -20,7 +20,7 @@ public class UserStatsDto {
 	private String thumbnail;
 	private Integer totalDifficulty;
 	private Integer totalPriority;
-	private Double totalScore;
+	private Double totalScore = 0.0d;
 
 	@QueryProjection
 	public UserStatsDto(Long id, String email, String nickname, String thumbnail) {
