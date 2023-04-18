@@ -125,6 +125,7 @@ public class ProjectService {
 		ProjectUser projectUser = ProjectUser.create(project, user);
 		validateDuplicateMember(project, projectUser);
 		project.addProjectUser(projectUser);
+		projectRepository.save(project);
 		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(
 			user.getUserId());
 		return ok(result);
