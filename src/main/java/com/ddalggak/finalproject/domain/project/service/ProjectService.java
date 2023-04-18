@@ -120,11 +120,14 @@ public class ProjectService {
 	@Transactional
 	public ResponseEntity<List<ProjectBriefResponseDto>> joinProject(User user,
 		String projectInviteCode) {
+		// 유효성 검사
 		Project project = projectRepository.findByUuid(projectInviteCode).orElseThrow(
 			() -> new CustomException(INVALID_INVITE_CODE));
 		ProjectUser projectUser = ProjectUser.create(project, user);
 		validateDuplicateMember(project, projectUser);
+		// 프로젝트에 user 추가
 		project.addProjectUser(projectUser);
+		projectRepository.save(project);
 		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(
 			user.getUserId());
 		return ok(result);
