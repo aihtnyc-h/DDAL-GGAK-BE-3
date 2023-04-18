@@ -1,5 +1,7 @@
 package com.ddalggak.finalproject.domain.label.dto;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -25,4 +27,6 @@ public interface LabelMapper extends GenericMapper<LabelResponseDto, Label> {
 	default void updateEntity(LabelResponseDto dto, Label entity) {
 
 	}
+
+	List<LabelResponseDto> toDtoList(List<Label> entityList);
 }
