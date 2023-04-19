@@ -22,6 +22,7 @@ import com.ddalggak.finalproject.domain.project.dto.ProjectInviteCodeDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectRequestDto;
 import com.ddalggak.finalproject.domain.project.dto.ProjectResponseDto;
 import com.ddalggak.finalproject.domain.project.service.ProjectService;
+import com.ddalggak.finalproject.domain.task.dto.TaskSearchCondition;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.global.aop.ExecutionTimer;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
@@ -129,8 +130,9 @@ public class ProjectController {
 	@ExecutionTimer
 	public ResponseEntity<List<UserResponseDto>> viewProjectUsers(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@PathVariable Long projectId) {
-		return projectService.viewProjectUsers(userDetails.getUser(), projectId);
+		@PathVariable Long projectId,
+		TaskSearchCondition condition) {
+		return projectService.viewProjectUsers(userDetails.getUser(), projectId, condition);
 	}
 
 	@Operation(summary = "프로젝트 참여자 삭제", description = "api for delete project member")
