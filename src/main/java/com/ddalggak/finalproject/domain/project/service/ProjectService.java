@@ -28,6 +28,7 @@ import com.ddalggak.finalproject.domain.project.dto.ProjectUserRequestDto;
 import com.ddalggak.finalproject.domain.project.entity.Project;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.project.repository.ProjectRepository;
+import com.ddalggak.finalproject.domain.task.dto.TaskSearchCondition;
 import com.ddalggak.finalproject.domain.user.dto.UserMapper;
 import com.ddalggak.finalproject.domain.user.dto.UserResponseDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
@@ -132,6 +133,7 @@ public class ProjectService {
 		validateDuplicateMember(project, projectUser);
 		// 프로젝트에 user 추가
 		project.addProjectUser(projectUser);
+		projectRepository.save(project);
 		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(
 			user.getUserId());
 		return ok(result);
@@ -190,14 +192,15 @@ public class ProjectService {
 
 	// 프로젝트에 참여중인 유저 목록 조회
 	@Transactional(readOnly = true)
-	public ResponseEntity<List<UserResponseDto>> viewProjectUsers(User user, Long projectId) {
+	public ResponseEntity<List<UserResponseDto>> viewProjectUsers(User user, Long projectId,
+		TaskSearchCondition condition) {
 		// 유효성 검증
 		Project project = validateProject(projectId);
 		validateExistMember(project, ProjectUser.create(project, user));
 
 		// 참여중인 유저 목록 리턴
 		List<UserResponseDto> userList = userRepository
-			.getProjectUserFromProjectId(projectId)
+			.getProjectUserWithTaskCondition(projectId, condition)
 			.stream()
 			.map(userMapper::toUserResponseDtoWithProjectUser)
 			.collect(Collectors.toList());
@@ -295,5 +298,6 @@ public class ProjectService {
 			projectRepository.save(project);
 		}
 	}
+
 }
 
