@@ -14,12 +14,14 @@ import java.util.List;
 
 import com.ddalggak.finalproject.domain.label.entity.LabelUser;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
+import com.ddalggak.finalproject.domain.task.dto.TaskSearchCondition;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
 import com.ddalggak.finalproject.domain.user.dto.QUserStatsDto;
 import com.ddalggak.finalproject.domain.user.dto.UserStatsDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
 import com.ddalggak.finalproject.global.error.CustomException;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -119,4 +121,30 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
 	}
 
+	@Override
+	public List<ProjectUser> getProjectUserWithTaskCondition(Long projectId, TaskSearchCondition condition) {
+		NumberExpression<Integer> rankPath = new CaseBuilder()
+			.when(projectUser.user.email.eq(project.projectLeader)).then(1)
+			.otherwise(2);
+
+		return queryFactory
+			.selectDistinct(projectUser)
+			.from(project)
+			.join(project.projectUserList, projectUser)
+			.leftJoin(project.taskList, task)
+			.where(project.projectId.eq(projectId),
+				statusNonEq(condition))
+			.orderBy(rankPath.asc())
+			.fetch();
+	}
+
+	private BooleanExpression statusNonEq(TaskSearchCondition condition) {
+		return condition.getTaskId() == null ? null : projectUser.user.notIn(
+			queryFactory
+				.select(taskUser.user)
+				.from(taskUser)
+				.join(taskUser.task, task)
+				.where(task.taskId.eq(condition.getTaskId()))
+		);
+	}
 }
