@@ -2,7 +2,6 @@ package com.ddalggak.finalproject.domain.task.dto;
 
 import java.time.LocalDate;
 
-import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,7 +22,7 @@ public class TaskRequestDto {
 	public String taskTitle;
 
 	@Schema(name = "when does this project expired at", example = "2023-03-22")
-	@Future(message = "expired date must be future")
+	// @Future(message = "expired date must be future")
 	private LocalDate expiredAt;
 
 	@Schema(name = "email for inviting user", example = "kimdaehyun@daum.net")
