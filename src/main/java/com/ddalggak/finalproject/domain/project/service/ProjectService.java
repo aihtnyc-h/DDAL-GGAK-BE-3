@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -53,6 +54,9 @@ public class ProjectService {
 	private final UserRepository userRepository;
 	private final MailService mailService;
 
+	@Value("${file.size.limit}")
+	private Long fileSizeLimit;//10메가바이트/킬로바이트/바이트
+
 	@Transactional
 	public ResponseEntity<List<ProjectBriefResponseDto>> createProject(User user, MultipartFile image,
 		ProjectRequestDto projectRequestDto) throws
@@ -68,6 +72,7 @@ public class ProjectService {
 		String imageUrl = null;
 		if (!(image == null)) {
 			fileCheck(image);
+			fileSizeCheck(image);
 			imageUrl = s3Uploader.upload(image, "project");
 		}
 		projectRequestDto.setThumbnail(imageUrl);
@@ -127,7 +132,6 @@ public class ProjectService {
 		validateDuplicateMember(project, projectUser);
 		// 프로젝트에 user 추가
 		project.addProjectUser(projectUser);
-		projectRepository.save(project);
 		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(
 			user.getUserId());
 		return ok(result);
@@ -143,6 +147,7 @@ public class ProjectService {
 			throw new CustomException(ErrorCode.UNAUTHENTICATED_USER);
 		}
 		fileCheck(image);
+		fileSizeCheck(image);
 		// 기존 이미지 삭제 후 새로운 이미지 업로드
 		if (project.getThumbnail() != null) {
 			s3Uploader.delete(project.getThumbnail());
@@ -269,6 +274,14 @@ public class ProjectService {
 				"webp"))) {
 				throw new CustomException(ErrorCode.TYPE_MISMATCH);
 			}
+		}
+	}
+
+	private void fileSizeCheck(MultipartFile image) {
+		// 파일 용량 확인
+		long fileSize = image.getSize();
+		if (fileSize > fileSizeLimit) {
+			throw new IllegalArgumentException("총 용량 10MB이하만 업로드 가능합니다");
 		}
 	}
 
