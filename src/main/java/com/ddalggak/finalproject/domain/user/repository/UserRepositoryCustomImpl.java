@@ -16,6 +16,7 @@ import com.ddalggak.finalproject.domain.label.entity.LabelUser;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.task.dto.TaskSearchCondition;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
+import com.ddalggak.finalproject.domain.ticket.entity.TicketStatus;
 import com.ddalggak.finalproject.domain.user.dto.QUserStatsDto;
 import com.ddalggak.finalproject.domain.user.dto.UserStatsDto;
 import com.ddalggak.finalproject.domain.user.entity.User;
@@ -111,12 +112,35 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 		}
 
 		List<Tuple> stats = queryFactory
-			.select(ticket.difficulty.sum(), ticket.priority.sum())
+			.select(ticket.difficulty.sum(), ticket.priority.sum(), ticket.difficulty.avg(), ticket.priority.avg(),
+				ticket.count())
 			.from(ticket)
 			.where(ticket.user.userId.eq(userId))
 			.fetch();
-		userStatsDto.setTotalDifficulty(stats.get(0).get(ticket.difficulty.sum()));
-		userStatsDto.setTotalPriority(stats.get(0).get(ticket.priority.sum()));
+
+		Long completedTicketCount = queryFactory
+			.select(ticket.count())
+			.from(ticket)
+			.where(ticket.user.userId.eq(userId),
+				ticket.status.eq(TicketStatus.DONE))
+			.fetchOne();
+		Integer calculatedTotalDifficulty = stats.get(0).get(ticket.difficulty.sum()) == null ? 0 :
+			stats.get(0).get(ticket.difficulty.sum());
+		Integer calculatedTotalPriority = stats.get(0).get(ticket.priority.sum()) == null ? 0 :
+			stats.get(0).get(ticket.priority.sum());
+		Double calculatedDifficulty =
+			(double)(stats.get(0).get(ticket.priority.avg()) == null ? 0 :
+				Math.round(stats.get(0).get(ticket.priority.avg()) * 100 / 100));
+		Double calculatedPriority = stats.get(0).get(ticket.difficulty.avg()) == null ? 0 :
+			(double)(Math.round(stats.get(0).get(ticket.difficulty.avg()) * 100 / 100));
+
+		userStatsDto.setTotalDifficulty(calculatedTotalDifficulty);
+		userStatsDto.setTotalPriority(calculatedTotalPriority);
+		userStatsDto.setTotalTicketCount(stats.get(0).get(ticket.count()));
+		userStatsDto.setAveragePriority(calculatedPriority);
+		userStatsDto.setAverageDifficulty(calculatedDifficulty);
+		userStatsDto.setCompletedTicketCount(completedTicketCount);
+
 		return userStatsDto;
 
 	}
