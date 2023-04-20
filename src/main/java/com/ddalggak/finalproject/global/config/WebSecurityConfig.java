@@ -1,8 +1,14 @@
 package com.ddalggak.finalproject.global.config;
 
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -81,20 +88,20 @@ public class WebSecurityConfig {
 			.antMatchers("/actuator/**").permitAll()
 			.antMatchers("/health").permitAll()
 			.antMatchers("/version").permitAll()
-			.and()
-			.oauth2Login()
-			.authorizationEndpoint()
-			.baseUri("/oauth2/authorization/*")
-			.authorizationRequestRepository(cookieAuthorizationRequestRepository())
-			.and()
-			.redirectionEndpoint()
-			.baseUri("/api/login/oauth2/code/*")
-			.and()
-			.userInfoEndpoint()
-			.userService(customOAuth2UserService)
-			.and()
-			.successHandler(oAuth2AuthenticationSuccessHandler())
-			.failureHandler(oAuth2AuthenticationFailureHandler())
+			// .and()
+			// .oauth2Login()
+			// .authorizationEndpoint()
+			// .baseUri("/oauth2/authorization/*")
+			// .authorizationRequestRepository(cookieAuthorizationRequestRepository())
+			// .and()
+			// .redirectionEndpoint()
+			// .baseUri("/api/login/oauth2/code/*")
+			// .and()
+			// .userInfoEndpoint()
+			// .userService(customOAuth2UserService)
+			// .and()
+			// .successHandler(oAuth2AuthenticationSuccessHandler())
+			// .failureHandler(oAuth2AuthenticationFailureHandler())
 
 			//                .antMatchers(HttpMethod.POST, "/api/logout").permitAll()
 			// JWT 인증/인가를 사용하기 위한 설정
@@ -108,12 +115,11 @@ public class WebSecurityConfig {
 		// 로그인 사용
 		http.formLogin().permitAll();// 로그인 페이지가 있을 경우 넣기!.loginPage(".api/user/login-page").permitAll();
 		// 로그인 실패
-		http.exceptionHandling().accessDeniedPage("/api/auth/login");
+		http.exceptionHandling().accessDeniedPage("/login");
 
 		http.logout()//.permitAll() // 로그아웃 기능 작동함
 			.logoutUrl("Logout") // 로그아웃 처리 URL, default: /logout, 원칙적으로 post 방식만 지원
-			.logoutSuccessUrl("/api/auth/login") // 로그아웃 성공 후 이동페이지
-			.deleteCookies("JSESSIONID", "remember-me");
+			.logoutSuccessUrl("/login"); // 로그아웃 성공 후 이동페이지
 		return http.build();
 	}
 	//    protected void cofigure(HttpSecurity http) throws Exception {
@@ -202,6 +208,13 @@ public class WebSecurityConfig {
 		return new OAuth2AuthenticationFailureHandler(cookieAuthorizationRequestRepository());
 	}
 
+	@Bean
+	public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
+		return restTemplateBuilder
+			.requestFactory(() -> new BufferingClientHttpRequestFactory(new SimpleClientHttpRequestFactory()))
+			.additionalMessageConverters(new StringHttpMessageConverter(StandardCharsets.UTF_8))
+			.build();
+	}
 }
 
 
