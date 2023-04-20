@@ -99,7 +99,7 @@ public class AuthController {
 	public ResponseEntity<?> validateToken(
 		HttpServletRequest request) {
 		// 토큰 가져오기
-		String token = jwtUtil.resolveAccessToken(request);
+		String token = jwtUtil.resolveToken(request);
 		Claims claims;
 		if (token != null) {
 			// 토큰 유효성 검사
@@ -115,13 +115,13 @@ public class AuthController {
 		return SuccessResponseDto.of(SuccessCode.SUCCESS_AUTH);
 	}
 
-	@Operation(summary = "refresh token", description = "토큰 재발급 get 메서드 체크")
-	@GetMapping("/refreshToken")
-	@ExecutionTimer
-	public void refreshToken(
-		HttpServletRequest request,
-		HttpServletResponse response) {
-		tokenService.refreshToken(request, response);
-	}
+	// @Operation(summary = "refresh token", description = "토큰 재발급 get 메서드 체크")
+	// @GetMapping("/refreshToken")
+	// @ExecutionTimer
+	// public void refreshToken(
+	// 	HttpServletRequest request,
+	// 	HttpServletResponse response) {
+	// 	tokenService.refreshToken(request, response);
+	// }
 
 }
