@@ -1,4 +1,4 @@
-package com.ddalggak.finalproject.domain.auth;
+package com.ddalggak.finalproject.domain.auth.controller;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ddalggak.finalproject.domain.auth.service.AuthService;
 import com.ddalggak.finalproject.domain.user.dto.EmailRequestDto;
 import com.ddalggak.finalproject.domain.user.dto.UserPageDto;
 import com.ddalggak.finalproject.domain.user.dto.UserRequestDto;
@@ -24,6 +25,7 @@ import com.ddalggak.finalproject.global.dto.SuccessResponseDto;
 import com.ddalggak.finalproject.global.error.ErrorCode;
 import com.ddalggak.finalproject.global.error.ErrorResponse;
 import com.ddalggak.finalproject.global.jwt.JwtUtil;
+import com.ddalggak.finalproject.global.jwt.token.service.TokenService;
 import com.ddalggak.finalproject.global.mail.MailService;
 import com.ddalggak.finalproject.global.mail.emailAuthCode.EmailAuthCodeDto;
 import com.ddalggak.finalproject.global.security.UserDetailsImpl;
@@ -42,6 +44,7 @@ public class AuthController {
 	private final AuthService authService;
 	private final JwtUtil jwtUtil;
 	private final UserRepository userRepository;
+	private final TokenService tokenService;
 
 	@Operation(summary = "email authentication", description = "email 인증 코드 발송 post 메서드 체크")
 	@PostMapping("/email")
@@ -96,7 +99,7 @@ public class AuthController {
 	public ResponseEntity<?> validateToken(
 		HttpServletRequest request) {
 		// 토큰 가져오기
-		String token = jwtUtil.resolveToken(request);
+		String token = jwtUtil.resolveAccessToken(request);
 		Claims claims;
 		if (token != null) {
 			// 토큰 유효성 검사
@@ -111,4 +114,14 @@ public class AuthController {
 			throw new UserException(ErrorCode.INVALID_REQUEST);
 		return SuccessResponseDto.of(SuccessCode.SUCCESS_AUTH);
 	}
+
+	@Operation(summary = "refresh token", description = "토큰 재발급 get 메서드 체크")
+	@GetMapping("/refreshToken")
+	@ExecutionTimer
+	public void refreshToken(
+		HttpServletRequest request,
+		HttpServletResponse response) {
+		tokenService.refreshToken(request, response);
+	}
+
 }
