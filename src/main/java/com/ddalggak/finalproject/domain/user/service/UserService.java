@@ -106,7 +106,7 @@ public class UserService {
 			.stream()
 			.map(ticketMapper::toDto)
 			.forEach(ticketResponseDto -> {
-				result.addScore(ticketResponseDto.getScore());
+				result.addScore(Math.round(ticketResponseDto.getScore() * 100) / 100.0);
 			});
 		return ok(result);
 	}
