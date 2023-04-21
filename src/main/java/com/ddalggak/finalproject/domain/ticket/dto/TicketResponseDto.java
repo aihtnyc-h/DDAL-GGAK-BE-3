@@ -40,8 +40,6 @@ public class TicketResponseDto {
 	private LocalDateTime completedAt;
 	@Schema(name = "label", example = "label leader")
 	private String label;
-	@Schema(name = "ticket Progress", example = "10")
-	private Double progress;
 	@Schema(name = "score of ticket", example = "10")
 	private Double score;
 	@Schema(name = "total comments")

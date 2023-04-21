@@ -62,11 +62,8 @@ public class ProjectService {
 	public ResponseEntity<List<ProjectBriefResponseDto>> createProject(User user, MultipartFile image,
 		ProjectRequestDto projectRequestDto) throws
 		IOException {
-		//todo 로직 수정
-		User existUser = userRepository.findByEmail(user.getEmail())
-			.orElseThrow(() -> new UserException(MEMBER_NOT_FOUND));
 		//1. user로 projectUserRequestDto 생성
-		ProjectUserRequestDto projectUserRequestDto = ProjectUserRequestDto.create(existUser);
+		ProjectUserRequestDto projectUserRequestDto = ProjectUserRequestDto.create(user);
 		//2. projectUserDto로 projectUser생성
 		ProjectUser projectUser = ProjectUser.create(projectUserRequestDto);
 		//2.5 image S3 서버에 업로드 -> 분기처리
@@ -83,7 +80,7 @@ public class ProjectService {
 		//4. projectRepository에 project 저장
 		projectRepository.save(project);
 		//5. projectResponseDto로 반환
-		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(existUser.getUserId());
+		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(user.getUserId());
 		return ResponseEntity.status(201)
 			.body(result);
 	}
@@ -158,6 +155,7 @@ public class ProjectService {
 		// 업로드한 이미지의 url을 바탕으로 update 쿼리, dynamic update 기준 업데이트
 		projectRequestDto.setThumbnail(imageUrl);
 		project.update(projectRequestDto);
+		projectRepository.save(project);
 
 		// 새로운 프로젝트 다시 받아옴
 		List<ProjectBriefResponseDto> result = projectRepository.findProjectAllByUserId(

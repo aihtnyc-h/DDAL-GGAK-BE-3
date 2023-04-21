@@ -20,6 +20,10 @@ public class UserStatsDto {
 	private String thumbnail;
 	private Integer totalDifficulty;
 	private Integer totalPriority;
+	private Long totalTicketCount;
+	private Long completedTicketCount;
+	private Double averageDifficulty;
+	private Double averagePriority;
 	private Double totalScore = 0.0d;
 
 	@QueryProjection

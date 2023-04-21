@@ -2,7 +2,6 @@ package com.ddalggak.finalproject.domain.ticket.dto;
 
 import static com.ddalggak.finalproject.domain.ticket.entity.TicketStatus.*;
 
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -32,7 +31,6 @@ public interface TicketMapper {
 		@Mapping(target = "expiredAt", source = "entity.expiredAt"),
 		@Mapping(target = "label", source = "entity.label.labelTitle"),
 		@Mapping(target = "commentList", source = "entity.comment"),
-		@Mapping(target = "progress", expression = "java(checkProgress(entity))"),
 		@Mapping(target = "score", expression = "java(calculateScore(entity))")
 	})
 	TicketResponseDto toDto(Ticket entity);
@@ -54,22 +52,6 @@ public interface TicketMapper {
 		return ticketList;
 	}
 
-	@Named("checkProgress")
-	default double checkProgress(Ticket ticket) {
-		LocalDateTime currentDate = LocalDateTime.now();
-		if (ticket.getExpiredAt() == null) {
-			return 0.0d;
-		} else if (ticket.getCompletedAt() != null ||
-			currentDate.isAfter(ticket.getExpiredAt().plusDays(1).atStartOfDay())) {
-			return 100.0d;
-		} else {
-			long now = ChronoUnit.HOURS.between(ticket.getCreatedAt(), currentDate);
-			long total = ChronoUnit.HOURS.between(ticket.getCreatedAt(),
-				ticket.getExpiredAt().plusDays(1).atStartOfDay());
-			return (100 * now / (double)total);
-		}
-	}
-
 	/*
 	 * 1. 티켓 점수 산정 방식은 가중 선형 조합을 이용한다.
 	 * 2. 추후 상용화 시 abstract class로 돌리고 @Value를 이용해 yml파일로 가중치를 따로 관리한다.
@@ -81,17 +63,14 @@ public interface TicketMapper {
 		if (ticket.getCompletedAt() == null) {
 			return 0;
 		} else {
-			double ticketProgress = ticket.getExpiredAt() == null ? 0.0d : checkTicketDuration(ticket);
 			double taskProgress = task.getExpiredAt() == null ? 0.0d : checkTicketDurationWithTask(ticket);
 
 			double difficultyWeight = 4;
 			double priorityWeight = 4;
-			double ticketProgressWeight = 1;
-			double taskProgressWeight = 1;
+			double taskProgressWeight = 2;
 
 			return (ticket.getDifficulty() / (double)task.getTotalDifficulty()) * difficultyWeight +
 				(ticket.getPriority() / (double)task.getTotalPriority()) * priorityWeight +
-				ticketProgress * ticketProgressWeight +
 				taskProgress * taskProgressWeight;
 		}
 	}
@@ -100,25 +79,15 @@ public interface TicketMapper {
 	 * 1. 티켓과 task의 expiredAt의 자유도를 고려한다.
 	 */
 
-	default double checkTicketDuration(Ticket ticket) {
-		if (ticket.getCompletedAt() == null) {
-			return 0;
-		} else {
-			long now = ChronoUnit.MINUTES.between(ticket.getCreatedAt(), ticket.getCompletedAt());
-			long total = ChronoUnit.MINUTES.between(ticket.getCreatedAt(),
-				ticket.getExpiredAt().plusDays(1).atStartOfDay());
-			return (100 * now / (double)total);
-		}
-	}
-
 	default double checkTicketDurationWithTask(Ticket ticket) {
-		if (ticket.getCompletedAt() == null) {
+		if (ticket.getCompletedAt() == null || ticket.getCompletedAt()
+			.isAfter(ticket.getTask().getExpiredAt().plusDays(1).atStartOfDay())) {
 			return 0;
 		} else {
 			long now = ChronoUnit.MINUTES.between(ticket.getCreatedAt(), ticket.getCompletedAt());
 			long total = ChronoUnit.MINUTES.between(ticket.getCreatedAt(),
 				ticket.getTask().getExpiredAt().plusDays(1).atStartOfDay());
-			return (100 * now / (double)total);
+			return now / (double)total;
 		}
 	}
 
