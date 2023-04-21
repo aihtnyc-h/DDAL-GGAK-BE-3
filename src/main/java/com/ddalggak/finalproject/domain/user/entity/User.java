@@ -14,6 +14,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import com.ddalggak.finalproject.domain.auth.dto.GoogleOAuthRequestDto;
 import com.ddalggak.finalproject.domain.label.entity.LabelUser;
 import com.ddalggak.finalproject.domain.project.entity.ProjectUser;
 import com.ddalggak.finalproject.domain.task.entity.TaskUser;
@@ -79,5 +80,12 @@ public class User extends BaseTimeEntity implements Serializable {
 
 	public void updateProfile(String profile) {
 		this.profile = profile;
+	}
+
+	public User(GoogleOAuthRequestDto.GoogleUser googleUserDto) {
+		this.profile = googleUserDto.getPicture();
+		this.email = googleUserDto.getEmail();
+		this.nickname = googleUserDto.getName();
+		this.providerType = ProviderType.GOOGLE;
 	}
 }
