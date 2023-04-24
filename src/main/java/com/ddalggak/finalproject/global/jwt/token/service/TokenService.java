@@ -34,7 +34,7 @@ public class TokenService {
 		String resolvedRefreshToken = jwtUtil.resolveRefreshToken(refreshToken.getRefreshToken());
 
 		if (!jwtUtil.validateRefreshToken(resolvedRefreshToken)) {
-			throw new CustomException(ErrorCode.INVALID_REQUEST);
+			throw new CustomException(ErrorCode.EXPIRED_REFRESH_TOKEN);
 		}
 
 		accessTokenRepository.deleteById(email);
