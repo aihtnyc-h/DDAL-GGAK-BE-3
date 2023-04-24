@@ -190,7 +190,7 @@ public class TicketService {
 		if (ticket.getTask().getTaskUserList().stream().noneMatch(
 			taskUser -> taskUser.getUser().getUserId().equals(user.getUserId())
 		)) {
-			throw new CustomException(UNAUTHORIZED_MEMBER);
+			throw new CustomException(UNAUTHENTICATED_USER);
 		}
 		if (ticketLabelRequestDto.labelId == 0) {
 			ticket.deleteLabel();
