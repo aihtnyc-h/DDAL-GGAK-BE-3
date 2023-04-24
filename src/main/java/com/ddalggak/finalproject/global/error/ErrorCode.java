@@ -29,6 +29,7 @@ public enum ErrorCode {
 	/* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
 	INVALID_AUTH_TOKEN(UNAUTHORIZED, "B-001", "Please enter an authorized token. "),
 	UNAUTHORIZED_MEMBER(UNAUTHORIZED, "B-002", "Please Log in"),
+	EXPIRED_REFRESH_TOKEN(UNAUTHORIZED, "B-003", "refresh token expired"),
 
 	/* 403 FORBIDDEN : 권한 없음*/
 	UNAUTHENTICATED_USER(FORBIDDEN, "C-001", "You do not have access."),
